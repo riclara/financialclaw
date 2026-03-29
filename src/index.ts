@@ -2,14 +2,14 @@ import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 import { configureDb } from "./db/database.js";
 import { InputSchema as ManageCurrencyInputSchema, executeManageCurrency } from "./tools/manage-currency.js";
 import { InputSchema as LogExpenseFromReceiptInputSchema, executeLogExpenseFromReceipt } from "./tools/log-expense-from-receipt.js";
-import { InputSchema as LogExpenseManualInputSchema, executeLogExpenseManual } = from "./tools/log-expense-manual.js";
-import { InputSchema as LogIncomeInputSchema, executeLogIncome } = from "./tools/log-income.js";
-import { InputSchema as LogIncomeReceiptInputSchema, executeLogIncomeReceipt } = from "./tools/log-income-receipt.js";
-import { InputSchema as AddRecurringExpenseInputSchema, executeAddRecurringExpense } = from "./tools/add-recurring-expense.js";
-import { InputSchema as MarkExpensePaidInputSchema, executeMarkExpensePaid } = from "./tools/mark-expense-paid.js";
-import { InputSchema as GetFinancialSummaryInputSchema, executeGetFinancialSummary } = from "./tools/get-financial-summary.js";
-import { InputSchema as ListExpensesInputSchema, executeListExpenses } = from "./tools/list-expenses.js";
-import { InputSchema as ListIncomesInputSchema, executeListIncomes } = from "./tools/list-incomes.js";
+import { InputSchema as LogExpenseManualInputSchema, executeLogExpenseManual } from "./tools/log-expense-manual.js";
+import { InputSchema as LogIncomeInputSchema, executeLogIncome } from "./tools/log-income.js";
+import { InputSchema as LogIncomeReceiptInputSchema, executeLogIncomeReceipt } from "./tools/log-income-receipt.js";
+import { InputSchema as AddRecurringExpenseInputSchema, executeAddRecurringExpense } from "./tools/add-recurring-expense.js";
+import { InputSchema as MarkExpensePaidInputSchema, executeMarkExpensePaid } from "./tools/mark-expense-paid.js";
+import { InputSchema as GetFinancialSummaryInputSchema, executeGetFinancialSummary } from "./tools/get-financial-summary.js";
+import { InputSchema as ListExpensesInputSchema, executeListExpenses } from "./tools/list-expenses.js";
+import { InputSchema as ListIncomesInputSchema, executeListIncomes } from "./tools/list-incomes.js";
 
 function wrapExecute<T>(
   fn: (input: T) => Promise<string> | string,
