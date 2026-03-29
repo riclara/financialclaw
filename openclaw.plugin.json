@@ -9,9 +9,6 @@
     "properties": {
       "dbPath": {
         "type": "string"
-      },
-      "pythonCmd": {
-        "type": "string"
       }
     },
     "additionalProperties": false
@@ -19,7 +16,7 @@
   "contracts": {
     "tools": [
       "manage_currency",
-      "log_expense_from_image",
+      "log_expense_from_receipt",
       "log_expense_manual",
       "log_income",
       "log_income_receipt",

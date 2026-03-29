@@ -1,25 +1,15 @@
 import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 import { configureDb } from "./db/database.js";
-import { InputSchema as ManageCurrencyInputSchema } from "./tools/manage-currency.js";
-import { executeManageCurrency } from "./tools/manage-currency.js";
-import { InputSchema as LogExpenseFromReceiptInputSchema } from "./tools/log-expense-from-receipt.js";
-import { executeLogExpenseFromReceipt } from "./tools/log-expense-from-receipt.js";
-import { InputSchema as LogExpenseManualInputSchema } from "./tools/log-expense-manual.js";
-import { executeLogExpenseManual } from "./tools/log-expense-manual.js";
-import { InputSchema as LogIncomeInputSchema } from "./tools/log-income.js";
-import { executeLogIncome } from "./tools/log-income.js";
-import { InputSchema as LogIncomeReceiptInputSchema } from "./tools/log-income-receipt.js";
-import { executeLogIncomeReceipt } from "./tools/log-income-receipt.js";
-import { InputSchema as AddRecurringExpenseInputSchema } from "./tools/add-recurring-expense.js";
-import { executeAddRecurringExpense } from "./tools/add-recurring-expense.js";
-import { InputSchema as MarkExpensePaidInputSchema } from "./tools/mark-expense-paid.js";
-import { executeMarkExpensePaid } from "./tools/mark-expense-paid.js";
-import { InputSchema as GetFinancialSummaryInputSchema } from "./tools/get-financial-summary.js";
-import { executeGetFinancialSummary } from "./tools/get-financial-summary.js";
-import { InputSchema as ListExpensesInputSchema } from "./tools/list-expenses.js";
-import { executeListExpenses } from "./tools/list-expenses.js";
-import { InputSchema as ListIncomesInputSchema } from "./tools/list-incomes.js";
-import { executeListIncomes } from "./tools/list-incomes.js";
+import { InputSchema as ManageCurrencyInputSchema, executeManageCurrency } from "./tools/manage-currency.js";
+import { InputSchema as LogExpenseFromReceiptInputSchema, executeLogExpenseFromReceipt } from "./tools/log-expense-from-receipt.js";
+import { InputSchema as LogExpenseManualInputSchema, executeLogExpenseManual } = from "./tools/log-expense-manual.js";
+import { InputSchema as LogIncomeInputSchema, executeLogIncome } = from "./tools/log-income.js";
+import { InputSchema as LogIncomeReceiptInputSchema, executeLogIncomeReceipt } = from "./tools/log-income-receipt.js";
+import { InputSchema as AddRecurringExpenseInputSchema, executeAddRecurringExpense } = from "./tools/add-recurring-expense.js";
+import { InputSchema as MarkExpensePaidInputSchema, executeMarkExpensePaid } = from "./tools/mark-expense-paid.js";
+import { InputSchema as GetFinancialSummaryInputSchema, executeGetFinancialSummary } = from "./tools/get-financial-summary.js";
+import { InputSchema as ListExpensesInputSchema, executeListExpenses } = from "./tools/list-expenses.js";
+import { InputSchema as ListIncomesInputSchema, executeListIncomes } = from "./tools/list-incomes.js";
 
 function wrapExecute<T>(
   fn: (input: T) => Promise<string> | string,
