@@ -1,5 +1,7 @@
 # financialclaw
 
+[![CI](https://github.com/riclara/financialclaw/actions/workflows/ci.yml/badge.svg)](https://github.com/riclara/financialclaw/actions/workflows/ci.yml)
+
 Plugin de OpenClaw para finanzas personales vía Telegram. Expone un set de tools para registrar gastos, ingresos, pagos recurrentes y generar resúmenes sobre una base SQLite embebida, con OCR local de recibos vía PaddleOCR y soporte multi-moneda.
 
 ## Estado del proyecto
