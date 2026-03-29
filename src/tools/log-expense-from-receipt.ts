@@ -142,7 +142,7 @@ export function executeLogExpenseFromReceipt(
   let message =
     `Gasto registrado por OCR: ${formattedAmount}${categoryPart} · ${descriptionFinal}${merchantPart} · ${date} · Pagado (ID: ${expenseId})`;
 
-  if (currency.code === PLACEHOLDER_CURRENCY) {
+  if (isPlaceholderCurrency(db)) {
     message +=
       "\n\nSugerencia: aún no has configurado una moneda real. Usa manage_currency para agregar la tuya y establecerla como moneda por defecto.";
   }

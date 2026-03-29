@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.2.0] - 2026-03-29
+### Changed
+- Refactorización a OCR Agéntico (TASK-21): Se eliminó el pipeline local basado en Python (PaddleOCR) y sus integraciones TypeScript, delegando la extracción directamente al agente Autónomo.
+- Cambio disruptivo: La herramienta `log_expense_from_image` fue renombrada a `log_expense_from_receipt` para aceptar datos estructurados en lugar de paths de imágenes locales.
+
 ## [Unreleased]
 
 ### Added

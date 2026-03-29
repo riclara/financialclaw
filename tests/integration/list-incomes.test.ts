@@ -334,8 +334,17 @@ describe("list_incomes — integración", () => {
     const result = executeListIncomes({ include_receipts: true }, db);
 
     const lines = result.split("\n");
-    const salaryABlock = lines.slice(lines.findIndex((l) => l.includes("Salario A")), lines.findIndex((l) => l.includes("Salario B"))).join("\n");
-    const salaryBBlock = lines.slice(lines.findIndex((l) => l.includes("Salario B"))).join("\n");
+    const idxA = lines.findIndex((l) => l.includes("Salario A"));
+    const idxB = lines.findIndex((l) => l.includes("Salario B"));
+
+    let salaryABlock, salaryBBlock;
+    if (idxA < idxB) {
+      salaryABlock = lines.slice(idxA, idxB).join("\n");
+      salaryBBlock = lines.slice(idxB).join("\n");
+    } else {
+      salaryBBlock = lines.slice(idxB, idxA).join("\n");
+      salaryABlock = lines.slice(idxA).join("\n");
+    }
 
     assert.ok(salaryABlock.includes("2026-08-01"), "Salario A debe incluir receipt de agosto (más reciente)");
     assert.ok(salaryABlock.includes("2026-04-01"), "Salario A debe incluir receipt de abril (quinto más reciente)");
