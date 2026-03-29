@@ -1,5 +1,7 @@
 # TASK-05: CLI Python para PaddleOCR
 
+> **[OBSOLETO/MIGRADO]**: Refactorizado a OCR Agéntico. Ver [TASK-21](task-21.md) y [Plan de Refactorización](../plan-refactor-ocr.md).
+
 > Volver al [indice de hitos](../hitos.md)
 
 ## Objetivo

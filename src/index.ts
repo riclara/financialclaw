@@ -1,26 +1,15 @@
 import { definePluginEntry } from "openclaw/plugin-sdk/plugin-entry";
 import { configureDb } from "./db/database.js";
-import { configurePythonCmd } from "./ocr/paddle-ocr-subprocess.js";
-import { InputSchema as ManageCurrencyInputSchema } from "./tools/manage-currency.js";
-import { executeManageCurrency } from "./tools/manage-currency.js";
-import { InputSchema as LogExpenseFromImageInputSchema } from "./tools/log-expense-from-image.js";
-import { executeLogExpenseFromImage } from "./tools/log-expense-from-image.js";
-import { InputSchema as LogExpenseManualInputSchema } from "./tools/log-expense-manual.js";
-import { executeLogExpenseManual } from "./tools/log-expense-manual.js";
-import { InputSchema as LogIncomeInputSchema } from "./tools/log-income.js";
-import { executeLogIncome } from "./tools/log-income.js";
-import { InputSchema as LogIncomeReceiptInputSchema } from "./tools/log-income-receipt.js";
-import { executeLogIncomeReceipt } from "./tools/log-income-receipt.js";
-import { InputSchema as AddRecurringExpenseInputSchema } from "./tools/add-recurring-expense.js";
-import { executeAddRecurringExpense } from "./tools/add-recurring-expense.js";
-import { InputSchema as MarkExpensePaidInputSchema } from "./tools/mark-expense-paid.js";
-import { executeMarkExpensePaid } from "./tools/mark-expense-paid.js";
-import { InputSchema as GetFinancialSummaryInputSchema } from "./tools/get-financial-summary.js";
-import { executeGetFinancialSummary } from "./tools/get-financial-summary.js";
-import { InputSchema as ListExpensesInputSchema } from "./tools/list-expenses.js";
-import { executeListExpenses } from "./tools/list-expenses.js";
-import { InputSchema as ListIncomesInputSchema } from "./tools/list-incomes.js";
-import { executeListIncomes } from "./tools/list-incomes.js";
+import { InputSchema as ManageCurrencyInputSchema, executeManageCurrency } from "./tools/manage-currency.js";
+import { InputSchema as LogExpenseFromReceiptInputSchema, executeLogExpenseFromReceipt } from "./tools/log-expense-from-receipt.js";
+import { InputSchema as LogExpenseManualInputSchema, executeLogExpenseManual } from "./tools/log-expense-manual.js";
+import { InputSchema as LogIncomeInputSchema, executeLogIncome } from "./tools/log-income.js";
+import { InputSchema as LogIncomeReceiptInputSchema, executeLogIncomeReceipt } from "./tools/log-income-receipt.js";
+import { InputSchema as AddRecurringExpenseInputSchema, executeAddRecurringExpense } from "./tools/add-recurring-expense.js";
+import { InputSchema as MarkExpensePaidInputSchema, executeMarkExpensePaid } from "./tools/mark-expense-paid.js";
+import { InputSchema as GetFinancialSummaryInputSchema, executeGetFinancialSummary } from "./tools/get-financial-summary.js";
+import { InputSchema as ListExpensesInputSchema, executeListExpenses } from "./tools/list-expenses.js";
+import { InputSchema as ListIncomesInputSchema, executeListIncomes } from "./tools/list-incomes.js";
 
 function wrapExecute<T>(
   fn: (input: T) => Promise<string> | string,
@@ -46,9 +35,7 @@ export default definePluginEntry({
       configureDb(config.dbPath as string);
     }
 
-    if (config.pythonCmd) {
-      configurePythonCmd(config.pythonCmd as string);
-    }
+    // Configuración de Python CMD eliminada - OCR ahora es agéntico
 
     api.registerTool({
       name: "manage_currency",
@@ -58,12 +45,14 @@ export default definePluginEntry({
       execute: wrapExecute(executeManageCurrency),
     });
 
+    // log_expense_from_image eliminado - reemplazado por log_expense_from_receipt (OCR agéntico)
+
     api.registerTool({
-      name: "log_expense_from_image",
-      label: "Log Expense From Image",
-      description: "Registrar gasto a partir de foto de recibo usando OCR",
-      parameters: LogExpenseFromImageInputSchema,
-      execute: wrapExecute(executeLogExpenseFromImage),
+      name: "log_expense_from_receipt",
+      label: "Log Expense From Receipt",
+      description: "Registrar gasto a partir de datos estructurados de OCR provistos por el agente",
+      parameters: LogExpenseFromReceiptInputSchema,
+      execute: wrapExecute(executeLogExpenseFromReceipt),
     });
 
     api.registerTool({
