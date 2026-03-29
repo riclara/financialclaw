@@ -168,9 +168,10 @@ describe("log_expense_from_receipt", () => {
   it("con currency real no muestra sugerencia de manage_currency", () => {
     const db = createTestDb();
     
-    // Primero agregamos una moneda real
+    // Primero agregamos una moneda real y la establecemos como default
+    db.prepare(`UPDATE currencies SET is_default = 0`).run();
     db.prepare(
-      `INSERT INTO currencies (code, name, symbol, is_default) VALUES ('USD', 'US Dollar', '$', 0)`
+      `INSERT INTO currencies (code, name, symbol, is_default) VALUES ('USD', 'US Dollar', '$', 1)`
     ).run();
 
     const result = withFixedDate(() =>
