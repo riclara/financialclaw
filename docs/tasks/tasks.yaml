@@ -1,0 +1,207 @@
+{
+  "format": 1,
+  "notes": "JSON-compatible YAML subset. Kept machine-readable with stdlib tooling to avoid adding a YAML parser dependency before TASK-01 exists.",
+  "tasks": [
+    {
+      "id": "TASK-01",
+      "title": "Inicializar proyecto",
+      "hito": 1,
+      "deps": [],
+      "detail_doc": "docs/tasks/task-01.md",
+      "files": ["package.json", "tsconfig.json", "openclaw.plugin.json", "requirements.txt", ".gitignore"],
+      "references": ["AGENTS.md"],
+      "acceptance_summary": ["npm install exitoso", "npx tsc --noEmit valida la configuración base"]
+    },
+    {
+      "id": "TASK-02",
+      "title": "Base de datos SQLite (schema + database)",
+      "hito": 2,
+      "deps": ["TASK-01"],
+      "detail_doc": "docs/tasks/task-02.md",
+      "files": ["src/db/schema.ts", "src/db/database.ts", "tests/helpers/test-db.ts"],
+      "references": ["AGENTS.md", "docs/testing.md"],
+      "acceptance_summary": ["createTestDb() crea la BD en memoria", "getDb() es named export", "seed inserta la moneda XXX"]
+    },
+    {
+      "id": "TASK-03",
+      "title": "Port de ocr-classification.ts",
+      "hito": 3,
+      "deps": ["TASK-01"],
+      "detail_doc": "docs/tasks/task-03.md",
+      "files": ["src/ocr/ocr-classification.ts", "tests/unit/ocr-classification.test.ts"],
+      "references": ["/Users/riclara/workspace/sendafinanciera/backend/src/infrastructure/ocr/ocr-classification.ts"],
+      "acceptance_summary": ["tests unitarios pasan", "categorías correctas para keywords conocidos", "OTHER como fallback"]
+    },
+    {
+      "id": "TASK-04",
+      "title": "Port de receipt-parser.ts",
+      "hito": 3,
+      "deps": ["TASK-01", "TASK-03"],
+      "detail_doc": "docs/tasks/task-04.md",
+      "files": ["src/ocr/receipt-parser.ts", "tests/unit/receipt-parser.test.ts"],
+      "references": ["/Users/riclara/workspace/sendafinanciera/backend/src/infrastructure/ocr/receipt-parser.ts"],
+      "acceptance_summary": ["tests unitarios pasan", "parsea montos con separadores de miles", "parsea fechas en múltiples formatos"]
+    },
+    {
+      "id": "TASK-05",
+      "title": "CLI Python para PaddleOCR",
+      "hito": 3,
+      "deps": ["TASK-01"],
+      "deps_note": "solo por `requirements.txt`",
+      "detail_doc": "docs/tasks/task-05.md",
+      "files": ["paddle_ocr_cli.py"],
+      "references": ["/Users/riclara/workspace/sendafinanciera/paddle-ocr/app.py", "requirements.txt"],
+      "acceptance_summary": ["python3 paddle_ocr_cli.py --warmup no falla", "stdout entrega JSON válido", "exit code 0 en éxito y 1 en error"]
+    },
+    {
+      "id": "TASK-06",
+      "title": "Subprocess TypeScript para PaddleOCR",
+      "hito": 3,
+      "deps": ["TASK-01", "TASK-05"],
+      "detail_doc": "docs/tasks/task-06.md",
+      "files": ["src/ocr/paddle-ocr-subprocess.ts"],
+      "references": ["paddle_ocr_cli.py"],
+      "acceptance_summary": ["TypeScript compila", "configurePythonCmd cambia el intérprete usado", "error descriptivo si falla el subprocess"]
+    },
+    {
+      "id": "TASK-07",
+      "title": "Helpers (date-utils + currency-utils)",
+      "hito": 4,
+      "deps": ["TASK-01", "TASK-02"],
+      "detail_doc": "docs/tasks/task-07.md",
+      "files": ["src/tools/helpers/date-utils.ts", "src/tools/helpers/currency-utils.ts", "tests/unit/date-utils.test.ts", "tests/unit/currency-utils.test.ts"],
+      "references": ["AGENTS.md", "docs/testing.md"],
+      "acceptance_summary": ["tests unitarios pasan", "resolveCurrency() sin argumento retorna moneda default", "formatAmount usa el símbolo correcto"]
+    },
+    {
+      "id": "TASK-08",
+      "title": "Tool: manage_currency",
+      "hito": 5,
+      "deps": ["TASK-02", "TASK-07"],
+      "detail_doc": "docs/tasks/task-08.md",
+      "files": ["src/tools/manage-currency.ts", "tests/integration/manage-currency.test.ts"],
+      "references": ["AGENTS.md", "docs/openclaw-sdk.md"],
+      "acceptance_summary": ["tests de integración pasan", "agregar moneda persiste en BD", "duplicada lanza error"]
+    },
+    {
+      "id": "TASK-09",
+      "title": "Tool: log_expense_manual",
+      "hito": 5,
+      "deps": ["TASK-02", "TASK-07"],
+      "detail_doc": "docs/tasks/task-09.md",
+      "files": ["src/tools/log-expense-manual.ts", "tests/integration/log-expense-manual.test.ts"],
+      "references": ["AGENTS.md", "docs/openclaw-sdk.md"],
+      "acceptance_summary": ["tests de integración pasan", "due_date hoy crea gasto PAID", "sin currency usa la moneda default"]
+    },
+    {
+      "id": "TASK-10",
+      "title": "Tool: mark_expense_paid",
+      "hito": 5,
+      "deps": ["TASK-02"],
+      "detail_doc": "docs/tasks/task-10.md",
+      "files": ["src/tools/mark-expense-paid.ts", "tests/integration/mark-expense-paid.test.ts"],
+      "references": ["docs/openclaw-sdk.md"],
+      "acceptance_summary": ["tests de integración pasan", "gasto existente cambia a PAID", "ID inexistente lanza error descriptivo"]
+    },
+    {
+      "id": "TASK-11",
+      "title": "Tool: log_income",
+      "hito": 5,
+      "deps": ["TASK-02", "TASK-07"],
+      "detail_doc": "docs/tasks/task-11.md",
+      "files": ["src/tools/log-income.ts", "tests/integration/log-income.test.ts"],
+      "references": ["AGENTS.md", "docs/openclaw-sdk.md"],
+      "acceptance_summary": ["tests de integración pasan", "ingreso persiste en BD", "sin currency usa la moneda default"]
+    },
+    {
+      "id": "TASK-12",
+      "title": "Tool: log_income_receipt",
+      "hito": 5,
+      "deps": ["TASK-02", "TASK-07", "TASK-11"],
+      "detail_doc": "docs/tasks/task-12.md",
+      "files": ["src/tools/log-income-receipt.ts", "tests/integration/log-income-receipt.test.ts"],
+      "references": ["AGENTS.md", "docs/openclaw-sdk.md"],
+      "acceptance_summary": ["tests de integración pasan", "receipt se vincula al income correcto", "income_id inexistente lanza error"]
+    },
+    {
+      "id": "TASK-13",
+      "title": "Tool: add_recurring_expense",
+      "hito": 5,
+      "deps": ["TASK-02", "TASK-07"],
+      "detail_doc": "docs/tasks/task-13.md",
+      "files": ["src/tools/add-recurring-expense.ts", "tests/integration/add-recurring-expense.test.ts"],
+      "references": ["AGENTS.md", "docs/openclaw-sdk.md"],
+      "acceptance_summary": ["tests de integración pasan", "la regla persiste", "valida parámetros según frequency"]
+    },
+    {
+      "id": "TASK-14",
+      "title": "Tool: get_financial_summary",
+      "hito": 5,
+      "deps": ["TASK-02", "TASK-07"],
+      "detail_doc": "docs/tasks/task-14.md",
+      "files": ["src/tools/get-financial-summary.ts", "tests/integration/get-financial-summary.test.ts"],
+      "references": ["AGENTS.md", "docs/openclaw-sdk.md"],
+      "acceptance_summary": ["tests de integración pasan", "sumas correctas por categoría y moneda", "sin datos retorna resumen vacío legible"]
+    },
+    {
+      "id": "TASK-15",
+      "title": "Tool: log_expense_from_image",
+      "hito": 5,
+      "deps": ["TASK-02", "TASK-03", "TASK-04", "TASK-06", "TASK-07"],
+      "detail_doc": "docs/tasks/task-15.md",
+      "files": ["src/tools/log-expense-from-image.ts", "tests/integration/log-expense-from-image.test.ts"],
+      "references": ["AGENTS.md", "docs/openclaw-sdk.md", "src/ocr/paddle-ocr-subprocess.ts"],
+      "acceptance_summary": ["tests con mock de OCR pasan", "gasto y extracción OCR persisten", "error claro si no se detecta monto"]
+    },
+    {
+      "id": "TASK-16",
+      "title": "Tool: list_expenses",
+      "hito": 6,
+      "deps": ["TASK-02", "TASK-07"],
+      "detail_doc": "docs/tasks/task-16.md",
+      "files": ["src/tools/list-expenses.ts", "tests/integration/list-expenses.test.ts"],
+      "references": ["AGENTS.md", "docs/openclaw-sdk.md"],
+      "acceptance_summary": ["tests de integración pasan", "filtros combinados funcionan", "paginación reporta total"]
+    },
+    {
+      "id": "TASK-17",
+      "title": "Tool: list_incomes",
+      "hito": 6,
+      "deps": ["TASK-02", "TASK-07"],
+      "detail_doc": "docs/tasks/task-17.md",
+      "files": ["src/tools/list-incomes.ts", "tests/integration/list-incomes.test.ts"],
+      "references": ["AGENTS.md", "docs/openclaw-sdk.md"],
+      "acceptance_summary": ["tests de integración pasan", "filtros funcionan", "include_receipts agrega pagos recibidos"]
+    },
+    {
+      "id": "TASK-18",
+      "title": "Daily sync helper",
+      "hito": 7,
+      "deps": ["TASK-02", "TASK-07", "TASK-13"],
+      "detail_doc": "docs/tasks/task-18.md",
+      "files": ["src/services/daily-sync.ts", "tests/integration/daily-sync.test.ts"],
+      "references": ["docs/openclaw-sdk.md", "AGENTS.md"],
+      "acceptance_summary": ["tests de integración pasan", "la generación recurrente es idempotente", "PENDING pasa a OVERDUE cuando corresponde"]
+    },
+    {
+      "id": "TASK-19",
+      "title": "Runner externo de reminders",
+      "hito": 7,
+      "deps": ["TASK-18"],
+      "detail_doc": "docs/tasks/task-19.md",
+      "files": ["src/services/daily-reminder-runner.ts", "src/bin/daily-reminder-runner.ts", "tests/integration/daily-reminder-runner.test.ts"],
+      "references": ["docs/openclaw-sdk.md", "src/services/daily-sync.ts"],
+      "acceptance_summary": ["tests con mock del sender pasan", "el runner usa openclaw message send y marca sent solo en éxito", "la ejecución es one-shot y queda lista para cron/systemd/launchd"]
+    },
+    {
+      "id": "TASK-20",
+      "title": "Entry point tools-only (src/index.ts)",
+      "hito": 8,
+      "deps": ["TASK-08", "TASK-09", "TASK-10", "TASK-11", "TASK-12", "TASK-13", "TASK-14", "TASK-15", "TASK-16", "TASK-17"],
+      "detail_doc": "docs/tasks/task-20.md",
+      "files": ["src/index.ts", "tests/integration/plugin-entry.test.ts"],
+      "references": ["docs/openclaw-sdk.md", "AGENTS.md"],
+      "acceptance_summary": ["npx tsc --noEmit pasa", "tests unit e integration pasan", "los 10 tools quedan registrados sin background service"]
+    }
+  ]
+}

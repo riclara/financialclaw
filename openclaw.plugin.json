@@ -1,0 +1,33 @@
+{
+  "id": "financialclaw",
+  "name": "FinancialClaw",
+  "description": "Plugin de finanzas personales: gastos, ingresos, recurrentes y OCR de recibos",
+  "version": "0.1.0",
+  "enabledByDefault": true,
+  "configSchema": {
+    "type": "object",
+    "properties": {
+      "dbPath": {
+        "type": "string"
+      },
+      "pythonCmd": {
+        "type": "string"
+      }
+    },
+    "additionalProperties": false
+  },
+  "contracts": {
+    "tools": [
+      "manage_currency",
+      "log_expense_from_image",
+      "log_expense_manual",
+      "log_income",
+      "log_income_receipt",
+      "add_recurring_expense",
+      "mark_expense_paid",
+      "get_financial_summary",
+      "list_expenses",
+      "list_incomes"
+    ]
+  }
+}

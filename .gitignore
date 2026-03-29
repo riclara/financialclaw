@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.venv/
+financialclaw.db
+*.db
+.env
+test-rel-*/

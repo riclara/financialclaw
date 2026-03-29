@@ -1,0 +1,219 @@
+import { randomUUID } from "node:crypto";
+
+import Database from "better-sqlite3";
+import { type Static, Type } from "@sinclair/typebox";
+import { Value } from "@sinclair/typebox/value";
+
+import { getDb } from "../db/database.js";
+import { computeNextDate } from "./helpers/date-utils.js";
+import {
+  formatAmount,
+  PLACEHOLDER_CURRENCY,
+  resolveCurrency,
+} from "./helpers/currency-utils.js";
+
+const ISO_DATE_PATTERN = "^\\d{4}-\\d{2}-\\d{2}$";
+
+function isValidCalendarDate(dateStr: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+  if (match === null) return false;
+  const year = Number.parseInt(match[1], 10);
+  const month = Number.parseInt(match[2], 10);
+  const day = Number.parseInt(match[3], 10);
+  const d = new Date(Date.UTC(year, month - 1, day));
+  return (
+    d.getUTCFullYear() === year &&
+    d.getUTCMonth() === month - 1 &&
+    d.getUTCDate() === day
+  );
+}
+
+function subtractDaysFromIso(dateStr: string, days: number): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr)!;
+  const year = Number.parseInt(match[1], 10);
+  const month = Number.parseInt(match[2], 10);
+  const day = Number.parseInt(match[3], 10);
+  const d = new Date(Date.UTC(year, month - 1, day));
+  d.setUTCDate(d.getUTCDate() - days);
+  return [
+    d.getUTCFullYear(),
+    String(d.getUTCMonth() + 1).padStart(2, "0"),
+    String(d.getUTCDate()).padStart(2, "0"),
+  ].join("-");
+}
+
+export const InputSchema = Type.Object(
+  {
+    description: Type.String({ minLength: 1 }),
+    amount: Type.Number({ minimum: 0 }),
+    currency: Type.Optional(Type.String()),
+    category: Type.Optional(Type.String()),
+    merchant: Type.Optional(Type.String()),
+    frequency: Type.Union([
+      Type.Literal("WEEKLY"),
+      Type.Literal("BIWEEKLY"),
+      Type.Literal("MONTHLY"),
+      Type.Literal("INTERVAL_DAYS"),
+    ]),
+    interval_days: Type.Optional(Type.Integer({ minimum: 1 })),
+    starts_on: Type.String({ pattern: ISO_DATE_PATTERN }),
+    ends_on: Type.Optional(Type.String({ pattern: ISO_DATE_PATTERN })),
+    reminder_days_before: Type.Optional(Type.Integer({ minimum: 1 })),
+  },
+  { additionalProperties: false },
+);
+
+export type AddRecurringExpenseInput = Static<typeof InputSchema>;
+
+export function executeAddRecurringExpense(
+  input: AddRecurringExpenseInput,
+  db: Database.Database = getDb(),
+): string {
+  if (!Value.Check(InputSchema, input)) {
+    throw new Error(
+      "Parámetros inválidos: revisa description, amount, frequency y starts_on.",
+    );
+  }
+
+  const trimmedDescription = input.description.trim();
+  if (trimmedDescription.length === 0) {
+    throw new Error(
+      "El campo description no puede estar vacío o contener solo espacios.",
+    );
+  }
+
+  if (!isValidCalendarDate(input.starts_on)) {
+    throw new Error(
+      `La fecha starts_on "${input.starts_on}" no es una fecha válida en el calendario.`,
+    );
+  }
+
+  if (input.ends_on !== undefined && !isValidCalendarDate(input.ends_on)) {
+    throw new Error(
+      `La fecha ends_on "${input.ends_on}" no es una fecha válida en el calendario.`,
+    );
+  }
+
+  if (input.ends_on !== undefined && input.starts_on > input.ends_on) {
+    throw new Error(
+      `La fecha starts_on "${input.starts_on}" no puede ser posterior a ends_on "${input.ends_on}".`,
+    );
+  }
+
+  if (input.frequency === "INTERVAL_DAYS" && !input.interval_days) {
+    throw new Error(
+      "El campo interval_days es obligatorio cuando frequency es INTERVAL_DAYS.",
+    );
+  }
+
+  const currency = resolveCurrency(input.currency?.trim(), db);
+  const category = input.category?.trim() || "OTHER";
+
+  // Precomputar fecha del reminder si aplica (se usa en transacción y en mensaje)
+  const scheduledDate =
+    input.reminder_days_before !== undefined
+      ? subtractDaysFromIso(input.starts_on, input.reminder_days_before)
+      : null;
+
+  const nextDate = computeNextDate(
+    input.starts_on,
+    input.frequency,
+    input.interval_days ?? 0,
+  );
+
+  const ruleId = randomUUID();
+  const expenseId = randomUUID();
+  const now = new Date().toISOString();
+
+  db.transaction(() => {
+    // 1. Insertar regla recurrente
+    // day_of_month queda NULL en esta TASK (MONTHLY ancla al día de starts_on)
+    db.prepare(
+      `INSERT INTO recurring_expense_rules (
+        id, name, amount, category, currency, frequency,
+        interval_days, day_of_month, starts_on, ends_on,
+        reminder_days_before, is_active, created_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      ruleId,
+      trimmedDescription,
+      input.amount,
+      category,
+      currency.code,
+      input.frequency,
+      input.interval_days ?? null,
+      null,
+      input.starts_on,
+      input.ends_on ?? null,
+      input.reminder_days_before ?? 0,
+      1,
+      now,
+    );
+
+    // 2. Insertar primer gasto generado por la regla
+    db.prepare(
+      `INSERT INTO expenses (
+        id, amount, currency, category, merchant, description,
+        due_date, payment_date, status, source,
+        ocr_extraction_id, recurring_rule_id, generated_from_rule,
+        is_active, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      expenseId,
+      input.amount,
+      currency.code,
+      category,
+      input.merchant ?? null,
+      trimmedDescription,
+      input.starts_on,
+      null,
+      "PENDING",
+      "MANUAL",
+      null,
+      ruleId,
+      1,
+      1,
+      now,
+      now,
+    );
+
+    // 3. Insertar primer reminder si aplica
+    if (scheduledDate !== null && input.reminder_days_before !== undefined) {
+      db.prepare(
+        `INSERT INTO reminders (id, expense_id, scheduled_date, days_before, sent, created_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+      ).run(
+        randomUUID(),
+        expenseId,
+        scheduledDate,
+        input.reminder_days_before,
+        0,
+        now,
+      );
+    }
+  })();
+
+  // Formatear respuesta
+  const formattedAmount = formatAmount(input.amount, currency);
+  let message = `Regla creada: ${formattedAmount} · ${trimmedDescription} · ${input.frequency} desde ${input.starts_on} (regla: ${ruleId})`;
+  message += `\nPrimer gasto generado con vencimiento ${input.starts_on} (gasto: ${expenseId})`;
+
+  const nextDateWithinWindow =
+    input.ends_on === undefined || nextDate <= input.ends_on;
+  if (nextDateWithinWindow) {
+    message += `\nPróxima fecha: ${nextDate}`;
+  } else {
+    message += `\nNo hay próxima ocurrencia dentro de la ventana de vigencia (ends_on: ${input.ends_on}).`;
+  }
+
+  if (scheduledDate !== null) {
+    message += `\nReminder programado para ${scheduledDate} (${input.reminder_days_before} días antes)`;
+  }
+
+  if (currency.code === PLACEHOLDER_CURRENCY) {
+    message +=
+      "\n\nSugerencia: aún no has configurado una moneda real. Usa manage_currency para agregar la tuya y establecerla como moneda por defecto.";
+  }
+
+  return message;
+}
