@@ -560,3 +560,10 @@ financialclaw es un plugin para OpenClaw que convierte un bot de Telegram en un 
 - Qué pasó: se agregó `.github/workflows/ci.yml` como pipeline único de verificación para `push`, `pull_request` y ejecución manual. El job no introduce reglas nuevas: usa Node 24 en `ubuntu-latest` y replica el cierre que ya se venía haciendo a mano (`npm ci`, `npx tsc --noEmit`, `npm run test:unit`, `npm run test:integration`, `npm run build`).
 - Por qué importa: **cuando el primer release sale, el riesgo deja de ser “no sabemos qué validar” y pasa a ser “alguien olvida validar lo que ya sabíamos”**. El valor del CI aquí no está en sofisticación, sino en convertir el checklist real del proyecto en una barrera automática por push/PR.
 - Pregunta clave: *"si mañana entra un cambio pequeño, el repositorio fallará exactamente donde hoy fallaría una revisión manual seria?"*
+
+### 2026-03-29 — Documentar operación real vale más que seguir refinando la arquitectura en abstracto
+- Autor: agente
+- Contexto: después de publicar `v0.1.0`, el siguiente paso útil ya no era técnico de implementación sino cerrar la brecha entre “runner existente” y “runner operable todos los días”.
+- Qué pasó: `docs/setup.md` se amplió con ejemplos concretos de `cron`, `launchd` y `systemd` para `src/bin/daily-reminder-runner.ts`, incluyendo variables de entorno, rutas de log, comandos de activación y recordatorios sobre `npm install` al cambiar de Node. No se tocó código: el valor estuvo en dejar una ruta de operación explícita para el recordatorio diario.
+- Por qué importa: **un componente one-shot no está realmente terminado hasta que alguien puede operarlo sin adivinar cómo se agenda ni cómo se observa su salida**. En este caso, la documentación operativa evita que el runner quede como capacidad “teóricamente lista” pero nunca desplegada.
+- Pregunta clave: *"si mañana alguien quiere programar los reminders, puede hacerlo sin abrir el código fuente ni inventar cómo envolver el comando?"*

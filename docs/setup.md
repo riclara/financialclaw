@@ -243,6 +243,128 @@ npx tsx src/bin/daily-reminder-runner.ts \
 
 La ejecución devuelve `0` si todos los reminders salieron bien y `1` si hubo fallos parciales o error fatal. El runner solo marca `sent = 1` y `sent_at` después de cada envío exitoso.
 
+### Ejemplo con `cron`
+
+Ejecutar todos los días a las 8:00 a. m. y dejar log en un archivo dedicado:
+
+```cron
+0 8 * * * cd /Users/riclara/workspace/financialclaw && FINANCIALCLAW_REMINDER_TARGET="<chat-o-destino>" FINANCIALCLAW_DB_PATH="/Users/riclara/workspace/financialclaw/financialclaw.db" FINANCIALCLAW_REMINDER_CHANNEL="telegram" FINANCIALCLAW_OPENCLAW_CMD="openclaw" /usr/bin/env npx tsx src/bin/daily-reminder-runner.ts >> /Users/riclara/workspace/financialclaw/logs/daily-reminder-runner.log 2>&1
+```
+
+Notas:
+
+- Crear antes el directorio `logs/` si vas a redirigir la salida.
+- Si usás `nvm`, `asdf` o una instalación de Node no estándar, conviene reemplazar `/usr/bin/env npx` por la ruta absoluta del `npx` correcto.
+- Si necesitas cuenta explícita, agrega `FINANCIALCLAW_REMINDER_ACCOUNT_ID="<account>"`.
+
+### Ejemplo con `launchd` (macOS)
+
+Archivo sugerido: `~/Library/LaunchAgents/dev.riclara.financialclaw.daily-reminder-runner.plist`
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>dev.riclara.financialclaw.daily-reminder-runner</string>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/riclara/workspace/financialclaw</string>
+
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/bin/env</string>
+      <string>npx</string>
+      <string>tsx</string>
+      <string>src/bin/daily-reminder-runner.ts</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>FINANCIALCLAW_REMINDER_TARGET</key>
+      <string>&lt;chat-o-destino&gt;</string>
+      <key>FINANCIALCLAW_DB_PATH</key>
+      <string>/Users/riclara/workspace/financialclaw/financialclaw.db</string>
+      <key>FINANCIALCLAW_REMINDER_CHANNEL</key>
+      <string>telegram</string>
+      <key>FINANCIALCLAW_OPENCLAW_CMD</key>
+      <string>openclaw</string>
+    </dict>
+
+    <key>StartCalendarInterval</key>
+    <dict>
+      <key>Hour</key>
+      <integer>8</integer>
+      <key>Minute</key>
+      <integer>0</integer>
+    </dict>
+
+    <key>StandardOutPath</key>
+    <string>/Users/riclara/workspace/financialclaw/logs/daily-reminder-runner.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/riclara/workspace/financialclaw/logs/daily-reminder-runner.err.log</string>
+  </dict>
+</plist>
+```
+
+Carga manual:
+
+```bash
+launchctl unload ~/Library/LaunchAgents/dev.riclara.financialclaw.daily-reminder-runner.plist 2>/dev/null || true
+launchctl load ~/Library/LaunchAgents/dev.riclara.financialclaw.daily-reminder-runner.plist
+launchctl start dev.riclara.financialclaw.daily-reminder-runner
+```
+
+### Ejemplo con `systemd` (Linux)
+
+Archivo sugerido: `/etc/systemd/system/financialclaw-daily-reminder-runner.service`
+
+```ini
+[Unit]
+Description=financialclaw daily reminder runner
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/Users/riclara/workspace/financialclaw
+Environment=FINANCIALCLAW_REMINDER_TARGET=<chat-o-destino>
+Environment=FINANCIALCLAW_DB_PATH=/Users/riclara/workspace/financialclaw/financialclaw.db
+Environment=FINANCIALCLAW_REMINDER_CHANNEL=telegram
+Environment=FINANCIALCLAW_OPENCLAW_CMD=openclaw
+ExecStart=/usr/bin/env npx tsx src/bin/daily-reminder-runner.ts
+```
+
+Timer sugerido: `/etc/systemd/system/financialclaw-daily-reminder-runner.timer`
+
+```ini
+[Unit]
+Description=Run financialclaw daily reminder runner every day
+
+[Timer]
+OnCalendar=*-*-* 08:00:00
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+```
+
+Activación:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now financialclaw-daily-reminder-runner.timer
+systemctl list-timers --all | grep financialclaw
+```
+
+### Recomendaciones operativas
+
+- Probar primero la invocación manual antes de programarlo.
+- Mantener `FINANCIALCLAW_DB_PATH` apuntando al SQLite real del entorno operativo, no a una base de pruebas.
+- Si el runner devuelve `1`, revisar logs antes de reintentar en bucle; los reminders fallidos no se marcan como enviados.
+- Si cambias de versión de Node en el host, vuelve a correr `npm install` antes de confiar en el scheduler.
+
 ---
 
 ## 7. Prueba end-to-end
