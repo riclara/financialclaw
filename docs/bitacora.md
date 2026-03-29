@@ -553,3 +553,10 @@ financialclaw es un plugin para OpenClaw que convierte un bot de Telegram en un 
 - Qué pasó: el código ya estaba cerrado, pero la documentación todavía mezclaba dos narrativas incompatibles: por un lado decía que el repo seguía “en implementación” y mantenía un `configSchema.reminders` en el manifiesto del plugin; por otro, el entry point real ya era tools-only y los reminders vivían en un runner externo. El cierre útil no fue agregar nada nuevo, sino alinear `README.md`, `docs/setup.md`, `docs/hitos.md`, `CHANGELOG.md` y `openclaw.plugin.json` con esa realidad operativa y dejar la verificación final como criterio explícito de salida.
 - Por qué importa: **un release interno/publicable falla igual si el código dice una cosa y la documentación/manifiesto publican otra**. En un plugin, el contrato visible no es solo `src/`; también es lo que el repositorio promete instalar, configurar y ejecutar.
 - Pregunta clave: *"si alguien instala este repositorio sin contexto previo, ¿verá el mismo producto que realmente compila y corre hoy?"*
+
+### 2026-03-29 — CI mínimo: el checklist de release ya no depende de memoria humana
+- Autor: agente
+- Contexto: publicación inicial del repositorio en GitHub después de cerrar roadmap, taggear `v0.1.0` y dejar el árbol limpio.
+- Qué pasó: se agregó `.github/workflows/ci.yml` como pipeline único de verificación para `push`, `pull_request` y ejecución manual. El job no introduce reglas nuevas: usa Node 24 en `ubuntu-latest` y replica el cierre que ya se venía haciendo a mano (`npm ci`, `npx tsc --noEmit`, `npm run test:unit`, `npm run test:integration`, `npm run build`).
+- Por qué importa: **cuando el primer release sale, el riesgo deja de ser “no sabemos qué validar” y pasa a ser “alguien olvida validar lo que ya sabíamos”**. El valor del CI aquí no está en sofisticación, sino en convertir el checklist real del proyecto en una barrera automática por push/PR.
+- Pregunta clave: *"si mañana entra un cambio pequeño, el repositorio fallará exactamente donde hoy fallaría una revisión manual seria?"*

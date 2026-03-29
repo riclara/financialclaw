@@ -5,6 +5,7 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado se
 ## [Unreleased]
 
 ### Added
+- Infraestructura: se agrega CI en GitHub Actions (`.github/workflows/ci.yml`) para `push`, `pull_request` y ejecución manual; el pipeline usa Node 24 sobre `ubuntu-latest` y corre `npm ci`, `npx tsc --noEmit`, `npm run test:unit`, `npm run test:integration` y `npm run build` para fijar automáticamente el mismo checklist de release usado localmente.
 - `TASK-19`: nuevo runner externo de reminders con `src/services/daily-reminder-runner.ts`, `src/bin/daily-reminder-runner.ts` y `tests/integration/daily-reminder-runner.test.ts`; ejecuta un ciclo one-shot de `dailySync()`, ordena `remindersDue` por `due_date` y `reminder_id`, entrega mensajes exclusivamente vía `openclaw message send`, marca `reminders.sent = 1` y `sent_at` solo tras éxito, expone `configureOpenClawCmd()` para cambiar el binario CLI y resuelve `target/channel/accountId/dbPath/openclawCmd` desde flags o variables de entorno sin usar `pluginConfig`, `registerService()` ni mensajería interna del runtime.
 - Bootstrap inicial del proyecto con `package.json`, `tsconfig.json`, `openclaw.plugin.json`, `requirements.txt` y `.gitignore` conforme al contrato de `TASK-01`.
 - Capa base de persistencia SQLite para `TASK-02`: `src/db/schema.ts` con `ALL_MIGRATIONS` y `ALL_SEEDS`, `src/db/database.ts` con `configureDb()` y `getDb()` lazy singleton, `tests/helpers/test-db.ts` y cobertura de integración para schema, seed `XXX` e inicialización tardía.
