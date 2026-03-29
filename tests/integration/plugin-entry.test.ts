@@ -6,7 +6,7 @@ import ts from "typescript";
 
 const EXPECTED_TOOL_NAMES = [
   "manage_currency",
-  "log_expense_from_image",
+  "log_expense_from_receipt",
   "log_expense_manual",
   "log_income",
   "log_income_receipt",
@@ -40,7 +40,6 @@ interface LoadedPlugin {
     }): void;
   };
   configureDbCalls: string[];
-  configurePythonCmdCalls: string[];
   toolExecuteCalls: Array<{ tool: ToolName; params: Record<string, unknown> }>;
 }
 
@@ -62,7 +61,6 @@ async function loadPlugin(): Promise<LoadedPlugin> {
   const compiledSource = compileIndexToCommonJs(sourceText);
 
   const configureDbCalls: string[] = [];
-  const configurePythonCmdCalls: string[] = [];
   const toolExecuteCalls: Array<{ tool: ToolName; params: Record<string, unknown> }> = [];
 
   const toolModuleMap: Record<string, { tool: ToolName; executeExport: string }> = {
@@ -70,9 +68,9 @@ async function loadPlugin(): Promise<LoadedPlugin> {
       tool: "manage_currency",
       executeExport: "executeManageCurrency",
     },
-    "./tools/log-expense-from-image.js": {
-      tool: "log_expense_from_image",
-      executeExport: "executeLogExpenseFromImage",
+    "./tools/log-expense-from-receipt.js": {
+      tool: "log_expense_from_receipt",
+      executeExport: "executeLogExpenseFromReceipt",
     },
     "./tools/log-expense-manual.js": {
       tool: "log_expense_manual",
@@ -123,14 +121,6 @@ async function loadPlugin(): Promise<LoadedPlugin> {
         },
       },
     ],
-    [
-      "./ocr/paddle-ocr-subprocess.js",
-      {
-        configurePythonCmd: (pythonCmd: string) => {
-          configurePythonCmdCalls.push(pythonCmd);
-        },
-      },
-    ],
   ]);
 
   for (const [specifier, { tool, executeExport }] of Object.entries(toolModuleMap)) {
@@ -166,7 +156,6 @@ async function loadPlugin(): Promise<LoadedPlugin> {
   return {
     plugin: module.exports.default as LoadedPlugin["plugin"],
     configureDbCalls,
-    configurePythonCmdCalls,
     toolExecuteCalls,
   };
 }
@@ -205,17 +194,15 @@ describe("plugin entry wiring", () => {
     assert.equal(registerServiceCalls.length, 0);
   });
 
-  it("llama configureDb y configurePythonCmd cuando llegan en pluginConfig", async () => {
+  it("llama configureDb cuando llega en pluginConfig", async () => {
     const {
       plugin,
       configureDbCalls,
-      configurePythonCmdCalls,
     } = await loadPlugin();
 
     plugin.register({
       pluginConfig: {
         dbPath: "/tmp/financialclaw.sqlite",
-        pythonCmd: "/tmp/venv/bin/python3",
         reminders: {
           enabled: true,
         },
@@ -227,7 +214,6 @@ describe("plugin entry wiring", () => {
     });
 
     assert.deepEqual(configureDbCalls, ["/tmp/financialclaw.sqlite"]);
-    assert.deepEqual(configurePythonCmdCalls, ["/tmp/venv/bin/python3"]);
   });
 
   it("adapta executeXxx a ToolResult para al menos un tool", async () => {

@@ -1,5 +1,7 @@
 # TASK-04: Port de receipt-parser.ts
 
+> **[OBSOLETO/MIGRADO]**: Refactorizado a OCR Agéntico. Ver [TASK-21](task-21.md) y [Plan de Refactorización](../plan-refactor-ocr.md).
+
 > Volver al [índice de hitos](../hitos.md)
 
 ## Objetivo

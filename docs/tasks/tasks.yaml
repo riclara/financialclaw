@@ -24,7 +24,7 @@
     },
     {
       "id": "TASK-03",
-      "title": "Port de ocr-classification.ts",
+      "title": "[OBSOLETO] Port de ocr-classification.ts",
       "hito": 3,
       "deps": ["TASK-01"],
       "detail_doc": "docs/tasks/task-03.md",
@@ -34,7 +34,7 @@
     },
     {
       "id": "TASK-04",
-      "title": "Port de receipt-parser.ts",
+      "title": "[OBSOLETO] Port de receipt-parser.ts",
       "hito": 3,
       "deps": ["TASK-01", "TASK-03"],
       "detail_doc": "docs/tasks/task-04.md",
@@ -44,7 +44,7 @@
     },
     {
       "id": "TASK-05",
-      "title": "CLI Python para PaddleOCR",
+      "title": "[OBSOLETO] CLI Python para PaddleOCR",
       "hito": 3,
       "deps": ["TASK-01"],
       "deps_note": "solo por `requirements.txt`",
@@ -55,7 +55,7 @@
     },
     {
       "id": "TASK-06",
-      "title": "Subprocess TypeScript para PaddleOCR",
+      "title": "[OBSOLETO] Subprocess TypeScript para PaddleOCR",
       "hito": 3,
       "deps": ["TASK-01", "TASK-05"],
       "detail_doc": "docs/tasks/task-06.md",
@@ -145,7 +145,7 @@
     },
     {
       "id": "TASK-15",
-      "title": "Tool: log_expense_from_image",
+      "title": "[OBSOLETO] Tool: log_expense_from_image",
       "hito": 5,
       "deps": ["TASK-02", "TASK-03", "TASK-04", "TASK-06", "TASK-07"],
       "detail_doc": "docs/tasks/task-15.md",
@@ -202,6 +202,16 @@
       "files": ["src/index.ts", "tests/integration/plugin-entry.test.ts"],
       "references": ["docs/openclaw-sdk.md", "AGENTS.md"],
       "acceptance_summary": ["npx tsc --noEmit pasa", "tests unit e integration pasan", "los 10 tools quedan registrados sin background service"]
+    },
+    {
+      "id": "TASK-21",
+      "title": "Refactorización a OCR Agéntico",
+      "hito": 9,
+      "deps": ["TASK-02", "TASK-07"],
+      "detail_doc": "docs/tasks/task-21.md",
+      "files": ["src/tools/log-expense-from-receipt.ts", "tests/integration/log-expense-from-receipt.test.ts", "src/index.ts", "tests/integration/plugin-entry.test.ts"],
+      "references": ["AGENTS.md", "docs/plan-refactor-ocr.md"],
+      "acceptance_summary": ["tests de integración pasan", "se eliminan dependencias python", "se inserta ocr_extractions de forma nativa"]
     }
   ]
 }

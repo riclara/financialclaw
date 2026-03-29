@@ -50,6 +50,7 @@ Hito 5: Tools core          [DONE]     TASK-08 → TASK-15
 Hito 6: Tools de consulta   [DONE]     TASK-16, TASK-17
 Hito 7: Automatización      [DONE]     TASK-18, TASK-19
 Hito 8: Integración final   [DONE]     TASK-20
+Hito 9: OCR Agéntico        [TODO]     TASK-21
 ```
 
 ---
@@ -99,7 +100,7 @@ Ambas ramas pueden correr en paralelo entre sí.
 TASK-04 depende de TASK-03. TASK-06 depende de TASK-05.
 ```
 
-### TASK-03 — Port de ocr-classification.ts — [ver detalle](tasks/task-03.md)
+### TASK-03 — [OBSOLETO] Port de ocr-classification.ts — [ver detalle](tasks/task-03.md)
 - **Estado**: `DONE`
 - **Archivo(s)**: `src/ocr/ocr-classification.ts`, `tests/unit/ocr-classification.test.ts`
 - **Dependencias**: TASK-01
@@ -110,7 +111,7 @@ TASK-04 depende de TASK-03. TASK-06 depende de TASK-05.
 - **Timestamp fin**: `2026-03-28T17:05:00-05:00`
 - **Notas**: Port verbatim de sendafinanciera con ExpenseCategory como enum local. 15 tests unitarios pasando, cubriendo normalización Unicode y todas las categorías disponibles.
 
-### TASK-04 — Port de receipt-parser.ts — [ver detalle](tasks/task-04.md)
+### TASK-04 — [OBSOLETO] Port de receipt-parser.ts — [ver detalle](tasks/task-04.md)
 - **Estado**: `DONE`
 - **Archivo(s)**: `src/ocr/receipt-parser.ts`, `tests/unit/receipt-parser.test.ts`
 - **Dependencias**: TASK-01, TASK-03
@@ -121,7 +122,7 @@ TASK-04 depende de TASK-03. TASK-06 depende de TASK-05.
 - **Timestamp fin**: `2026-03-28T23:45:00-05:00`
 - **Notas**: Port verbatim desde sendafinanciera con ajuste de import a `./ocr-classification.js`. 27 tests unitarios pasan cubriendo monto, fecha y merchant parsing. Desbloquea TASK-15 (log_expense_from_image).
 
-### TASK-05 — CLI Python para PaddleOCR — [ver detalle](tasks/task-05.md)
+### TASK-05 — [OBSOLETO] CLI Python para PaddleOCR — [ver detalle](tasks/task-05.md)
 - **Estado**: `DONE`
 - **Timestamp inicio**: `2026-03-28T18:00:00-05:00`
 - **Timestamp fin**: `2026-03-29T01:24:58Z`
@@ -132,7 +133,7 @@ TASK-04 depende de TASK-03. TASK-06 depende de TASK-05.
 - **Criterio de aceptación**: `./.venv/bin/python3 paddle_ocr_cli.py --warmup` no falla en el entorno OCR configurado. Output es JSON válido con campos `rawText`, `lines`, `averageConfidence`. Exit code 0 en éxito, 1 en error.
 - **Notas**: CLI creado con funciones portadas del fuente. Verificación exitosa usando el entorno virtual: `./.venv/bin/python3 paddle_ocr_cli.py --warmup` pasó con exit code 0 y output JSON válido. La TASK y `docs/setup.md` quedan alineadas sobre el intérprete operativo real del pipeline OCR.
 
-### TASK-06 — Subprocess TypeScript para PaddleOCR — [ver detalle](tasks/task-06.md)
+### TASK-06 — [OBSOLETO] Subprocess TypeScript para PaddleOCR — [ver detalle](tasks/task-06.md)
 - **Estado**: `DONE`
 - **Archivo(s)**: `src/ocr/paddle-ocr-subprocess.ts`
 - **Dependencias**: TASK-01, TASK-05
@@ -257,7 +258,7 @@ Secuencial (depende también de TASK-03, TASK-04, TASK-06):
 - **Timestamp fin**: `2026-03-29T01:00:00-05:00`
 - **Notas**: Alias confirmados en preflight: `income_receipts.amount`/`income_receipts.date` (no `received_amount`/`received_on`), `recurring_expense_rules.name` (no `description`). Patrón `(? IS NULL OR currency = ?)` para filtro opcional sin duplicar queries. Secciones por moneda ordenadas alfabéticamente. `monthlyEquivalent()` local para sumar reglas recurrentes. 13/13 tests pasan, suite completa 69/69.
 
-### TASK-15 — Tool: log_expense_from_image — [ver detalle](tasks/task-15.md)
+### TASK-15 — [OBSOLETO] Tool: log_expense_from_image — [ver detalle](tasks/task-15.md)
 - **Estado**: `DONE`
 - **Archivo(s)**: `src/tools/log-expense-from-image.ts`, `tests/integration/log-expense-from-image.test.ts`
 - **Dependencias**: TASK-02, TASK-03, TASK-04, TASK-06, TASK-07
@@ -343,6 +344,23 @@ Secuencial (depende también de TASK-03, TASK-04, TASK-06):
 
 ---
 
+## Hito 9: OCR Agéntico
+
+> Adaptación a la nueva arquitectura basada en el agente OpenClaw.
+
+### TASK-21 — Refactorización a OCR Agéntico — [ver detalle](tasks/task-21.md)
+- **Estado**: `DONE`
+- **Archivo(s)**: `src/tools/log-expense-from-receipt.ts`, `tests/integration/log-expense-from-receipt.test.ts`, `src/index.ts`, `tests/integration/plugin-entry.test.ts`
+- **Dependencias**: TASK-02, TASK-07
+- **Desbloquea**: nada
+- **Descripción**: Refactorizar persistencia OCR para basarse en OpenClaw e insertar nativamente.
+- **Criterio de aceptación**: tests de integración pasan, dependencias eliminadas.
+- **Timestamp inicio**: `2026-03-29T10:30:00-05:00`
+- **Timestamp fin**: `2026-03-29T11:00:00-05:00`
+- **Timestamp fin**: `2026-03-29T11:00:00-05:00`
+
+---
+
 ## Resumen de paralelismo
 
 Una vez que las dependencias están satisfechas, estas tareas pueden ejecutarse **en paralelo** por distintos agentes:
@@ -355,6 +373,7 @@ Una vez que las dependencias están satisfechas, estas tareas pueden ejecutarse 
 | 4 | TASK-08, TASK-09, TASK-10, TASK-11, TASK-13, TASK-14, TASK-16, TASK-17 | TASK-02 + TASK-07 |
 | 5 | TASK-12, TASK-15, TASK-18 | Fase 4 parcial + Hito 3 completo (para 15) |
 | 6 | TASK-19, TASK-20 | TASK-18 (para 19), TASK-08 → TASK-17 (para 20) |
+| 7 | TASK-21 | TASK-02, TASK-07 |
 
 **Máximo paralelismo teórico**: hasta 8 agentes simultáneos en Fase 4.
 
