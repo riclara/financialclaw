@@ -90,10 +90,10 @@ export function executeLogExpenseFromReceipt(
     ).run(
       extractionId,
       "openclaw_agent",
-      null, // source_path no aplica para OCR agéntico
+      null, // source_path not applicable for agentic OCR
       rawText,
-      null, // lines_json no aplica para OCR agéntico
-      null, // average_confidence no aplica para OCR agéntico
+      null, // lines_json not applicable for agentic OCR
+      null, // average_confidence not applicable for agentic OCR
       amount,
       currency.code,
       date,

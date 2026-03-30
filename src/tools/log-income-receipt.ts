@@ -68,7 +68,7 @@ export function executeLogIncomeReceipt(
     throw new Error(`La fecha "${input.received_on}" no es una fecha válida en el calendario.`);
   }
 
-  // 1. Buscar income por income_id
+  // 1. Look up income by income_id
   const income = db
     .prepare(
       `SELECT id, reason, expected_amount, currency, date, frequency, interval_days, is_recurring, next_expected_receipt_date
@@ -80,14 +80,14 @@ export function executeLogIncomeReceipt(
     throw new Error(`El ingreso con ID "${input.income_id}" no existe.`);
   }
 
-  // 2. Resolver moneda efectiva
+  // 2. Resolve effective currency
   let currency: CurrencyRow;
   const trimmedCurrency = input.currency?.trim();
   if (trimmedCurrency) {
-    // Validar la moneda provista explícitamente (ignorar si era solo espacios)
+    // Validate explicitly provided currency (ignore if whitespace-only)
     currency = resolveCurrency(trimmedCurrency, db);
   } else {
-    // Usar la moneda persistida del income (no la moneda default global)
+    // Use the currency stored on the income (not the global default)
     const incomeCurrency = db
       .prepare(
         `SELECT code, name, symbol, is_default FROM currencies WHERE code = ?`,
@@ -102,7 +102,7 @@ export function executeLogIncomeReceipt(
     currency = incomeCurrency;
   }
 
-  // 3. Calcular próxima fecha si el income es recurrente
+  // 3. Compute next date if income is recurring
   const isRecurring = income.is_recurring === 1;
   let nextDate: string | null = null;
   if (isRecurring && income.frequency) {
@@ -113,7 +113,7 @@ export function executeLogIncomeReceipt(
     );
   }
 
-  // 4. Insertar receipt y actualizar income (atómico)
+  // 4. Insert receipt and update income (atomic)
   const receiptId = randomUUID();
   const now = new Date().toISOString();
 
@@ -138,11 +138,11 @@ export function executeLogIncomeReceipt(
     }
   })();
 
-  // 5. Formatear respuesta
+  // 5. Format response
   const formattedReceived = formatAmount(input.received_amount, currency);
   let message = `Recepción registrada: ${formattedReceived} · ${income.reason} · ${input.received_on} (ID: ${receiptId})`;
 
-  // Diferencia vs expected_amount
+  // Difference vs expected_amount
   const diff = input.received_amount - income.expected_amount;
   if (diff !== 0) {
     const formattedDiff = formatAmount(Math.abs(diff), currency);
