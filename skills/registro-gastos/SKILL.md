@@ -30,14 +30,24 @@ Ejemplos:
 
 Usa `log_expense_from_receipt` cuando el usuario envíe una foto de un recibo, ticket o factura.
 
-Antes de invocar el tool, extrae del recibo usando tus capacidades de visión:
-- `amount`: el total del recibo (número, sin símbolos ni puntos de miles)
-- `date`: fecha en formato YYYY-MM-DD
-- `merchant`: nombre del establecimiento
-- `category`: infiere según tipo de negocio
-- `raw_text`: todo el texto visible del recibo
+Flujo obligatorio — no saltear ningún paso:
 
-Si no puedes leer el monto con certeza, pregunta al usuario antes de invocar el tool.
+1. Extrae del recibo usando tus capacidades de visión:
+   - `amount`: el total del recibo (número, sin símbolos ni puntos de miles)
+   - `date`: fecha en formato YYYY-MM-DD
+   - `merchant`: nombre del establecimiento
+   - `category`: infiere según tipo de negocio
+   - `raw_text`: todo el texto visible del recibo
+
+2. Antes de invocar el tool, muestra los datos extraídos al usuario y pide confirmación:
+   > "Encontré esto en el recibo — ¿es correcto?
+   > • Monto: [amount]
+   > • Fecha: [date]
+   > • Comercio: [merchant]
+   > • Categoría: [category]
+   > Responde 'sí' para guardar o corrígeme si algo está mal."
+
+3. Solo llama a `log_expense_from_receipt` después de que el usuario confirme o corrija los datos.
 
 ## Marcar gasto como pagado
 
