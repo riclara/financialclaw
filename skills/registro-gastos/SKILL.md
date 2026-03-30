@@ -48,7 +48,7 @@ Flujo obligatorio — no saltear ningún paso:
    > • Comercio: [merchant]
    > • Categoría: [category]"
 
-   Si el canal es Telegram: envía el mensaje con un botón inline "Sí ✅" usando un bloque interactivo (`type: "buttons"`, `label: "Sí ✅"`, `value: "confirmar"`). El usuario puede presionar el botón para confirmar, o escribir directamente lo que debe corregirse.
+   Si el canal es Telegram: envía el mensaje con un botón inline "Sí ✅" usando un bloque interactivo (`type: "buttons"`, `label: "Sí ✅"`, `value: "si"`). El usuario puede presionar el botón para confirmar, o escribir directamente lo que debe corregirse.
 
    Si el canal no es Telegram: pide confirmación en texto plano ("Responde 'sí' para guardar o dime qué corregir").
 
