@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/riclara/financialclaw/actions/workflows/ci.yml/badge.svg)](https://github.com/riclara/financialclaw/actions/workflows/ci.yml)
 
-Plugin de OpenClaw para finanzas personales vía Telegram. Expone un set de tools para registrar gastos, ingresos, pagos recurrentes y generar resúmenes sobre una base SQLite embebida, con OCR local de recibos vía PaddleOCR y soporte multi-moneda.
+Plugin de OpenClaw para finanzas personales vía Telegram. Expone un set de tools para registrar gastos, ingresos, pagos recurrentes y generar resúmenes sobre una base SQLite embebida. OCR de recibos delegado al agente OpenClaw (arquitectura agéntica). Soporte multi-moneda.
 
 ## Estado del proyecto
 
@@ -15,7 +15,7 @@ Si necesitas el detalle de avance por tarea, revisa [docs/hitos.md](docs/hitos.m
 ## Capacidades principales
 
 - Tools de OpenClaw para gastos, ingresos, reglas recurrentes y consultas.
-- OCR local con PaddleOCR ejecutado en un virtualenv Python.
+- OCR de recibos agéntico: el agente OpenClaw extrae los datos y los pasa al tool `log_expense_from_receipt`.
 - Persistencia en SQLite embebida.
 - Resolución explícita de moneda con soporte multi-moneda y placeholder inicial `XXX`.
 
@@ -27,15 +27,11 @@ Pasos mínimos:
 
 ```bash
 npm install
-python3.12 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
 ```
 
-Para precalentar OCR y dejar listo el runner externo:
+Para dejar listo el runner externo de reminders:
 
 ```bash
-./.venv/bin/python3 paddle_ocr_cli.py --warmup
 npx tsx src/bin/daily-reminder-runner.ts --target "<chat-o-destino>"
 ```
 

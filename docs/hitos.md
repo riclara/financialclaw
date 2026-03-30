@@ -50,7 +50,7 @@ Hito 5: Tools core          [DONE]     TASK-08 → TASK-15
 Hito 6: Tools de consulta   [DONE]     TASK-16, TASK-17
 Hito 7: Automatización      [DONE]     TASK-18, TASK-19
 Hito 8: Integración final   [DONE]     TASK-20
-Hito 9: OCR Agéntico        [TODO]     TASK-21
+Hito 9: OCR Agéntico        [DONE]     TASK-21
 ```
 
 ---
@@ -336,11 +336,11 @@ Secuencial (depende también de TASK-03, TASK-04, TASK-06):
 - **Archivo(s)**: `src/index.ts`, `tests/integration/plugin-entry.test.ts`
 - **Dependencias**: TASK-08, TASK-09, TASK-10, TASK-11, TASK-12, TASK-13, TASK-14, TASK-15, TASK-16, TASK-17
 - **Desbloquea**: nada (es la tarea final)
-- **Descripción**: `definePluginEntry` que lee `api.pluginConfig`, llama `configureDb()` y `configurePythonCmd()`, y registra los 10 tools con `api.registerTool()` usando `wrapExecute()`. No registra services; la automatización de reminders vive fuera del plugin.
+- **Descripción**: `definePluginEntry` que lee `api.pluginConfig`, llama `configureDb()`, y registra los 10 tools con `api.registerTool()` usando `wrapExecute()`. No registra services; la automatización de reminders vive fuera del plugin. (Nota: `configurePythonCmd()` fue eliminado en TASK-21 al retirar el pipeline PaddleOCR.)
 - **Criterio de aceptación**: `npx tsc --noEmit` pasa sin errores. Todos los tests (unit + integration) pasan. Los 10 tools están registrados y `src/index.ts` no llama `api.registerService()`.
 - **Timestamp inicio**: `2026-03-29T00:41:45-0500`
 - **Timestamp fin**: `2026-03-29T00:41:45-0500`
-- **Notas**: `Se corrige el wiring incompleto: se elimina el registro duplicado de manage_currency, se registra list_expenses y el entry point queda blindado con tests de integración/smoke que verifican exactamente 10 tools, ausencia de duplicados, ausencia de registerService(), aplicación de configureDb()/configurePythonCmd() y adaptación a ToolResult. Verificación final: npx tsc --noEmit, npx tsx --test tests/integration/plugin-entry.test.ts y npm run test:integration en verde.`
+- **Notas**: `Se corrige el wiring incompleto: se elimina el registro duplicado de manage_currency, se registra list_expenses y el entry point queda blindado con tests de integración/smoke que verifican exactamente 10 tools, ausencia de duplicados, ausencia de registerService(), aplicación de configureDb() y adaptación a ToolResult. Verificación final: npx tsc --noEmit, npx tsx --test tests/integration/plugin-entry.test.ts y npm run test:integration en verde. (configurePythonCmd() fue eliminado posteriormente en TASK-21.)`
 
 ---
 
@@ -356,7 +356,6 @@ Secuencial (depende también de TASK-03, TASK-04, TASK-06):
 - **Descripción**: Refactorizar persistencia OCR para basarse en OpenClaw e insertar nativamente.
 - **Criterio de aceptación**: tests de integración pasan, dependencias eliminadas.
 - **Timestamp inicio**: `2026-03-29T10:30:00-05:00`
-- **Timestamp fin**: `2026-03-29T11:00:00-05:00`
 - **Timestamp fin**: `2026-03-29T11:00:00-05:00`
 
 ---
