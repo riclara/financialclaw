@@ -40,14 +40,19 @@ Flujo obligatorio — no saltear ningún paso:
    - `raw_text`: todo el texto visible del recibo
 
 2. Antes de invocar el tool, muestra los datos extraídos al usuario y pide confirmación:
+
+   Mensaje:
    > "Encontré esto en el recibo — ¿es correcto?
    > • Monto: [amount]
    > • Fecha: [date]
    > • Comercio: [merchant]
-   > • Categoría: [category]
-   > Responde 'sí' para guardar o corrígeme si algo está mal."
+   > • Categoría: [category]"
 
-3. Solo llama a `log_expense_from_receipt` después de que el usuario confirme o corrija los datos.
+   Si el canal es Telegram: envía el mensaje con un botón inline "Sí ✅" usando un bloque interactivo (`type: "buttons"`, `label: "Sí ✅"`, `value: "confirmar"`). El usuario puede presionar el botón para confirmar, o escribir directamente lo que debe corregirse.
+
+   Si el canal no es Telegram: pide confirmación en texto plano ("Responde 'sí' para guardar o dime qué corregir").
+
+3. Solo llama a `log_expense_from_receipt` después de que el usuario confirme (botón o texto afirmativo) o tras aplicar las correcciones que indique.
 
 ## Marcar gasto como pagado
 
