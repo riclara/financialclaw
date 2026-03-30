@@ -13,6 +13,12 @@
     },
     "additionalProperties": false
   },
+  "skills": [
+    "skills/registro-gastos",
+    "skills/registro-ingresos",
+    "skills/consultas-financieras",
+    "skills/configuracion-moneda"
+  ],
   "contracts": {
     "tools": [
       "manage_currency",
