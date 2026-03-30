@@ -1,39 +1,39 @@
 ---
 name: registro-ingresos
 description: |
-  Registrar ingresos en financialclaw. Usar cuando: el usuario mencione haber recibido dinero, cobrado un sueldo, recibido un pago de cliente, o quiera registrar una fuente de ingreso nueva. También cuando registre el cobro de una cuota o pago parcial sobre un ingreso ya existente. NO usar para: gastos, consultas de ingresos previos.
+  Log income in financialclaw. Use when: the user mentions receiving money, getting a salary, receiving a client payment, or wants to register a new income source. Also when they log a payment or partial installment received against an already existing income. NOT for: expenses, querying past income.
 metadata:
   {
     "openclaw": { "emoji": "💰" }
   }
 ---
 
-# Registro de ingresos
+# Income logging
 
-## Ingreso nuevo
+## New income
 
-Usa `log_income` para fuentes de ingreso nuevas o pagos únicos.
+Use `log_income` for new income sources or one-time payments.
 
-Parámetros requeridos: `amount`, `description`, `date`.
-Parámetros opcionales: `currency`, `is_recurring`, `frequency`, `interval_days`.
+Required params: `amount`, `description`, `date`.
+Optional params: `currency`, `is_recurring`, `frequency`, `interval_days`.
 
-Si el ingreso es recurrente (sueldo mensual, cliente fijo), activa `is_recurring: true` y especifica `frequency`.
+If the income is recurring (monthly salary, fixed client), set `is_recurring: true` and specify `frequency`.
 
-Frecuencias: `WEEKLY`, `BIWEEKLY`, `MONTHLY`, `INTERVAL_DAYS`.
-Para `INTERVAL_DAYS`, `interval_days` es obligatorio.
+Frequencies: `WEEKLY`, `BIWEEKLY`, `MONTHLY`, `INTERVAL_DAYS`.
+For `INTERVAL_DAYS`, `interval_days` is required.
 
-Ejemplos:
-- "Recibí mi sueldo de $3.000.000" → `log_income` con is_recurring: true, frequency: MONTHLY
-- "Me pagaron un proyecto por $500 USD" → `log_income` con currency: USD
-- "Ingreso de freelance, $200 cada dos semanas" → frequency: BIWEEKLY
+Examples:
+- "I got my salary of $3,000" → `log_income` with is_recurring: true, frequency: MONTHLY
+- "A client paid me $500 USD" → `log_income` with currency: USD
+- "Freelance income, $200 every two weeks" → frequency: BIWEEKLY
 
-## Pago recibido sobre ingreso existente
+## Payment received on existing income
 
-Usa `log_income_receipt` cuando el usuario informe el cobro de una cuota o pago sobre un ingreso ya registrado (no uno nuevo).
+Use `log_income_receipt` when the user reports receiving an installment or payment against an already registered income (not a new one).
 
-Requiere `income_id`. Si el usuario no lo tiene, usa `list_incomes` para mostrárselos primero.
+Requires `income_id`. If the user doesn't have it, use `list_incomes` first to show them.
 
-Parámetros requeridos: `income_id`, `amount`, `date`.
-Parámetro opcional: `notes`.
+Required params: `income_id`, `amount`, `date`.
+Optional param: `notes`.
 
-Ejemplo: "Recibí el pago de marzo del cliente X" → busca el income_id con `list_incomes` y luego usa `log_income_receipt`.
+Example: "I received the March payment from client X" → find the income_id with `list_incomes`, then use `log_income_receipt`.

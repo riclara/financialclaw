@@ -1,53 +1,53 @@
 ---
 name: consultas-financieras
 description: |
-  Consultar el estado financiero del usuario en financialclaw. Usar cuando: el usuario pregunte cuánto ha gastado, quiera ver sus gastos o ingresos, pida un resumen del mes o del año, o pregunte por su situación financiera general. NO usar para: registrar gastos o ingresos nuevos, configurar moneda.
+  Query the user's financial status in financialclaw. Use when: the user asks how much they have spent, wants to see their expenses or income, requests a monthly or yearly summary, or asks about their overall financial situation. NOT for: logging new expenses or income, configuring currency.
 metadata:
   {
     "openclaw": { "emoji": "📊" }
   }
 ---
 
-# Consultas financieras
+# Financial queries
 
-## Resumen general
+## General summary
 
-Usa `get_financial_summary` para una vista consolidada del período: total gastos por categoría, total ingresos, balance y compromisos recurrentes activos.
+Use `get_financial_summary` for a consolidated view of the period: total expenses by category, total income, balance, and active recurring commitments.
 
-Períodos: `this_month` (default), `last_month`, `last_30_days`, `this_year`.
-Filtra por `currency` si el usuario maneja varias monedas.
+Periods: `this_month` (default), `last_month`, `last_30_days`, `this_year`.
+Filter by `currency` if the user manages multiple currencies.
 
-Ejemplos:
-- "¿Cómo van mis finanzas este mes?" → `get_financial_summary`
-- "Resumen de gastos del mes pasado" → period: last_month
-- "Balance del año" → period: this_year
+Examples:
+- "How are my finances this month?" → `get_financial_summary`
+- "Summary of last month's expenses" → period: last_month
+- "Year-to-date balance" → period: this_year
 
-## Listar gastos
+## List expenses
 
-Usa `list_expenses` para ver gastos individuales con filtros.
+Use `list_expenses` to see individual expenses with filters.
 
-Filtros disponibles:
+Available filters:
 - `period`: `this_month`, `last_month`, `last_30_days`, `this_year`, `all`
 - `status`: `PENDING`, `PAID`, `OVERDUE`
-- `category`: nombre de la categoría
-- `search`: búsqueda en descripción o comercio
-- `source`: `manual` u `ocr`
-- `limit` / `offset`: paginación (default 20, máx 50)
+- `category`: category name
+- `search`: search in description or merchant
+- `source`: `manual` or `ocr`
+- `limit` / `offset`: pagination (default 20, max 50)
 
-Ejemplos:
-- "Muéstrame los gastos pendientes" → status: PENDING
-- "¿Cuánto gasté en supermercado?" → category: SUPERMARKET
-- "Gastos de transporte en los últimos 30 días" → period: last_30_days, category: TRANSPORT
+Examples:
+- "Show me pending expenses" → status: PENDING
+- "How much did I spend at the supermarket?" → category: SUPERMARKET
+- "Transport expenses in the last 30 days" → period: last_30_days, category: TRANSPORT
 
-Si hay más resultados de los mostrados, informa al usuario que puede pedir más con offset.
+If there are more results than shown, let the user know they can request more using offset.
 
-## Listar ingresos
+## List income
 
-Usa `list_incomes` para ver ingresos registrados.
+Use `list_incomes` to see registered income.
 
-Filtros: `recurring` (true/false), `search`, `currency`, `include_receipts` (muestra pagos recibidos por ingreso).
+Filters: `recurring` (true/false), `search`, `currency`, `include_receipts` (shows received payments per income).
 
-Ejemplos:
-- "¿Qué ingresos tengo?" → `list_incomes`
-- "Mis ingresos recurrentes" → recurring: true
-- "Ingresos con detalle de pagos" → include_receipts: true
+Examples:
+- "What income do I have?" → `list_incomes`
+- "My recurring income" → recurring: true
+- "Income with payment details" → include_receipts: true

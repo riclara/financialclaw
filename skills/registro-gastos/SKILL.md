@@ -1,74 +1,74 @@
 ---
 name: registro-gastos
 description: |
-  Registrar gastos en financialclaw. Usar cuando: el usuario mencione haber gastado dinero, comprado algo, pagado una cuenta, o envíe una foto de un recibo o ticket. También cuando quiera marcar un gasto existente como pagado, o crear un gasto recurrente (servicios, suscripciones, cuotas fijas). NO usar para: ingresos, consultas de gastos previos, configuración de moneda.
+  Log expenses in financialclaw. Use when: the user mentions spending money, buying something, paying a bill, or sends a photo of a receipt or ticket. Also when they want to mark an existing expense as paid, or set up a recurring expense (utilities, subscriptions, fixed fees). NOT for: income, querying past expenses, currency configuration.
 metadata:
   {
     "openclaw": { "emoji": "💸" }
   }
 ---
 
-# Registro de gastos
+# Expense logging
 
-## Gasto manual
+## Manual expense
 
-Usa `log_expense_manual` cuando el usuario describa un gasto con palabras (sin foto).
+Use `log_expense_manual` when the user describes an expense in words (no photo).
 
-Parámetros requeridos: `amount`, `description`.
-Parámetros opcionales: `category`, `currency`, `merchant`, `due_date`.
+Required params: `amount`, `description`.
+Optional params: `category`, `currency`, `merchant`, `due_date`.
 
-Si falta el monto, pregunta antes de registrar. Si falta la fecha, usa hoy por defecto (el tool lo hace automáticamente).
+If the amount is missing, ask before logging. If the date is missing, today is used by default (the tool handles this automatically).
 
-Categorías disponibles: `HOUSING`, `SERVICES`, `TRANSPORT`, `SUPERMARKET`, `HEALTH`, `EDUCATION`, `ENTERTAINMENT`, `RESTAURANT`, `OTHER`.
+Available categories: `HOUSING`, `SERVICES`, `TRANSPORT`, `SUPERMARKET`, `HEALTH`, `EDUCATION`, `ENTERTAINMENT`, `RESTAURANT`, `OTHER`.
 
-Ejemplos:
-- "Gasté $50.000 en el super" → `log_expense_manual` con category: SUPERMARKET
-- "Pagué el arriendo" → pregunta el monto si no lo dio
-- "Almuerzo por $18.000 en Crepes & Waffles" → agrega merchant
+Examples:
+- "I spent $50 at the supermarket" → `log_expense_manual` with category: SUPERMARKET
+- "I paid rent" → ask for the amount if not given
+- "Lunch for $18 at Crepes & Waffles" → include merchant
 
-## Gasto desde foto de recibo
+## Expense from receipt photo
 
-Usa `log_expense_from_receipt` cuando el usuario envíe una foto de un recibo, ticket o factura.
+Use `log_expense_from_receipt` when the user sends a photo of a receipt, ticket, or invoice.
 
-Flujo obligatorio — no saltear ningún paso:
+Mandatory flow — do not skip any step:
 
-1. Extrae del recibo usando tus capacidades de visión:
-   - `amount`: el total del recibo (número, sin símbolos ni puntos de miles)
-   - `date`: fecha en formato YYYY-MM-DD
-   - `merchant`: nombre del establecimiento
-   - `category`: infiere según tipo de negocio
-   - `raw_text`: todo el texto visible del recibo
+1. Extract from the receipt using your vision capabilities:
+   - `amount`: the receipt total (number, no currency symbols or thousand separators)
+   - `date`: date in YYYY-MM-DD format
+   - `merchant`: name of the establishment
+   - `category`: infer from the type of business
+   - `raw_text`: all visible text from the receipt
 
-2. Antes de invocar el tool, muestra los datos extraídos al usuario y pide confirmación:
+2. Before invoking the tool, show the extracted data to the user and ask for confirmation:
 
-   Mensaje:
-   > "Encontré esto en el recibo — ¿es correcto?
-   > • Monto: [amount]
-   > • Fecha: [date]
-   > • Comercio: [merchant]
-   > • Categoría: [category]"
+   Message:
+   > "Here's what I found on the receipt — is this correct?
+   > • Amount: [amount]
+   > • Date: [date]
+   > • Merchant: [merchant]
+   > • Category: [category]"
 
-   Si el canal es Telegram: envía el mensaje con un botón inline "Sí ✅" usando un bloque interactivo (`type: "buttons"`, `label: "Sí ✅"`, `value: "si"`). El usuario puede presionar el botón para confirmar, o escribir directamente lo que debe corregirse.
+   If the channel is Telegram: send the message with an inline button "Yes ✅" using an interactive block (`type: "buttons"`, `label: "Yes ✅"`, `value: "si"`). The user can press the button to confirm, or type directly what needs to be corrected.
 
-   Si el canal no es Telegram: pide confirmación en texto plano ("Responde 'sí' para guardar o dime qué corregir").
+   If the channel is not Telegram: ask for confirmation in plain text ("Reply 'yes' to save or tell me what to correct").
 
-3. Solo llama a `log_expense_from_receipt` después de que el usuario confirme (botón o texto afirmativo) o tras aplicar las correcciones que indique.
+3. Only call `log_expense_from_receipt` after the user confirms (button or affirmative text) or after applying the corrections they indicate.
 
-## Marcar gasto como pagado
+## Mark expense as paid
 
-Usa `mark_expense_paid` cuando el usuario confirme que pagó un gasto pendiente.
+Use `mark_expense_paid` when the user confirms they paid a pending expense.
 
-Necesitas el `expense_id`. Si el usuario no lo tiene a mano, usa `list_expenses` con `status: "PENDING"` para mostrárselos y que elija.
+You need the `expense_id`. If the user doesn't have it handy, use `list_expenses` with `status: "PENDING"` to show them the list so they can choose.
 
-## Gasto recurrente
+## Recurring expense
 
-Usa `add_recurring_expense` para servicios fijos, suscripciones o cuotas.
+Use `add_recurring_expense` for fixed services, subscriptions, or installments.
 
-Parámetro `frequency`: `WEEKLY`, `BIWEEKLY`, `MONTHLY`, `INTERVAL_DAYS`.
-Para `INTERVAL_DAYS`, `interval_days` es obligatorio.
+`frequency` param: `WEEKLY`, `BIWEEKLY`, `MONTHLY`, `INTERVAL_DAYS`.
+For `INTERVAL_DAYS`, `interval_days` is required.
 
-Ejemplo: "Quiero registrar que pago Netflix cada mes por $45.000" → `add_recurring_expense` con frequency: MONTHLY.
+Example: "I want to log that I pay Netflix every month for $15" → `add_recurring_expense` with frequency: MONTHLY.
 
-## Moneda sin configurar
+## Currency not configured
 
-Si la respuesta del tool incluye sugerencia de configurar moneda, informa al usuario que su moneda por defecto no está configurada y ofrécele hacerlo ahora con `manage_currency`.
+If the tool response includes a suggestion to configure the currency, inform the user that their default currency is not set and offer to configure it now with `manage_currency`.
