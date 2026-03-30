@@ -2,6 +2,11 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.3.0] - 2026-03-30
+### Added
+- 4 skills para el agente OpenClaw: `registro-gastos`, `registro-ingresos`, `consultas-financieras`, `configuracion-moneda`.
+- Flujo de confirmación con botón inline de Telegram antes de guardar un gasto desde foto de recibo.
+
 ## [Unreleased]
 
 ### Added
