@@ -2,11 +2,6 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
-## [0.3.0] - 2026-03-30
-### Added
-- 4 skills para el agente OpenClaw: `registro-gastos`, `registro-ingresos`, `consultas-financieras`, `configuracion-moneda`.
-- Flujo de confirmación con botón inline de Telegram antes de guardar un gasto desde foto de recibo.
-
 ## [Unreleased]
 
 ### Added
@@ -67,6 +62,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado se
 - Rediseño final del roadmap para salir del bloqueo upstream de reminders sin bajar el estándar: `TASK-19` deja de modelarse como service interno del plugin y pasa a `daily-reminder-runner` externo usando la CLI pública `openclaw message send`; `TASK-20` se redefine como `src/index.ts` tools-only, sin `registerService()` y sin depender ya de `TASK-19`.
 - `docs/plan-tecnico.md` corrige la deriva del seed de moneda default y alinea la arquitectura con `XXX / Sin configurar / ¤` en vez de `COP`.
 - `docs/hitos.md` cierra `TASK-01` como `DONE` después de verificar `npm install` con `better-sqlite3@^12.8.0`; `tsc` sigue pendiente de tener al menos un archivo TypeScript de entrada, tal como documenta la propia tarea.
+
+## [0.3.0] - 2026-03-30
+### Added
+- 4 skills para el agente OpenClaw: `registro-gastos`, `registro-ingresos`, `consultas-financieras`, `configuracion-moneda`.
+- Flujo de confirmación con botón inline de Telegram antes de guardar un gasto desde foto de recibo.
 
 ## [0.2.0] - 2026-03-29
 ### Changed

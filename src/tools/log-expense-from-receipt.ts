@@ -14,6 +14,20 @@ import { todayISO } from "./helpers/date-utils.js";
 
 const ISO_DATE_PATTERN = "^\\d{4}-\\d{2}-\\d{2}$";
 
+function isValidCalendarDate(dateStr: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+  if (match === null) return false;
+  const year = Number.parseInt(match[1], 10);
+  const month = Number.parseInt(match[2], 10);
+  const day = Number.parseInt(match[3], 10);
+  const d = new Date(Date.UTC(year, month - 1, day));
+  return (
+    d.getUTCFullYear() === year &&
+    d.getUTCMonth() === month - 1 &&
+    d.getUTCDate() === day
+  );
+}
+
 export const InputSchema = Type.Object(
   {
     amount: Type.Number({ minimum: 0.01 }),
@@ -46,6 +60,9 @@ function assertValidInput(input: LogExpenseFromReceiptInput): void {
   }
   if (input.raw_text !== undefined && input.raw_text.trim().length === 0) {
     throw new Error("raw_text no puede contener solo espacios en blanco.");
+  }
+  if (!isValidCalendarDate(input.date)) {
+    throw new Error("date no es una fecha de calendario válida.");
   }
 }
 
