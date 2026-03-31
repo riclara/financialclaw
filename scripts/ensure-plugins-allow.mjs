@@ -2,7 +2,7 @@
  * ensure-plugins-allow.mjs
  *
  * Run this script once after `openclaw plugins install` to configure
- * financialclaw in the OpenClaw config file (~/openclaw.json).
+ * financialclaw in the OpenClaw config file.
  *
  * What it does:
  *   1. Adds "financialclaw" to plugins.allow (preserving active channels
@@ -10,28 +10,59 @@
  *   2. Sets plugins.entries.financialclaw.config.dbPath if not already set
  *
  * Usage:
- *   node scripts/ensure-plugins-allow.mjs [--db-path /ruta/a/financialclaw.db]
+ *   node scripts/ensure-plugins-allow.mjs [--config /ruta/openclaw.json] [--db-path /ruta/financialclaw.db]
  *
- * If --db-path is omitted, defaults to ~/.openclaw/workspace/financialclaw.db
+ * Config path resolution order:
+ *   1. --config argument
+ *   2. OPENCLAW_CONFIG env var
+ *   3. Output of `openclaw config path` (if CLI available)
+ *   4. ~/openclaw.json (default)
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, dirname } from "node:path";
+import { execSync } from "node:child_process";
 
-const configPath = join(homedir(), "openclaw.json");
+function parseArg(name) {
+  const i = process.argv.indexOf(name);
+  return i !== -1 && process.argv[i + 1] ? process.argv[i + 1] : null;
+}
+
+function resolveConfigPath() {
+  // 1. --config argument
+  const arg = parseArg("--config");
+  if (arg) return arg;
+
+  // 2. env var
+  if (process.env.OPENCLAW_CONFIG) return process.env.OPENCLAW_CONFIG;
+
+  // 3. ask the CLI
+  try {
+    const out = execSync("openclaw config path", { encoding: "utf-8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+    if (out && existsSync(out)) return out;
+  } catch {
+    // CLI not available or doesn't support 'config path' — fall through
+  }
+
+  // 4. default
+  return join(homedir(), "openclaw.json");
+}
+
+const configPath = resolveConfigPath();
 
 if (!existsSync(configPath)) {
   console.error(`Config not found: ${configPath}`);
+  console.error(`Use --config /ruta/al/openclaw.json to specify the path.`);
   process.exit(1);
 }
 
+console.log(`Using config: ${configPath}`);
+
 // Parse --db-path argument
-const dbPathArg = process.argv.indexOf("--db-path");
 const dbPath =
-  dbPathArg !== -1 && process.argv[dbPathArg + 1]
-    ? process.argv[dbPathArg + 1]
-    : join(homedir(), ".openclaw", "workspace", "financialclaw.db");
+  parseArg("--db-path") ??
+  join(homedir(), ".openclaw", "workspace", "financialclaw.db");
 
 const cfg = JSON.parse(readFileSync(configPath, "utf-8"));
 const plugins = (cfg.plugins ??= {});
@@ -66,12 +97,11 @@ if (plugins.allow) {
 }
 
 // 2. Set dbPath in plugins.entries.financialclaw.config if not already set
-const entry = (plugins.entries ??= {});
-const fc = (entry.financialclaw ??= { enabled: true, config: {} });
+const entries = (plugins.entries ??= {});
+const fc = (entries.financialclaw ??= { enabled: true, config: {} });
 fc.config ??= {};
 
 if (!fc.config.dbPath) {
-  // Ensure parent directory exists
   mkdirSync(dirname(dbPath), { recursive: true });
   fc.config.dbPath = dbPath;
   console.log(`Set dbPath: ${dbPath}`);
