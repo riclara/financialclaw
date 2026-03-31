@@ -1,6 +1,6 @@
 {
   "name": "financialclaw",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Plugin OpenClaw para finanzas personales via Telegram",
   "type": "module",
   "openclaw": {
@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "postinstall": "npm rebuild better-sqlite3",
+    "postinstall": "npm rebuild better-sqlite3 && node scripts/ensure-plugins-allow.mjs",
     "test": "tsx --test tests/**/*.test.ts",
     "test:unit": "tsx --test tests/unit/**/*.test.ts",
     "test:integration": "tsx --test tests/integration/**/*.test.ts"

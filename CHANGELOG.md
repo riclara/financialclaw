@@ -2,6 +2,10 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.3.1] - 2026-03-31
+### Fixed
+- `openclaw plugins install` no agrega el plugin a `plugins.allow`, causando que los tools no se carguen y que canales activos (Telegram) dejen de funcionar al agregar `plugins.allow` manualmente sin incluirlos. Nuevo script `ensure-plugins-allow.mjs` en postinstall detecta channels y plugins activos y los preserva en el allowlist.
+
 ## [0.3.0] - 2026-03-30
 ### Added
 - 4 skills para el agente OpenClaw: `registro-gastos`, `registro-ingresos`, `consultas-financieras`, `configuracion-moneda`.
