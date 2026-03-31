@@ -36,7 +36,8 @@
   },
   "files": [
     "src/",
-    "scripts/"
+    "scripts/",
+    "openclaw.plugin.json"
   ],
   "engines": {
     "node": ">=22.14.0"
