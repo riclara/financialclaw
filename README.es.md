@@ -31,7 +31,7 @@ openclaw gateway restart
 
 `openclaw plugins install` registra el plugin pero no lo activa completamente. Hay dos cosas que deben configurarse manualmente en `~/openclaw.json` (o `~/.openclaw/openclaw.json`):
 
-1. **`plugins.allow`** — sin esto, OpenClaw no carga el plugin aunque esté instalado. El script preserva los canales y plugins que ya estén en el allowlist para no romper nada.
+1. **`plugins.allow`** — una vez que este campo existe, OpenClaw lo usa como allowlist explícita: todo lo que no esté listado deja de funcionar, incluyendo canales activos como Telegram. El script detecta todos los canales y plugins activos y los incluye junto a `financialclaw`, para que nada deje de funcionar.
 2. **`plugins.entries.financialclaw.config.dbPath`** — sin esto, la base de datos se crea en una ruta temporal que se borra al reinstalar el plugin.
 
 `financialclaw-setup` resuelve ambos automáticamente.
