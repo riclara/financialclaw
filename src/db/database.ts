@@ -1,6 +1,11 @@
 import Database from "better-sqlite3";
+import { mkdirSync } from "node:fs";
+import { homedir } from "node:os";
+import { join, dirname } from "node:path";
 
 import { ALL_MIGRATIONS, ALL_SEEDS } from "./schema.js";
+
+const DEFAULT_DB_PATH = join(homedir(), ".openclaw", "workspace", "financialclaw.db");
 
 let _db: Database.Database | undefined;
 let _dbPath: string | undefined;
@@ -52,7 +57,8 @@ export function configureDb(dbPath: string): void {
 
 export function getDb(): Database.Database {
   if (_db === undefined) {
-    _dbPath = _dbPath ?? process.env.FINANCIALCLAW_DB_PATH ?? "./financialclaw.db";
+    _dbPath = _dbPath ?? process.env.FINANCIALCLAW_DB_PATH ?? DEFAULT_DB_PATH;
+    mkdirSync(dirname(_dbPath), { recursive: true });
     _db = new Database(_dbPath);
     initializeDb(_db);
   }

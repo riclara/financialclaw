@@ -2,6 +2,10 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.3.2] - 2026-03-31
+### Fixed
+- BD creada en `./financialclaw.db` (relativo al cwd del gateway) cuando `dbPath` no estaba configurado, causando que se perdiera al reinstalar el plugin. El default ahora es `~/.openclaw/workspace/financialclaw.db` (ruta absoluta). El directorio se crea automáticamente si no existe.
+
 ## [0.3.1] - 2026-03-31
 ### Fixed
 - `openclaw plugins install` no agrega el plugin a `plugins.allow` ni configura `dbPath`, causando que los tools no se carguen, que canales activos (Telegram) dejen de funcionar y que la BD quede sin ruta configurada. Nuevo script `scripts/ensure-plugins-allow.mjs` para ejecutar manualmente post-install: agrega `financialclaw` al allowlist preservando channels y plugins activos, y configura `plugins.entries.financialclaw.config.dbPath` con un default sensato o ruta custom vía `--db-path`.
