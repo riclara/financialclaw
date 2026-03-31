@@ -15,14 +15,12 @@
  * Config path resolution order:
  *   1. --config argument
  *   2. OPENCLAW_CONFIG env var
- *   3. Output of `openclaw config path` (if CLI available)
- *   4. ~/openclaw.json (default)
+ *   3. First existing file among known locations (see CANDIDATE_PATHS)
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, dirname } from "node:path";
-import { execSync } from "node:child_process";
 
 function parseArg(name) {
   const i = process.argv.indexOf(name);
@@ -37,29 +35,34 @@ function resolveConfigPath() {
   // 2. env var
   if (process.env.OPENCLAW_CONFIG) return process.env.OPENCLAW_CONFIG;
 
-  // 3. ask the CLI
-  try {
-    const out = execSync("openclaw config path", { encoding: "utf-8", stdio: ["ignore", "pipe", "ignore"] }).trim();
-    if (out && existsSync(out)) return out;
-  } catch {
-    // CLI not available or doesn't support 'config path' — fall through
+  // 3. known locations in priority order
+  const home = homedir();
+  const CANDIDATE_PATHS = [
+    join(home, ".openclaw", "openclaw.json"),   // most common
+    join(home, "openclaw.json"),                // some installs
+    join(home, ".config", "openclaw", "openclaw.json"),
+  ];
+
+  for (const p of CANDIDATE_PATHS) {
+    if (existsSync(p)) return p;
   }
 
-  // 4. default
-  return join(homedir(), "openclaw.json");
+  // Return first candidate as default even if it doesn't exist yet
+  // (will fail below with a helpful error)
+  return CANDIDATE_PATHS[0];
 }
 
 const configPath = resolveConfigPath();
 
 if (!existsSync(configPath)) {
   console.error(`Config not found: ${configPath}`);
-  console.error(`Use --config /ruta/al/openclaw.json to specify the path.`);
+  console.error(`Tried: ~/.openclaw/openclaw.json, ~/openclaw.json, ~/.config/openclaw/openclaw.json`);
+  console.error(`Use --config /ruta/al/config to specify the path explicitly.`);
   process.exit(1);
 }
 
 console.log(`Using config: ${configPath}`);
 
-// Parse --db-path argument
 const dbPath =
   parseArg("--db-path") ??
   join(homedir(), ".openclaw", "workspace", "financialclaw.db");

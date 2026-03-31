@@ -30,7 +30,8 @@ openclaw plugins install /ruta/al/financialclaw
 # 2. Configurar plugins.allow y dbPath en el config de OpenClaw
 #    (openclaw plugins install no hace esto automáticamente)
 node scripts/ensure-plugins-allow.mjs
-# Con ruta personalizada para el config de OpenClaw:
+# El script detecta el config en ~/.openclaw/openclaw.json automáticamente.
+# Si está en otro lado, usar --config:
 # node scripts/ensure-plugins-allow.mjs --config /ruta/openclaw.json
 # Con ruta personalizada para la BD:
 # node scripts/ensure-plugins-allow.mjs --db-path /tu/ruta/financialclaw.db
