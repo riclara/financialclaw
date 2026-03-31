@@ -31,7 +31,7 @@ if (plugins.allow) {
   // Active plugins in entries
   if (plugins.entries) {
     for (const [name, entry] of Object.entries(plugins.entries)) {
-      if (entry.enabled) allow.add(name);
+      if (entry.enabled !== false) allow.add(name);
     }
   }
 
