@@ -1,5 +1,5 @@
 {
-  "name": "financialclaw",
+  "name": "@riclara/financialclaw",
   "version": "0.3.2",
   "description": "Plugin OpenClaw para finanzas personales via Telegram",
   "type": "module",
@@ -34,6 +34,10 @@
     "typescript": "^5.5.0",
     "vitest": "^4.1.2"
   },
+  "files": [
+    "src/",
+    "scripts/"
+  ],
   "engines": {
     "node": ">=22.14.0"
   }
