@@ -35,7 +35,7 @@ export default definePluginEntry({
       configureDb(config.dbPath as string);
     }
 
-    // Configuración de Python CMD eliminada - OCR ahora es agéntico
+    // Python CMD config removed - OCR is now agentic
 
     api.registerTool({
       name: "manage_currency",
@@ -45,7 +45,7 @@ export default definePluginEntry({
       execute: wrapExecute(executeManageCurrency),
     });
 
-    // log_expense_from_image eliminado - reemplazado por log_expense_from_receipt (OCR agéntico)
+    // log_expense_from_image removed - replaced by log_expense_from_receipt (agentic OCR)
 
     api.registerTool({
       name: "log_expense_from_receipt",

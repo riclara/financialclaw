@@ -90,5 +90,5 @@ Eliminar el pipeline local de Python (PaddleOCR) y la lógica de clasificación 
 ## Criterios de aceptación
 
 - `npm run test:unit` y `npm run test:integration` sin errores, ni referencias a mocks del OCR.
-- `npx tsc --noEmit` pasa exitosamente con 9 herramientas puras instaladas y testeadas en el punto de entrada.
+- `npx tsc --noEmit` pasa exitosamente con 10 herramientas instaladas y testeadas en el punto de entrada.
 - El build refleja fielmente la desaparición de dependencias Python.

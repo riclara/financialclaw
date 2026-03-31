@@ -101,7 +101,7 @@ export function executeGetFinancialSummary(
 
   // ── Queries ────────────────────────────────────────────────────────────────
 
-  // Total gastos por moneda y categoría dentro del período
+  // Total expenses by currency and category within the period
   const expenseByCat = db
     .prepare(
       `SELECT currency, category, SUM(amount) AS total
@@ -112,7 +112,7 @@ export function executeGetFinancialSummary(
     )
     .all(range.start, range.end, filter, filter) as ExpenseCatRow[];
 
-  // Gastos pendientes por moneda dentro del período
+  // Pending expenses by currency within the period
   const pendingByCurrency = db
     .prepare(
       `SELECT currency, SUM(amount) AS total
@@ -123,8 +123,8 @@ export function executeGetFinancialSummary(
     )
     .all(range.start, range.end, filter, filter) as CurrencyTotalRow[];
 
-  // Ingresos recibidos por moneda dentro del período
-  // (income_receipts.amount / income_receipts.date — columnas reales, no alias del doc)
+  // Income received by currency within the period
+  // (income_receipts.amount / income_receipts.date — real columns, not doc aliases)
   const incomeByCurrency = db
     .prepare(
       `SELECT currency, SUM(amount) AS total
@@ -135,8 +135,8 @@ export function executeGetFinancialSummary(
     )
     .all(range.start, range.end, filter, filter) as CurrencyTotalRow[];
 
-  // Reglas recurrentes activas — independiente del período
-  // recurring_expense_rules.name = lo que el usuario llamó "description" en el input
+  // Active recurring rules — independent of the period
+  // recurring_expense_rules.name = what the user called "description" in the input
   const rules = db
     .prepare(
       `SELECT name, amount, currency, frequency, interval_days

@@ -2,10 +2,10 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
-## [0.2.0] - 2026-03-29
-### Changed
-- Refactorización a OCR Agéntico (TASK-21): Se eliminó el pipeline local basado en Python (PaddleOCR) y sus integraciones TypeScript, delegando la extracción directamente al agente Autónomo.
-- Cambio disruptivo: La herramienta `log_expense_from_image` fue renombrada a `log_expense_from_receipt` para aceptar datos estructurados en lugar de paths de imágenes locales.
+## [0.3.0] - 2026-03-30
+### Added
+- 4 skills para el agente OpenClaw: `registro-gastos`, `registro-ingresos`, `consultas-financieras`, `configuracion-moneda`.
+- Flujo de confirmación con botón inline de Telegram antes de guardar un gasto desde foto de recibo.
 
 ## [Unreleased]
 
@@ -32,19 +32,19 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado se
 - Cierre del parche de compatibilidad de `ocr_extractions`: se refuerzan los tests de integración para verificar las columnas `status` (NOT NULL, default 'COMPLETED') y `failure_code` tanto en instalaciones nuevas como en bases legacy mediante migraciones idempotentes; 77/77 tests de integración pasan tras la verificación.
 - `TASK-16`: nuevo módulo `list_expenses` con `InputSchema` TypeBox y `executeListExpenses()` para listar gastos con filtros; parámetros: `period?` (this_month/last_month/last_30_days/this_year/all), `start_date?`, `end_date?`, `category?`, `status?`, `search?`, `currency?`, `source?`, `limit?` (default 20, max 50), `offset?`; búsqueda en `description` y `merchant` con LIKE; conteo total con COUNT(*) sin LIMIT/OFFSET; retorna IDs utilizables; paginación con hint de más resultados; incluye 21 tests de integración.
 - `TASK-17`: nuevo módulo `list_incomes` con `InputSchema` TypeBox y `executeListIncomes()` para listar ingresos con filtros; parámetros: `recurring?`, `search?`, `currency?`, `limit?` (default 20, max 50), `offset?`, `include_receipts?` (default false); búsqueda en `reason` con LIKE; conteo total con COUNT(*) sin LIMIT/OFFSET; si `include_receipts=true`, trae hasta 5 receipts por income ordenados por fecha DESC; retorna IDs utilizables; paginación con hint de más resultados; incluye 20 tests de integración.
-- `TASK-20`: nuevo módulo `src/index.ts` que implementa el entry point del plugin financialclaw; exporta `default definePluginEntry({...})` que lee `api.pluginConfig`, llama `configureDb()` si llega `dbPath`, llama `configurePythonCmd()` si llega `pythonCmd`, y registra exactamente los 10 tools con `api.registerTool()` usando `wrapExecute()`; no registra services; incluye tests de integración que verifican el registro correcto de tools y aplicación de configuración; **DONE**: TypeScript compila sin errores y todos los tests de integración pasan.
+- `TASK-20`: nuevo módulo `src/index.ts` que implementa el entry point del plugin financialclaw; exporta `default definePluginEntry({...})` que lee `api.pluginConfig`, llama `configureDb()` si llega `dbPath`, y registra exactamente los 10 tools con `api.registerTool()` usando `wrapExecute()`; no registra services; incluye tests de integración que verifican el registro correcto de tools y aplicación de configuración; **DONE**: TypeScript compila sin errores y todos los tests de integración pasan. (El soporte de `configurePythonCmd()`/`pythonCmd` fue retirado en TASK-21.)
 
 ### State (pre-release)
-- 20/20 TASKs completadas y verificadas. Todos los hitos cerrados.
+- 21/21 TASKs completadas y verificadas. Todos los hitos cerrados.
 
 ### Changed
 - Preparación final de release interno/publicación del repositorio: `README.md`, `docs/setup.md`, `docs/hitos.md` y `openclaw.plugin.json` quedan alineados con el estado real del proyecto como plugin tools-only más runner externo de reminders.
 - `docs/setup.md` ahora documenta una invocación manual concreta del runner externo, las variables mínimas (`FINANCIALCLAW_REMINDER_TARGET`, `FINANCIALCLAW_DB_PATH`, `FINANCIALCLAW_REMINDER_CHANNEL`, `FINANCIALCLAW_REMINDER_ACCOUNT_ID`, `FINANCIALCLAW_OPENCLAW_CMD`) y el comportamiento de exit code para operación/scheduling externo.
-- `README.md` deja de presentar el repositorio como “en implementación” y resume explícitamente OCR local con PaddleOCR, SQLite embebida, multi-moneda y el modelo tools-only con automatización fuera del plugin.
+- `README.md` deja de presentar el repositorio como “en implementación” y resume explícitamente SQLite embebida, multi-moneda y el modelo tools-only con automatización fuera del plugin. (La mención de OCR local con PaddleOCR fue reemplazada en 0.2.0 por el modelo agéntico.)
 - Verificación final de cierre ejecutada en el estado actual del repo: `npm install`, `npx tsc --noEmit`, `npm run test:unit`, `npm run test:integration` y `npm run build` en verde con `better-sqlite3` recompilado para el Node activo.
 - Implementación final de `TASK-19`: el runner externo usa el flag público `--account` al invocar `openclaw message send` y mantiene el mapping explícito `accountId` -> `--account`; la cobertura de integración ahora fija también ese comando observable para evitar futuras derivas de la CLI.
 - `TASK-19` queda corregida a nivel contractual para alinearse con la CLI pública actual de OpenClaw: la documentación del runner externo reemplaza `--account-id` por `--account` y deja explícito el mapping `accountId` (shape interno TypeScript) -> `--account` (flag CLI público). El cierre operativo deja `docs/hitos.md` con Hito 7 en `DONE`.
-- `TASK-20` queda cerrado de forma contractual: `src/index.ts` elimina el registro duplicado de `manage_currency`, agrega `list_expenses`, conserva exactamente los 10 tools publicados por `openclaw.plugin.json`, mantiene `wrapExecute()` adaptando a `ToolResult` compatible con la SDK actual y sigue sin registrar services ni consumir `pluginConfig.reminders`; `tests/integration/plugin-entry.test.ts` blinda ese wiring con un smoke test que compila el entry point en memoria y stubbea `registerTool`, `configureDb()` y `configurePythonCmd()` sin depender del runtime real de OpenClaw.
+- `TASK-20` queda cerrado de forma contractual: `src/index.ts` elimina el registro duplicado de `manage_currency`, agrega `list_expenses`, conserva exactamente los 10 tools publicados por `openclaw.plugin.json`, mantiene `wrapExecute()` adaptando a `ToolResult` compatible con la SDK actual y sigue sin registrar services ni consumir `pluginConfig.reminders`; `tests/integration/plugin-entry.test.ts` blinda ese wiring con un smoke test que compila el entry point en memoria y stubbea `registerTool` y `configureDb()` sin depender del runtime real de OpenClaw.
 - `docs/tasks/task-13.md` y `docs/hitos.md` alineados para cerrar tres contradicciones bloqueantes previas a la implementación de `add_recurring_expense`: (1) el campo de input se llama `description` y se mapea a `recurring_expense_rules.name` y a `expenses.description`; (2) `day_of_month` no se expone en el input ni se usa en el INSERT de esta TASK; para `MONTHLY`, el día queda anclado al `starts_on`; (3) la idempotencia de re-ejecución del tool fue eliminada como criterio — el índice único `(recurring_rule_id, due_date)` protege duplicados para una misma regla existente (dailySync), no ejecuciones repetidas del tool de creación.
 - `AGENTS.md` ahora exige un preflight de contradicciones antes de implementar TASKs que crucen schema, nombres de columnas, defaults sensibles o side effects repartidos entre documentación y código; si aparece una ambigüedad material, la implementación debe frenarse y reportarse antes de inventar comportamiento.
 - `docs/bitacora.md` registra esta práctica como aprendizaje explícito del proceso después del reproceso observado en TASKs con contrato documental y schema repartidos.
@@ -67,6 +67,12 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado se
 - Rediseño final del roadmap para salir del bloqueo upstream de reminders sin bajar el estándar: `TASK-19` deja de modelarse como service interno del plugin y pasa a `daily-reminder-runner` externo usando la CLI pública `openclaw message send`; `TASK-20` se redefine como `src/index.ts` tools-only, sin `registerService()` y sin depender ya de `TASK-19`.
 - `docs/plan-tecnico.md` corrige la deriva del seed de moneda default y alinea la arquitectura con `XXX / Sin configurar / ¤` en vez de `COP`.
 - `docs/hitos.md` cierra `TASK-01` como `DONE` después de verificar `npm install` con `better-sqlite3@^12.8.0`; `tsc` sigue pendiente de tener al menos un archivo TypeScript de entrada, tal como documenta la propia tarea.
+
+## [0.2.0] - 2026-03-29
+### Changed
+- Refactorización a OCR Agéntico (TASK-21): Se eliminó el pipeline local basado en Python (PaddleOCR) y sus integraciones TypeScript, delegando la extracción directamente al agente OpenClaw.
+- Cambio disruptivo: La herramienta `log_expense_from_image` fue renombrada a `log_expense_from_receipt` para aceptar datos estructurados en lugar de paths de imágenes locales.
+- `src/index.ts` ya no llama `configurePythonCmd()` ni acepta `pluginConfig.pythonCmd`; la única configuración de runtime es `dbPath`.
 
 ## [0.1.0] - 2026-03-28
 ### Added
