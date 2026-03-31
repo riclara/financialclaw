@@ -23,10 +23,18 @@ Si necesitas el detalle de avance por tarea, revisa [docs/hitos.md](docs/hitos.m
 
 La guía completa está en [docs/setup.md](docs/setup.md).
 
-Pasos mínimos:
-
 ```bash
-npm install
+# 1. Instalar el plugin en OpenClaw
+openclaw plugins install /ruta/al/financialclaw
+
+# 2. Configurar plugins.allow y dbPath en el config de OpenClaw
+#    (openclaw plugins install no hace esto automáticamente)
+node scripts/ensure-plugins-allow.mjs
+# Con ruta personalizada para la BD:
+# node scripts/ensure-plugins-allow.mjs --db-path /tu/ruta/financialclaw.db
+
+# 3. Reiniciar el gateway
+openclaw gateway stop && openclaw gateway
 ```
 
 Para dejar listo el runner externo de reminders:
