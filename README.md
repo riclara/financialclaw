@@ -14,7 +14,44 @@ npx @riclara/financialclaw financialclaw-setup
 openclaw gateway restart
 ```
 
-`financialclaw-setup` automatically configures `plugins.allow` and `dbPath` in the OpenClaw config. Options:
+### Why is `financialclaw-setup` needed?
+
+`openclaw plugins install` registers the plugin but does not fully activate it. Two things must be configured manually in `~/openclaw.json` (or `~/.openclaw/openclaw.json`):
+
+1. **`plugins.allow`** — without this, OpenClaw will not load the plugin even if it is installed. The setup script preserves any channels and plugins already in the allowlist so nothing breaks.
+2. **`plugins.entries.financialclaw.config.dbPath`** — without this, the database is created in a temporary path that gets deleted on reinstall.
+
+`financialclaw-setup` handles both automatically.
+
+### Manual verification
+
+To confirm the config was applied correctly:
+
+```bash
+# Check plugins.allow includes financialclaw
+node -e "const c=require(require('os').homedir()+'/.openclaw/openclaw.json'); console.log(c.plugins.allow)"
+
+# Check dbPath is set
+node -e "const c=require(require('os').homedir()+'/.openclaw/openclaw.json'); console.log(c.plugins.entries.financialclaw.config)"
+```
+
+Or open `~/.openclaw/openclaw.json` directly and look for:
+
+```json
+"plugins": {
+  "allow": ["financialclaw", "...other active channels..."],
+  "entries": {
+    "financialclaw": {
+      "enabled": true,
+      "config": {
+        "dbPath": "/home/youruser/.openclaw/workspace/financialclaw.db"
+      }
+    }
+  }
+}
+```
+
+### Options
 
 ```bash
 # Custom database path (default: ~/.openclaw/workspace/financialclaw.db)
