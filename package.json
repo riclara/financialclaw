@@ -11,7 +11,7 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "postinstall": "npm rebuild better-sqlite3 && node scripts/ensure-plugins-allow.mjs",
+    "postinstall": "npm rebuild better-sqlite3",
     "test": "tsx --test tests/**/*.test.ts",
     "test:unit": "tsx --test tests/unit/**/*.test.ts",
     "test:integration": "tsx --test tests/integration/**/*.test.ts"
