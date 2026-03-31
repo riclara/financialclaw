@@ -185,7 +185,7 @@ sudo systemctl enable --now financialclaw-reminders.timer
     <key>EnvironmentVariables</key>
     <dict>
       <key>FINANCIALCLAW_REMINDER_TARGET</key>
-      <string><destination></string>
+      <string>&lt;destination&gt;</string>
       <key>FINANCIALCLAW_DB_PATH</key>
       <string>/Users/youruser/.openclaw/workspace/financialclaw.db</string>
     </dict>

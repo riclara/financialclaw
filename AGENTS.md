@@ -40,7 +40,7 @@ Cada nueva conversación o agente debe seguir este protocolo para no desperdicia
 ### Paso 4: al terminar
 1. Ejecutar verificación (sección "Verificación" abajo)
 2. Marcar TASK como `DONE` en `docs/hitos.md`
-3. Agregar entrada en `docs/bitacora.md` si hubo algo relevante
+3. Agregar entrada en `docs/bitacora.md` si hubo algo relevante (archivo local, no versionado en git)
 
 ## Catálogo de documentación
 
@@ -61,7 +61,7 @@ Referencia completa de todos los documentos (NO leer todos — usar la tabla del
 | 8 | `docs/setup.md` | Instalación, verificación, troubleshooting | Solo si necesitas instalar o debuggear entorno |
 | 9 | `docs/versionamiento.md` | Migraciones, changelog, compatibilidad | Solo si modificas schema o haces release |
 | 10 | `docs/hitos.md` | Estado de tareas, sincronización | **SIEMPRE** (Paso 1) |
-| 11 | `docs/bitacora.md` | Bitácora de desarrollo | Leer antes de escribir para no duplicar |
+| 11 | `docs/bitacora.md` | Bitácora de desarrollo (local, no versionado) | Leer antes de escribir para no duplicar |
 
 ## Convenciones de código
 
@@ -158,7 +158,7 @@ Reglas:
 
 ## Bitácora de desarrollo (OBLIGATORIO)
 
-El archivo `docs/bitacora.md` es un registro vivo del proceso de construcción. **Todo agente debe actualizarlo al completar una tarea o al tomar una decisión significativa.**
+El archivo `docs/bitacora.md` es un registro vivo del proceso de construcción. **Todo agente debe actualizarlo al completar una tarea o al tomar una decisión significativa.** El archivo es local y no está versionado en git — si no existe, crearlo.
 
 ### Cuándo escribir una entrada
 
