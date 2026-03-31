@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/riclara/financialclaw/actions/workflows/ci.yml/badge.svg)](https://github.com/riclara/financialclaw/actions/workflows/ci.yml)
 
-Plugin de OpenClaw para finanzas personales vía Telegram. Expone un set de tools para registrar gastos, ingresos, pagos recurrentes y generar resúmenes sobre una base SQLite embebida. OCR de recibos delegado al agente OpenClaw (arquitectura agéntica). Soporte multi-moneda.
+Plugin de OpenClaw para finanzas personales. Registra gastos, ingresos, pagos recurrentes y genera resúmenes. Compatible con cualquier canal soportado por OpenClaw (Telegram, WhatsApp, etc.). El OCR de recibos es agéntico: si tu canal permite enviar imágenes, podés fotografiar un recibo y el agente extrae los datos automáticamente. Base de datos SQLite embebida. Soporte multi-moneda.
 
 ## Estado del proyecto
 

@@ -4,7 +4,7 @@
 
 > [Documentación en español](README.es.md)
 
-Personal finance plugin for OpenClaw via Telegram. Registers expenses (with agentic OCR for receipts), income, recurring payments, and generates summaries. Embedded SQLite database. Multi-currency support.
+Personal finance plugin for OpenClaw. Registers expenses, income, recurring payments, and generates summaries. Works with any OpenClaw-supported channel (Telegram, WhatsApp, etc.). Receipt OCR is handled agentically — if your channel supports sending images, you can photograph a receipt and the agent will extract the data automatically. Embedded SQLite database. Multi-currency support.
 
 ## Installation
 
