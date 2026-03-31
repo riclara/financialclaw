@@ -37,6 +37,7 @@
   "files": [
     "src/",
     "scripts/",
+    "skills/",
     "openclaw.plugin.json"
   ],
   "engines": {
