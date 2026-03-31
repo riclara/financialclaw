@@ -19,28 +19,25 @@ Si necesitas el detalle de avance por tarea, revisa [docs/hitos.md](docs/hitos.m
 - Persistencia en SQLite embebida.
 - Resolución explícita de moneda con soporte multi-moneda y placeholder inicial `XXX`.
 
-## Instalación rápida
-
-La guía completa está en [docs/setup.md](docs/setup.md).
+## Instalación
 
 ```bash
-# 1. Instalar el plugin en OpenClaw
-openclaw plugins install /ruta/al/financialclaw
-
-# 2. Configurar plugins.allow y dbPath en el config de OpenClaw
-#    (openclaw plugins install no hace esto automáticamente)
-#    Desde path local:
-financialclaw-setup
-#    Desde npm (sin clonar el repo):
-#    npx @riclara/financialclaw financialclaw-setup
-# Con ruta personalizada para la BD:
-# financialclaw-setup --db-path /tu/ruta/financialclaw.db
-# Si el config de OpenClaw está en otro lado:
-# financialclaw-setup --config /ruta/openclaw.json
-
-# 3. Reiniciar el gateway
-openclaw gateway stop && openclaw gateway
+openclaw plugins install @riclara/financialclaw
+npx @riclara/financialclaw financialclaw-setup
+openclaw gateway restart
 ```
+
+`financialclaw-setup` configura automáticamente `plugins.allow` y `dbPath` en el config de OpenClaw. Opciones:
+
+```bash
+# Ruta personalizada para la BD (por defecto: ~/.openclaw/workspace/financialclaw.db)
+npx @riclara/financialclaw financialclaw-setup --db-path /tu/ruta/financialclaw.db
+
+# Si el config de OpenClaw está en una ubicación no estándar
+npx @riclara/financialclaw financialclaw-setup --config /ruta/openclaw.json
+```
+
+La guía completa está en [docs/setup.md](docs/setup.md).
 
 Para dejar listo el runner externo de reminders:
 
