@@ -68,6 +68,10 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado se
 - `docs/plan-tecnico.md` corrige la deriva del seed de moneda default y alinea la arquitectura con `XXX / Sin configurar / ¤` en vez de `COP`.
 - `docs/hitos.md` cierra `TASK-01` como `DONE` después de verificar `npm install` con `better-sqlite3@^12.8.0`; `tsc` sigue pendiente de tener al menos un archivo TypeScript de entrada, tal como documenta la propia tarea.
 
+## [0.3.1] - 2026-03-31
+### Fixed
+- `openclaw plugins install` no agrega el plugin a `plugins.allow`, causando que los tools no se carguen y que canales activos (Telegram) dejen de funcionar al agregar `plugins.allow` manualmente sin incluirlos. Nuevo script `ensure-plugins-allow.mjs` en postinstall detecta channels y plugins activos y los preserva en el allowlist.
+
 ## [0.2.0] - 2026-03-29
 ### Changed
 - Refactorización a OCR Agéntico (TASK-21): Se eliminó el pipeline local basado en Python (PaddleOCR) y sus integraciones TypeScript, delegando la extracción directamente al agente OpenClaw.
