@@ -1,346 +1,155 @@
-# financialclaw — Instalación y configuración
+# financialclaw — Setup and configuration
 
-Esta guía cubre todo lo necesario para tener el plugin funcionando desde cero: dependencias del sistema, entorno Python, dependencias Node, variables de entorno, registro en OpenClaw y ejecución del runner externo de reminders.
+> [Versión en español](setup.es.md)
+
+This guide covers everything needed to get the plugin running: prerequisites, installation, OpenClaw configuration, and the external reminders runner.
 
 ---
 
-## Prerrequisitos del sistema
+## Prerequisites
 
-| Requisito | Versión mínima | Cómo verificar |
+| Requirement | Minimum version | How to check |
 |---|---|---|
-| Node.js | 22.14+ (recomendado: 24) | `node --version` |
-| Python | 3.12+ | `python3 --version` |
-| pip | cualquier reciente | `pip3 --version` |
-| OpenClaw CLI | instalado y configurado | `openclaw --version` |
+| Node.js | 22.14+ (recommended: 24) | `node --version` |
+| OpenClaw CLI | installed and configured | `openclaw --version` |
 
-Si no tenés Python 3.12+:
+---
+
+## 1. Install the plugin
 
 ```bash
-# macOS con Homebrew
-brew install python@3.12
-
-# Ubuntu / Debian
-sudo apt install python3.12 python3.12-venv python3.12-pip
+openclaw plugins install @riclara/financialclaw
 ```
 
 ---
 
-## 1. Instalar dependencias Node
+## 2. Configure OpenClaw
 
-Desde la raíz del plugin:
-
-```bash
-npm install
-```
-
-Esto instala `better-sqlite3`, `@sinclair/typebox` y las devDependencies de TypeScript.
-
-> **Importante**: `better-sqlite3` es un addon nativo. El `postinstall` del proyecto ejecuta `npm rebuild better-sqlite3` para recompilarlo con la versión de Node activa. Si cambiás de versión de Node después de haber instalado dependencias, corré `npm install` otra vez antes de ejecutar tests o usar el plugin.
-
----
-
-## 2. Configurar el entorno Python para PaddleOCR
-
-PaddleOCR y sus dependencias pesan aproximadamente **1 GB** (framework PaddlePaddle + modelos). Se instalan en un entorno virtual aislado para no afectar el Python del sistema.
-
-### 2a. Crear el virtualenv
+`openclaw plugins install` registers the plugin but does not fully activate it. Run the setup command:
 
 ```bash
-python3.12 -m venv .venv
+npx @riclara/financialclaw financialclaw-setup
 ```
 
-Esto crea un directorio `.venv/` dentro del plugin. Está excluido del control de versiones (agregarlo a `.gitignore`).
+This configures two required fields in your OpenClaw config (`~/.openclaw/openclaw.json`):
 
-### 2b. Activar el entorno (solo para instalación, no requerido en uso)
+**`plugins.allow`** — once this field exists, OpenClaw uses it as an explicit allowlist: anything not listed stops working, including active channels. The setup command discovers all currently active channels and plugins and includes them alongside `financialclaw`.
+
+**`plugins.entries.financialclaw.config.dbPath`** — without this, the database is created inside the plugin directory and gets deleted on reinstall. Default: `~/.openclaw/workspace/financialclaw.db`.
+
+### Options
 
 ```bash
-# macOS / Linux
-source .venv/bin/activate
+# Custom database path
+npx @riclara/financialclaw financialclaw-setup --db-path /your/path/financialclaw.db
 
-# Windows
-.venv\Scripts\activate
+# If the OpenClaw config is in a non-standard location
+npx @riclara/financialclaw financialclaw-setup --config /path/to/openclaw.json
 ```
 
-### 2c. Instalar dependencias Python
-
-Con el entorno activado:
+### Manual verification
 
 ```bash
-pip install --upgrade pip
-pip install -r requirements.txt
+node -e "const c=require(require('os').homedir()+'/.openclaw/openclaw.json'); console.log(c.plugins.allow)"
+node -e "const c=require(require('os').homedir()+'/.openclaw/openclaw.json'); console.log(c.plugins.entries.financialclaw.config)"
 ```
 
-La instalación puede tardar **5-15 minutos** dependiendo de la conexión. PaddlePaddle descarga binarios precompilados para CPU.
-
-### 2d. Descargar los modelos OCR (primera ejecución)
-
-Los modelos (~200 MB) se descargan automáticamente la primera vez que se corre OCR. Para hacerlo ahora y no pagar esa latencia en el primer mensaje de Telegram:
-
-```bash
-./.venv/bin/python3 paddle_ocr_cli.py --warmup
-```
-
-> **Nota**: esta ejecución tarda ~30-60 s la primera vez. Las siguientes arrancan en ~5-10 s.
-> **Importante**: usar siempre `./.venv/bin/python3` — el Python del sistema no tiene PaddleOCR instalado.
-
----
-
-## 3. Configurar variables de entorno
-
-Crear un archivo `.env` en la raíz del plugin (o exportar las variables en el shell):
-
-```bash
-# Ruta al archivo SQLite donde se guardan los datos
-# Por defecto: ./financialclaw.db (se crea automáticamente)
-FINANCIALCLAW_DB_PATH=./financialclaw.db
-
-# Ruta al Python del virtualenv creado en el paso 2
-# Apuntar al binario dentro de .venv para usar las dependencias instaladas
-FINANCIALCLAW_PYTHON_CMD=./.venv/bin/python3
-
-# Destino por defecto para el runner externo de reminders
-FINANCIALCLAW_REMINDER_TARGET=<chat-o-destino>
-
-# Canal soportado por el runner externo
-FINANCIALCLAW_REMINDER_CHANNEL=telegram
-
-# Cuenta opcional de OpenClaw cuando aplique
-FINANCIALCLAW_REMINDER_ACCOUNT_ID=<account>
-
-# Binario CLI de OpenClaw si no está en PATH
-FINANCIALCLAW_OPENCLAW_CMD=openclaw
-```
-
-> En Windows: `FINANCIALCLAW_PYTHON_CMD=.\.venv\Scripts\python.exe`
-
----
-
-## 4. Verificar la instalación
-
-### Verificar OCR
-
-```bash
-# Pasar cualquier foto de un recibo
-./.venv/bin/python3 paddle_ocr_cli.py /ruta/a/recibo.jpg
-```
-
-Debería imprimir un JSON como:
+Expected output:
 
 ```json
-{
-  "rawText": "SUPERMERCADO EXITO\nTOTAL $54.900\n16/03/2026",
-  "lines": [...],
-  "averageConfidence": 0.95
-}
-```
-
-Si hay errores, verificar que el virtualenv esté bien creado y que `FINANCIALCLAW_PYTHON_CMD` apunte al Python correcto.
-
-### Verificar base de datos
-
-```bash
-node --input-type=module <<'EOF'
-import { getDb } from './src/db/database.js';
-const db = getDb();
-const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
-console.log('Tablas creadas:', tables.map(t => t.name));
-const currencies = db.prepare('SELECT * FROM currencies').all();
-console.log('Monedas:', currencies);
-EOF
-```
-
-Debería imprimir:
-```
-Tablas creadas: [ 'currencies', 'ocr_extractions', 'recurring_expense_rules', 'expenses', 'incomes', 'income_receipts', 'reminders' ]
-Monedas: [ { code: 'XXX', name: 'Sin configurar', symbol: '¤', is_default: 1, ... } ]
+["financialclaw", "telegram"]
+{ "dbPath": "/home/youruser/.openclaw/workspace/financialclaw.db" }
 ```
 
 ---
 
-## 5. Registrar el plugin en OpenClaw
-
-```bash
-openclaw plugin install /ruta/absoluta/a/financialclaw
-```
-
-O configurar manualmente en el archivo de configuración de OpenClaw:
-
-```json5
-{
-  plugins: {
-    entries: {
-      "financialclaw": {
-        enabled: true,
-        config: {
-          dbPath: "./financialclaw.db",
-          pythonCmd: "./.venv/bin/python3"
-        }
-      }
-    },
-    load: {
-      paths: ["/ruta/absoluta/a/financialclaw"]
-    }
-  }
-}
-```
-
-Reiniciar el gateway de OpenClaw para que cargue el plugin:
+## 3. Restart the gateway
 
 ```bash
 openclaw gateway restart
 ```
 
-Verificar que los tools estén disponibles:
+---
+
+## 4. Verify the installation
+
+Send a message to your OpenClaw bot through your configured channel. Ask it to register an expense:
+
+> "Log a $50 expense at the supermarket"
+
+It should respond with a confirmation. You can also verify the database directly:
 
 ```bash
-openclaw tools list
+sqlite3 ~/.openclaw/workspace/financialclaw.db \
+  "SELECT amount, description, category, date FROM expenses ORDER BY created_at DESC LIMIT 5;"
 ```
 
-Deberías ver 10 tools:
-```
-manage_currency           Gestiona monedas: agregar, listar o cambiar la default
-log_expense_from_image    Registra un gasto a partir de una foto de recibo
-log_expense_manual        Registra un gasto manualmente
-log_income                Registra un ingreso
-log_income_receipt        Registra un pago recibido de un ingreso
-add_recurring_expense     Agrega una regla de gasto recurrente
-mark_expense_paid         Marca un gasto como pagado
-get_financial_summary     Muestra un resumen financiero del período
-list_expenses             Busca y lista gastos con filtros
-list_incomes              Busca y lista ingresos con filtros
-```
+### Receipt OCR
+
+If your channel supports sending images, you can send a photo of a receipt. The OpenClaw agent will extract the data and call `log_expense_from_receipt` automatically — no local OCR setup required.
 
 ---
 
-## 6. Ejecutar el runner externo de reminders
+## 5. Set up the external reminders runner (optional)
 
-El plugin no registra services. La automatización corre fuera del runtime del plugin mediante un runner one-shot que podés programar con `cron`, `systemd` o `launchd`.
+The plugin does not run background automation. Recurring expense reminders are delivered by an external one-shot runner scheduled with `cron`, `systemd`, or `launchd`.
 
-### Invocación manual mínima
+### Manual invocation
 
 ```bash
-npx tsx src/bin/daily-reminder-runner.ts --target "<chat-o-destino>"
+npx tsx src/bin/daily-reminder-runner.ts --target "<chat-or-destination>"
 ```
 
-### Invocación manual completa
+### Full options
 
 ```bash
 npx tsx src/bin/daily-reminder-runner.ts \
-  --target "<chat-o-destino>" \
+  --target "<chat-or-destination>" \
   --channel telegram \
-  --account "<account-opcional>" \
-  --db-path ./financialclaw.db \
+  --account "<optional-account>" \
+  --db-path ~/.openclaw/workspace/financialclaw.db \
   --openclaw-cmd openclaw
 ```
 
-### Variables mínimas para correrlo por entorno
+### Environment variables
 
-- `FINANCIALCLAW_REMINDER_TARGET`: obligatorio si no pasás `--target`.
-- `FINANCIALCLAW_DB_PATH`: recomendado para apuntar al SQLite operativo.
-- `FINANCIALCLAW_REMINDER_CHANNEL`: opcional, hoy solo soporta `telegram`.
-- `FINANCIALCLAW_REMINDER_ACCOUNT_ID`: opcional.
-- `FINANCIALCLAW_OPENCLAW_CMD`: opcional si `openclaw` ya está en `PATH`.
+| Variable | Required | Default | Description |
+|---|---|---|---|
+| `FINANCIALCLAW_REMINDER_TARGET` | Yes (if no `--target`) | — | Destination chat or peer |
+| `FINANCIALCLAW_DB_PATH` | No | `~/.openclaw/workspace/financialclaw.db` | Path to SQLite database |
+| `FINANCIALCLAW_REMINDER_CHANNEL` | No | `telegram` | Channel for delivery |
+| `FINANCIALCLAW_REMINDER_ACCOUNT_ID` | No | — | OpenClaw account (maps to `--account`) |
+| `FINANCIALCLAW_OPENCLAW_CMD` | No | `openclaw` | Path to OpenClaw CLI binary |
 
-La ejecución devuelve `0` si todos los reminders salieron bien y `1` si hubo fallos parciales o error fatal. El runner solo marca `sent = 1` y `sent_at` después de cada envío exitoso.
+Exit code `0` = all reminders sent successfully. Exit code `1` = partial or total failure. The runner only marks `sent = 1` after each successful delivery.
 
-### Ejemplo con `cron`
-
-Ejecutar todos los días a las 8:00 a. m. y dejar log en un archivo dedicado:
+### cron example
 
 ```cron
-0 8 * * * cd /Users/riclara/workspace/financialclaw && FINANCIALCLAW_REMINDER_TARGET="<chat-o-destino>" FINANCIALCLAW_DB_PATH="/Users/riclara/workspace/financialclaw/financialclaw.db" FINANCIALCLAW_REMINDER_CHANNEL="telegram" FINANCIALCLAW_OPENCLAW_CMD="openclaw" /usr/bin/env npx tsx src/bin/daily-reminder-runner.ts >> /Users/riclara/workspace/financialclaw/logs/daily-reminder-runner.log 2>&1
+0 8 * * * FINANCIALCLAW_REMINDER_TARGET="<destination>" FINANCIALCLAW_DB_PATH="$HOME/.openclaw/workspace/financialclaw.db" npx tsx /path/to/financialclaw/src/bin/daily-reminder-runner.ts >> /var/log/financialclaw-reminders.log 2>&1
 ```
 
-Notas:
+### systemd example
 
-- Crear antes el directorio `logs/` si vas a redirigir la salida.
-- Si usás `nvm`, `asdf` o una instalación de Node no estándar, conviene reemplazar `/usr/bin/env npx` por la ruta absoluta del `npx` correcto.
-- Si necesitas cuenta explícita, agrega `FINANCIALCLAW_REMINDER_ACCOUNT_ID="<account>"`.
-
-### Ejemplo con `launchd` (macOS)
-
-Archivo sugerido: `~/Library/LaunchAgents/dev.riclara.financialclaw.daily-reminder-runner.plist`
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-  <dict>
-    <key>Label</key>
-    <string>dev.riclara.financialclaw.daily-reminder-runner</string>
-
-    <key>WorkingDirectory</key>
-    <string>/Users/riclara/workspace/financialclaw</string>
-
-    <key>ProgramArguments</key>
-    <array>
-      <string>/usr/bin/env</string>
-      <string>npx</string>
-      <string>tsx</string>
-      <string>src/bin/daily-reminder-runner.ts</string>
-    </array>
-
-    <key>EnvironmentVariables</key>
-    <dict>
-      <key>FINANCIALCLAW_REMINDER_TARGET</key>
-      <string>&lt;chat-o-destino&gt;</string>
-      <key>FINANCIALCLAW_DB_PATH</key>
-      <string>/Users/riclara/workspace/financialclaw/financialclaw.db</string>
-      <key>FINANCIALCLAW_REMINDER_CHANNEL</key>
-      <string>telegram</string>
-      <key>FINANCIALCLAW_OPENCLAW_CMD</key>
-      <string>openclaw</string>
-    </dict>
-
-    <key>StartCalendarInterval</key>
-    <dict>
-      <key>Hour</key>
-      <integer>8</integer>
-      <key>Minute</key>
-      <integer>0</integer>
-    </dict>
-
-    <key>StandardOutPath</key>
-    <string>/Users/riclara/workspace/financialclaw/logs/daily-reminder-runner.log</string>
-    <key>StandardErrorPath</key>
-    <string>/Users/riclara/workspace/financialclaw/logs/daily-reminder-runner.err.log</string>
-  </dict>
-</plist>
-```
-
-Carga manual:
-
-```bash
-launchctl unload ~/Library/LaunchAgents/dev.riclara.financialclaw.daily-reminder-runner.plist 2>/dev/null || true
-launchctl load ~/Library/LaunchAgents/dev.riclara.financialclaw.daily-reminder-runner.plist
-launchctl start dev.riclara.financialclaw.daily-reminder-runner
-```
-
-### Ejemplo con `systemd` (Linux)
-
-Archivo sugerido: `/etc/systemd/system/financialclaw-daily-reminder-runner.service`
+`/etc/systemd/system/financialclaw-reminders.service`:
 
 ```ini
 [Unit]
-Description=financialclaw daily reminder runner
+Description=financialclaw daily reminders
 After=network-online.target
-Wants=network-online.target
 
 [Service]
 Type=oneshot
-WorkingDirectory=/Users/riclara/workspace/financialclaw
-Environment=FINANCIALCLAW_REMINDER_TARGET=<chat-o-destino>
-Environment=FINANCIALCLAW_DB_PATH=/Users/riclara/workspace/financialclaw/financialclaw.db
-Environment=FINANCIALCLAW_REMINDER_CHANNEL=telegram
-Environment=FINANCIALCLAW_OPENCLAW_CMD=openclaw
-ExecStart=/usr/bin/env npx tsx src/bin/daily-reminder-runner.ts
+Environment=FINANCIALCLAW_REMINDER_TARGET=<destination>
+Environment=FINANCIALCLAW_DB_PATH=/home/youruser/.openclaw/workspace/financialclaw.db
+ExecStart=/usr/bin/env npx tsx /path/to/financialclaw/src/bin/daily-reminder-runner.ts
 ```
 
-Timer sugerido: `/etc/systemd/system/financialclaw-daily-reminder-runner.timer`
+`/etc/systemd/system/financialclaw-reminders.timer`:
 
 ```ini
 [Unit]
-Description=Run financialclaw daily reminder runner every day
+Description=Run financialclaw reminders daily
 
 [Timer]
 OnCalendar=*-*-* 08:00:00
@@ -350,114 +159,93 @@ Persistent=true
 WantedBy=timers.target
 ```
 
-Activación:
-
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now financialclaw-daily-reminder-runner.timer
-systemctl list-timers --all | grep financialclaw
+sudo systemctl enable --now financialclaw-reminders.timer
 ```
 
-### Recomendaciones operativas
+### launchd example (macOS)
 
-- Probar primero la invocación manual antes de programarlo.
-- Mantener `FINANCIALCLAW_DB_PATH` apuntando al SQLite real del entorno operativo, no a una base de pruebas.
-- Si el runner devuelve `1`, revisar logs antes de reintentar en bucle; los reminders fallidos no se marcan como enviados.
-- Si cambias de versión de Node en el host, vuelve a correr `npm install` antes de confiar en el scheduler.
+`~/Library/LaunchAgents/dev.riclara.financialclaw.reminders.plist`:
 
----
-
-## 7. Prueba end-to-end
-
-1. Abrir Telegram y hablar con el bot de OpenClaw.
-2. Enviar una foto de cualquier recibo.
-3. El agente debería responder con algo como:
-   > "Gasto registrado: $54.900 en Exito (SUPERMERCADO) — 16/03/2026"
-4. Verificar el registro en la base de datos:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>dev.riclara.financialclaw.reminders</string>
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/bin/env</string>
+      <string>npx</string>
+      <string>tsx</string>
+      <string>/path/to/financialclaw/src/bin/daily-reminder-runner.ts</string>
+    </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>FINANCIALCLAW_REMINDER_TARGET</key>
+      <string><destination></string>
+      <key>FINANCIALCLAW_DB_PATH</key>
+      <string>/Users/youruser/.openclaw/workspace/financialclaw.db</string>
+    </dict>
+    <key>StartCalendarInterval</key>
+    <dict>
+      <key>Hour</key><integer>8</integer>
+      <key>Minute</key><integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/var/log/financialclaw-reminders.log</string>
+    <key>StandardErrorPath</key>
+    <string>/var/log/financialclaw-reminders.err.log</string>
+  </dict>
+</plist>
+```
 
 ```bash
-sqlite3 financialclaw.db "SELECT amount, merchant, category, date FROM expenses ORDER BY created_at DESC LIMIT 5;"
+launchctl load ~/Library/LaunchAgents/dev.riclara.financialclaw.reminders.plist
 ```
 
 ---
 
-## 8. Estructura del directorio tras la instalación
-
-```
-financialclaw/
-├── .venv/                  # Entorno Python (no versionar)
-├── financialclaw.db        # Base de datos SQLite (no versionar)
-├── openclaw.plugin.json    # Manifiesto del plugin
-├── paddle_ocr_cli.py
-├── requirements.txt
-├── package.json
-├── node_modules/           # (no versionar)
-├── docs/
-│   ├── producto.md
-│   ├── plan-tecnico.md
-│   ├── openclaw-sdk.md
-│   ├── testing.md
-│   ├── setup.md            # este archivo
-│   ├── versionamiento.md
-│   ├── hitos.md
-│   └── bitacora.md
-├── tests/                  # Tests (unit + integration)
-└── src/
-    └── ...
-```
-
-Agregar al `.gitignore`:
-
-```
-.venv/
-node_modules/
-financialclaw.db
-*.db
-```
-
----
-
-## 9. Actualización del plugin
+## 6. Updating the plugin
 
 ```bash
-# Actualizar dependencias Node
+openclaw plugins uninstall financialclaw
+openclaw plugins install @riclara/financialclaw
+npx @riclara/financialclaw financialclaw-setup
+openclaw gateway restart
+```
+
+`financialclaw-setup` will detect that `dbPath` is already set and skip it. The database is preserved across updates.
+
+Schema migrations run automatically on startup — no data is lost.
+
+---
+
+## Troubleshooting
+
+**Plugin tools are not available to the agent**
+→ Run `financialclaw-setup` and restart the gateway. Check that `plugins.allow` includes `financialclaw`.
+
+**Database is deleted on reinstall**
+→ Make sure `dbPath` points outside the plugin directory. Run `financialclaw-setup` to set it to `~/.openclaw/workspace/financialclaw.db`.
+
+**Channel stops working after install**
+→ `plugins.allow` was set without including the channel. Run `financialclaw-setup` again — it will add the missing entries.
+
+**`better-sqlite3` fails with `NODE_MODULE_VERSION` or `ERR_DLOPEN_FAILED`**
+→ The native binary was compiled for a different Node version. Run:
+```bash
 npm install
-
-# Actualizar dependencias Python
-source .venv/bin/activate
-pip install --upgrade -r requirements.txt
 ```
 
-Si hay cambios en el esquema de la base de datos, la migración es automática: `database.ts` ejecuta los `CREATE TABLE IF NOT EXISTS` al arrancar, sin borrar datos existentes.
-
-Si actualizaste Node.js desde la última instalación, este paso también recompone `better-sqlite3` para el runtime activo.
-
----
-
-## Solución de problemas comunes
-
-**`paddle_ocr_cli.py` falla con "No module named paddleocr"**
-→ `FINANCIALCLAW_PYTHON_CMD` no apunta al Python del virtualenv. Verificar que sea `./.venv/bin/python3`.
-
-**Primera ejecución OCR muy lenta (>60 s)**
-→ Normal: los modelos se están descargando por primera vez. Ejecutar `--warmup` manualmente (paso 2d) para hacerlo una sola vez.
-
-**`better-sqlite3` falla al instalar en npm**
-→ Verificar primero que el proyecto esté usando la línea actual del lockfile (`better-sqlite3@^12.8.0`), que sí es compatible con Node 24. Si aun así npm cae a compilación nativa, instalar las herramientas de build:
+**`better-sqlite3` fails to build from source**
+→ Install build tools:
 ```bash
 # macOS
 xcode-select --install
 
-# Ubuntu
-sudo apt install build-essential python3-dev
+# Ubuntu / Debian
+sudo apt install build-essential
 ```
-
-**Tests o arranque fallan con `NODE_MODULE_VERSION` o `ERR_DLOPEN_FAILED`**
-→ El binario nativo de `better-sqlite3` fue compilado con otra versión de Node. Ejecutar:
-```bash
-npm install
-```
-Esto dispara `postinstall` y recompila `better-sqlite3` con el Node activo.
-
-**OpenClaw no encuentra el plugin**
-→ Verificar que la ruta en la configuración de OpenClaw sea absoluta y que `package.json` tenga el campo `"openclaw": { "extensions": [...] }`.

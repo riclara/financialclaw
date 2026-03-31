@@ -86,6 +86,6 @@ This project uses `better-sqlite3`, a native addon. The compiled binary depends 
 ## Documentation
 
 - [README.es.md](README.es.md): documentación en español
-- [docs/setup.md](docs/setup.md): full setup guide and troubleshooting
+- [docs/setup.md](docs/setup.md): full setup guide and troubleshooting — [español](docs/setup.es.md)
 - [docs/hitos.md](docs/hitos.md): implementation status
 - [docs/testing.md](docs/testing.md): testing strategy

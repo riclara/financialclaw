@@ -103,6 +103,6 @@ npm run build
 
 ## Documentación
 
-- [docs/setup.md](docs/setup.md): instalación y troubleshooting
+- [docs/setup.es.md](docs/setup.es.md): instalación y troubleshooting — [English](docs/setup.md)
 - [docs/hitos.md](docs/hitos.md): estado final de implementación
 - [docs/testing.md](docs/testing.md): estrategia de pruebas
