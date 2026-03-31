@@ -3,6 +3,9 @@
   "version": "0.3.2",
   "description": "Plugin OpenClaw para finanzas personales via Telegram",
   "type": "module",
+  "bin": {
+    "financialclaw-setup": "scripts/ensure-plugins-allow.mjs"
+  },
   "openclaw": {
     "extensions": [
       "./src/index.ts"
