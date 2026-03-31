@@ -113,4 +113,4 @@ if (!fc.config.dbPath) {
 }
 
 writeFileSync(configPath, JSON.stringify(cfg, null, 2) + "\n");
-console.log("Done. Restart gateway: openclaw gateway stop && openclaw gateway");
+console.log("Done. Restart gateway: openclaw gateway restart");
