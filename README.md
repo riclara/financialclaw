@@ -11,55 +11,23 @@ Personal finance plugin for OpenClaw. Registers expenses, income, recurring paym
 
 ```bash
 openclaw plugins install @riclara/financialclaw
-npx @riclara/financialclaw financialclaw-setup
 openclaw gateway restart
 ```
 
-### Why is `financialclaw-setup` needed?
-
-`openclaw plugins install` registers the plugin but does not fully activate it. Two things must be configured manually in `~/openclaw.json` (or `~/.openclaw/openclaw.json`):
-
-1. **`plugins.allow`** — once this field exists, OpenClaw uses it as an explicit allowlist: anything not listed will stop working, including active channels like Telegram. The setup script discovers all currently active channels and plugins and includes them alongside `financialclaw`, so nothing breaks.
-2. **`plugins.entries.financialclaw.config.dbPath`** — without this, the database is created in a temporary path that gets deleted on reinstall.
-
-`financialclaw-setup` handles both automatically.
-
-### Manual verification
-
-To confirm the config was applied correctly:
-
-```bash
-# Check plugins.allow includes financialclaw
-node -e "const c=require(require('os').homedir()+'/.openclaw/openclaw.json'); console.log(c.plugins.allow)"
-
-# Check dbPath is set
-node -e "const c=require(require('os').homedir()+'/.openclaw/openclaw.json'); console.log(c.plugins.entries.financialclaw.config)"
-```
-
-Or open `~/.openclaw/openclaw.json` directly and look for:
+To use a custom database path (default: `~/.openclaw/workspace/financialclaw.db`), add it to `~/.openclaw/openclaw.json`:
 
 ```json
-"plugins": {
-  "allow": ["financialclaw", "...other active channels..."],
-  "entries": {
-    "financialclaw": {
-      "enabled": true,
-      "config": {
-        "dbPath": "/home/youruser/.openclaw/workspace/financialclaw.db"
+{
+  "plugins": {
+    "entries": {
+      "financialclaw": {
+        "config": {
+          "dbPath": "/your/path/financialclaw.db"
+        }
       }
     }
   }
 }
-```
-
-### Options
-
-```bash
-# Custom database path (default: ~/.openclaw/workspace/financialclaw.db)
-npx @riclara/financialclaw financialclaw-setup --db-path /your/path/financialclaw.db
-
-# If the OpenClaw config is in a non-standard location
-npx @riclara/financialclaw financialclaw-setup --config /path/to/openclaw.json
 ```
 
 ## Available tools
@@ -76,6 +44,7 @@ npx @riclara/financialclaw financialclaw-setup --config /path/to/openclaw.json
 | `get_financial_summary` | Get a financial summary for a period |
 | `list_expenses` | List expenses with filters |
 | `list_incomes` | List incomes with filters |
+| `run_daily_sync` | Run the daily sync: generate recurring expenses, mark overdue, send reminders |
 
 ## About Node.js and `better-sqlite3`
 
