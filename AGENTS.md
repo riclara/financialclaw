@@ -184,9 +184,18 @@ El archivo `docs/bitacora.md` es un registro vivo del proceso de construcción. 
 
 Usar la plantilla al final de `docs/bitacora.md`. Incluir siempre: fecha, autor, contexto, qué pasó, por qué importa.
 
-## Changelog
+## Changelog y versionado automático
 
 Todo cambio visible va en `CHANGELOG.md` (raíz del proyecto). Formato: Keep a Changelog.
+
+### Release automático con release-please
+
+Las versiones y el `CHANGELOG.md` los gestiona **release-please** automáticamente. No editar manualmente la versión en `package.json`, `openclaw.plugin.json` ni `CHANGELOG.md`.
+
+- El bump de versión lo determina el prefijo del commit: `fix:` → patch, `feat:` → minor, `feat!:` / `BREAKING CHANGE` → major
+- `release-please-config.json` mapea los tipos de commit a secciones Keep a Changelog (`feat` → `Added`, `fix` → `Fixed`)
+- `openclaw.plugin.json` se sincroniza automáticamente vía `extra-files` en `release-please-config.json` — **no editar su campo `version` a mano**
+- El workflow `.github/workflows/release-please.yml` crea el PR de release; al mergearlo se publica automáticamente a npm vía `.github/workflows/publish.yml`
 
 ## Estructura de TASKs (IMPORTANTE)
 
