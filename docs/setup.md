@@ -25,40 +25,22 @@ openclaw plugins install @riclara/financialclaw
 
 ## 2. Configure OpenClaw
 
-`openclaw plugins install` registers the plugin but does not fully activate it. Run the setup command:
+After installing, restart the gateway to load the plugin (see step 3).
 
-```bash
-npx @riclara/financialclaw financialclaw-setup
-```
-
-This configures two required fields in your OpenClaw config (`~/.openclaw/openclaw.json`):
-
-**`plugins.allow`** — once this field exists, OpenClaw uses it as an explicit allowlist: anything not listed stops working, including active channels. The setup command discovers all currently active channels and plugins and includes them alongside `financialclaw`.
-
-**`plugins.entries.financialclaw.config.dbPath`** — without this, the database is created inside the plugin directory and gets deleted on reinstall. Default: `~/.openclaw/workspace/financialclaw.db`.
-
-### Options
-
-```bash
-# Custom database path
-npx @riclara/financialclaw financialclaw-setup --db-path /your/path/financialclaw.db
-
-# If the OpenClaw config is in a non-standard location
-npx @riclara/financialclaw financialclaw-setup --config /path/to/openclaw.json
-```
-
-### Manual verification
-
-```bash
-node -e "const c=require(require('os').homedir()+'/.openclaw/openclaw.json'); console.log(c.plugins.allow)"
-node -e "const c=require(require('os').homedir()+'/.openclaw/openclaw.json'); console.log(c.plugins.entries.financialclaw.config)"
-```
-
-Expected output:
+To use a custom database path (default: `~/.openclaw/workspace/financialclaw.db`), add it to `~/.openclaw/openclaw.json`:
 
 ```json
-["financialclaw", "telegram"]
-{ "dbPath": "/home/youruser/.openclaw/workspace/financialclaw.db" }
+{
+  "plugins": {
+    "entries": {
+      "financialclaw": {
+        "config": {
+          "dbPath": "/your/path/financialclaw.db"
+        }
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -90,121 +72,15 @@ If your channel supports sending images, you can send a photo of a receipt. The 
 
 ---
 
-## 5. Set up the external reminders runner (optional)
+## 5. Set up the daily sync (optional)
 
-The plugin does not run background automation. Recurring expense reminders are delivered by an external one-shot runner scheduled with `cron`, `systemd`, or `launchd`.
+The plugin includes a `run_daily_sync` tool that generates recurring expenses, marks overdue ones, and delivers reminders. To run it automatically every day, set it up via OpenClaw's built-in cron system:
 
-### Manual invocation
+Ask your OpenClaw agent to create a daily schedule:
 
-```bash
-npx tsx src/bin/daily-reminder-runner.ts --target "<chat-or-destination>"
-```
+> "Create a daily cron job at 8am that runs the financialclaw daily sync"
 
-### Full options
-
-```bash
-npx tsx src/bin/daily-reminder-runner.ts \
-  --target "<chat-or-destination>" \
-  --channel telegram \
-  --account "<optional-account>" \
-  --db-path ~/.openclaw/workspace/financialclaw.db \
-  --openclaw-cmd openclaw
-```
-
-### Environment variables
-
-| Variable | Required | Default | Description |
-|---|---|---|---|
-| `FINANCIALCLAW_REMINDER_TARGET` | Yes (if no `--target`) | — | Destination chat or peer |
-| `FINANCIALCLAW_DB_PATH` | No | `~/.openclaw/workspace/financialclaw.db` | Path to SQLite database |
-| `FINANCIALCLAW_REMINDER_CHANNEL` | No | `telegram` | Channel for delivery |
-| `FINANCIALCLAW_REMINDER_ACCOUNT_ID` | No | — | OpenClaw account (maps to `--account`) |
-| `FINANCIALCLAW_OPENCLAW_CMD` | No | `openclaw` | Path to OpenClaw CLI binary |
-
-Exit code `0` = all reminders sent successfully. Exit code `1` = partial or total failure. The runner only marks `sent = 1` after each successful delivery.
-
-### cron example
-
-```cron
-0 8 * * * FINANCIALCLAW_REMINDER_TARGET="<destination>" FINANCIALCLAW_DB_PATH="$HOME/.openclaw/workspace/financialclaw.db" npx tsx /path/to/financialclaw/src/bin/daily-reminder-runner.ts >> /var/log/financialclaw-reminders.log 2>&1
-```
-
-### systemd example
-
-`/etc/systemd/system/financialclaw-reminders.service`:
-
-```ini
-[Unit]
-Description=financialclaw daily reminders
-After=network-online.target
-
-[Service]
-Type=oneshot
-Environment=FINANCIALCLAW_REMINDER_TARGET=<destination>
-Environment=FINANCIALCLAW_DB_PATH=/home/youruser/.openclaw/workspace/financialclaw.db
-ExecStart=/usr/bin/env npx tsx /path/to/financialclaw/src/bin/daily-reminder-runner.ts
-```
-
-`/etc/systemd/system/financialclaw-reminders.timer`:
-
-```ini
-[Unit]
-Description=Run financialclaw reminders daily
-
-[Timer]
-OnCalendar=*-*-* 08:00:00
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-```
-
-```bash
-sudo systemctl daemon-reload
-sudo systemctl enable --now financialclaw-reminders.timer
-```
-
-### launchd example (macOS)
-
-`~/Library/LaunchAgents/dev.riclara.financialclaw.reminders.plist`:
-
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-  <dict>
-    <key>Label</key>
-    <string>dev.riclara.financialclaw.reminders</string>
-    <key>ProgramArguments</key>
-    <array>
-      <string>/usr/bin/env</string>
-      <string>npx</string>
-      <string>tsx</string>
-      <string>/path/to/financialclaw/src/bin/daily-reminder-runner.ts</string>
-    </array>
-    <key>EnvironmentVariables</key>
-    <dict>
-      <key>FINANCIALCLAW_REMINDER_TARGET</key>
-      <string>&lt;destination&gt;</string>
-      <key>FINANCIALCLAW_DB_PATH</key>
-      <string>/Users/youruser/.openclaw/workspace/financialclaw.db</string>
-    </dict>
-    <key>StartCalendarInterval</key>
-    <dict>
-      <key>Hour</key><integer>8</integer>
-      <key>Minute</key><integer>0</integer>
-    </dict>
-    <key>StandardOutPath</key>
-    <string>/var/log/financialclaw-reminders.log</string>
-    <key>StandardErrorPath</key>
-    <string>/var/log/financialclaw-reminders.err.log</string>
-  </dict>
-</plist>
-```
-
-```bash
-launchctl load ~/Library/LaunchAgents/dev.riclara.financialclaw.reminders.plist
-```
+The agent will call `cron.add` with an `agentTurn` payload targeting `run_daily_sync`. You can verify it's active by asking the agent to list scheduled tasks.
 
 ---
 
@@ -230,13 +106,10 @@ The daily sync will also notify you automatically when a new version is availabl
 ## Troubleshooting
 
 **Plugin tools are not available to the agent**
-→ Run `financialclaw-setup` and restart the gateway. Check that `plugins.allow` includes `financialclaw`.
+→ Restart the gateway with `openclaw gateway restart`. If the problem persists, verify the plugin is enabled in `~/.openclaw/openclaw.json`.
 
 **Database is deleted on reinstall**
-→ Make sure `dbPath` points outside the plugin directory. Run `financialclaw-setup` to set it to `~/.openclaw/workspace/financialclaw.db`.
-
-**Channel stops working after install**
-→ `plugins.allow` was set without including the channel. Run `financialclaw-setup` again — it will add the missing entries.
+→ Configure a persistent `dbPath` outside the plugin directory in `~/.openclaw/openclaw.json` (see step 2).
 
 **`better-sqlite3` fails with `NODE_MODULE_VERSION` or `ERR_DLOPEN_FAILED`**
 → The native binary was compiled for a different Node version. Run:

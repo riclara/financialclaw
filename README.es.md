@@ -7,9 +7,7 @@ Plugin de OpenClaw para finanzas personales. Registra gastos, ingresos, pagos re
 
 ## Estado del proyecto
 
-El plugin quedó cerrado como plugin **tools-only**: registra 10 tools en OpenClaw y no corre automatizaciones dentro del runtime del plugin.
-
-Los reminders viven en un runner externo one-shot (`src/bin/daily-reminder-runner.ts`) que ejecuta `dailySync()` y entrega mensajes mediante `openclaw message send`. La programación periódica queda fuera del repositorio (`cron`, `systemd`, `launchd`, etc.).
+El plugin registra 11 tools en OpenClaw. Los reminders y el sync diario corren mediante el sistema de cron integrado de OpenClaw — no se requiere configuración externa.
 
 Si necesitas el detalle de avance por tarea, revisa [docs/hitos.md](docs/hitos.md).
 
@@ -24,64 +22,26 @@ Si necesitas el detalle de avance por tarea, revisa [docs/hitos.md](docs/hitos.m
 
 ```bash
 openclaw plugins install @riclara/financialclaw
-npx @riclara/financialclaw financialclaw-setup
 openclaw gateway restart
 ```
 
-### ¿Por qué es necesario `financialclaw-setup`?
-
-`openclaw plugins install` registra el plugin pero no lo activa completamente. Hay dos cosas que deben configurarse manualmente en `~/openclaw.json` (o `~/.openclaw/openclaw.json`):
-
-1. **`plugins.allow`** — una vez que este campo existe, OpenClaw lo usa como allowlist explícita: todo lo que no esté listado deja de funcionar, incluyendo canales activos como Telegram. El script detecta todos los canales y plugins activos y los incluye junto a `financialclaw`, para que nada deje de funcionar.
-2. **`plugins.entries.financialclaw.config.dbPath`** — sin esto, la base de datos se crea en una ruta temporal que se borra al reinstalar el plugin.
-
-`financialclaw-setup` resuelve ambos automáticamente.
-
-### Verificación manual
-
-Para confirmar que la configuración quedó correcta:
-
-```bash
-# Verificar que plugins.allow incluye financialclaw
-node -e "const c=require(require('os').homedir()+'/.openclaw/openclaw.json'); console.log(c.plugins.allow)"
-
-# Verificar que dbPath está configurado
-node -e "const c=require(require('os').homedir()+'/.openclaw/openclaw.json'); console.log(c.plugins.entries.financialclaw.config)"
-```
-
-O abrir `~/.openclaw/openclaw.json` directamente y buscar:
+Para usar una ruta personalizada para la BD (por defecto: `~/.openclaw/workspace/financialclaw.db`), agregarla en `~/.openclaw/openclaw.json`:
 
 ```json
-"plugins": {
-  "allow": ["financialclaw", "...otros canales activos..."],
-  "entries": {
-    "financialclaw": {
-      "enabled": true,
-      "config": {
-        "dbPath": "/home/tuusuario/.openclaw/workspace/financialclaw.db"
+{
+  "plugins": {
+    "entries": {
+      "financialclaw": {
+        "config": {
+          "dbPath": "/tu/ruta/financialclaw.db"
+        }
       }
     }
   }
 }
 ```
 
-### Opciones
-
-```bash
-# Ruta personalizada para la BD (por defecto: ~/.openclaw/workspace/financialclaw.db)
-npx @riclara/financialclaw financialclaw-setup --db-path /tu/ruta/financialclaw.db
-
-# Si el config de OpenClaw está en una ubicación no estándar
-npx @riclara/financialclaw financialclaw-setup --config /ruta/openclaw.json
-```
-
-La guía completa está en [docs/setup.md](docs/setup.md).
-
-Para dejar listo el runner externo de reminders:
-
-```bash
-npx tsx src/bin/daily-reminder-runner.ts --target "<chat-o-destino>"
-```
+La guía completa está en [docs/setup.es.md](docs/setup.es.md).
 
 ## Importante sobre Node.js y `better-sqlite3`
 
