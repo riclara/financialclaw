@@ -3,6 +3,17 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
 ## [0.3.2] - 2026-03-31
+### Added
+- Nuevo comando `financialclaw-setup` expuesto como bin de npm. Ejecutar con `npx @riclara/financialclaw financialclaw-setup` (o `--db-path` / `--config` para rutas personalizadas) tras instalar el plugin. Agrega `financialclaw` a `plugins.allow` preservando channels y plugins activos, y configura `dbPath`.
+- Campo `files` en `package.json` para publicación correcta en npm: incluye `src/`, `scripts/`, `skills/` y `openclaw.plugin.json`.
+- README en inglés como documento principal; versión en español en `README.es.md`.
+- `docs/setup.md` reescrito en inglés (sin contenido de PaddleOCR ni Python); versión en español en `docs/setup.es.md`.
+
+### Changed
+- Nombre del paquete cambiado de `financialclaw` a `@riclara/financialclaw` (scope npm).
+- Los 4 skills del agente (`registro-gastos`, `registro-ingresos`, `consultas-financieras`, `configuracion-moneda`) consolidados en un único skill `financialclaw`.
+- `docs/bitacora.md` pasa a ser archivo local no versionado en git (`.gitignore`).
+
 ### Fixed
 - BD creada en `./financialclaw.db` (relativo al cwd del gateway) cuando `dbPath` no estaba configurado, causando que se perdiera al reinstalar el plugin. El default ahora es `~/.openclaw/workspace/financialclaw.db` (ruta absoluta). El directorio se crea automáticamente si no existe.
 
