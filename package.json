@@ -36,6 +36,7 @@
   },
   "files": [
     "src/",
+    "!src/services/daily-reminder-runner.ts",
     "scripts/",
     "skills/",
     "openclaw.plugin.json"

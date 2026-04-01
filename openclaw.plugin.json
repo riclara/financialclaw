@@ -27,7 +27,8 @@
       "mark_expense_paid",
       "get_financial_summary",
       "list_expenses",
-      "list_incomes"
+      "list_incomes",
+      "run_daily_sync"
     ]
   }
 }

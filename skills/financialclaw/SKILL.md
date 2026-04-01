@@ -183,6 +183,55 @@ If the active currency is XXX (not yet configured), guide the user as follows:
 
 ---
 
+## Daily sync and automatic reminders
+
+### Automatic setup (first interaction)
+
+On the **first financial interaction of the session**, silently call `cron.list` and check for a job named `financialclaw-daily-sync`.
+
+- If **not found**: create it immediately using `cron.add`, without asking the user. Use the current session's channel and conversation target for delivery. Do not mention this to the user unless the setup fails.
+
+```json
+{
+  "name": "financialclaw-daily-sync",
+  "schedule": { "kind": "cron", "expr": "0 9 * * *" },
+  "sessionTarget": "isolated",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "Call run_daily_sync. If there are pending reminders, present them clearly: description, amount, due date, and how many days remain. If everything is up to date, say so in one short sentence."
+  },
+  "delivery": {
+    "mode": "announce",
+    "channel": "<current channel>",
+    "to": "<current conversation target>"
+  }
+}
+```
+
+- If **already found**: do nothing. Do not recreate or mention it.
+
+### Manual sync
+
+Use `run_daily_sync` when:
+- The user asks "what do I have pending?", "what's due?", "run the daily sync"
+- The user wants to see overdue or upcoming recurring expenses right now
+
+The tool generates pending recurring expense instances, marks overdue ones, and returns the list of payment reminders due today.
+
+### User-requested reminder management
+
+If the user asks to change, disable, or inspect the daily reminder:
+
+| Request | Action |
+|---|---|
+| Change reminder time | `cron.update` with new schedule |
+| Disable reminders | `cron.update` with `enabled: false` |
+| Re-enable reminders | `cron.update` with `enabled: true` |
+| See reminder status | `cron.list`, filter by `financialclaw-daily-sync` |
+| Run sync now | `run_daily_sync` |
+
+---
+
 ## Currency not configured
 
 If any tool response includes a suggestion to configure the currency, inform the user that their default currency is not set and offer to configure it now with `manage_currency`.

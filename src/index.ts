@@ -10,6 +10,7 @@ import { InputSchema as MarkExpensePaidInputSchema, executeMarkExpensePaid } fro
 import { InputSchema as GetFinancialSummaryInputSchema, executeGetFinancialSummary } from "./tools/get-financial-summary.js";
 import { InputSchema as ListExpensesInputSchema, executeListExpenses } from "./tools/list-expenses.js";
 import { InputSchema as ListIncomesInputSchema, executeListIncomes } from "./tools/list-incomes.js";
+import { InputSchema as RunDailySyncInputSchema, executeRunDailySync } from "./tools/run-daily-sync.js";
 
 function wrapExecute<T>(
   fn: (input: T) => Promise<string> | string,
@@ -119,6 +120,13 @@ export default definePluginEntry({
       execute: wrapExecute(executeListIncomes),
     });
 
-    // No register services - reminders automation lives outside the plugin.
+    api.registerTool({
+      name: "run_daily_sync",
+      label: "Run Daily Sync",
+      description:
+        "Ejecutar el sync diario: genera instancias de gastos recurrentes pendientes, marca vencidos y retorna los recordatorios de pago del día. Invocar desde el cron automático o cuando el usuario quiera ver qué tiene pendiente.",
+      parameters: RunDailySyncInputSchema,
+      execute: wrapExecute(executeRunDailySync),
+    });
   },
 });
