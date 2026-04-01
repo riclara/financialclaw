@@ -25,22 +25,26 @@ openclaw plugins install @riclara/financialclaw
 
 ## 2. Configure OpenClaw
 
-After installing, restart the gateway to load the plugin (see step 3).
+Run the setup command:
 
-To use a custom database path (default: `~/.openclaw/workspace/financialclaw.db`), add it to `~/.openclaw/openclaw.json`:
+```bash
+npx @riclara/financialclaw financialclaw-setup
+```
 
-```json
-{
-  "plugins": {
-    "entries": {
-      "financialclaw": {
-        "config": {
-          "dbPath": "/your/path/financialclaw.db"
-        }
-      }
-    }
-  }
-}
+This configures two required fields in `~/.openclaw/openclaw.json`:
+
+**`plugins.allow`** — once this field exists, OpenClaw uses it as an explicit allowlist: anything not listed stops working, including active channels like Telegram. The setup command discovers all currently active channels and plugins and adds `financialclaw` alongside them so nothing breaks.
+
+**`plugins.entries.financialclaw.config.dbPath`** — without this, the database is created inside the plugin directory and gets deleted on reinstall. Default: `~/.openclaw/workspace/financialclaw.db`.
+
+### Options
+
+```bash
+# Custom database path
+npx @riclara/financialclaw financialclaw-setup --db-path /your/path/financialclaw.db
+
+# If the OpenClaw config is in a non-standard location
+npx @riclara/financialclaw financialclaw-setup --config /path/to/openclaw.json
 ```
 
 ---
@@ -106,10 +110,13 @@ The daily sync will also notify you automatically when a new version is availabl
 ## Troubleshooting
 
 **Plugin tools are not available to the agent**
-→ Restart the gateway with `openclaw gateway restart`. If the problem persists, verify the plugin is enabled in `~/.openclaw/openclaw.json`.
+→ Run `financialclaw-setup` and restart the gateway. Check that `plugins.allow` includes `financialclaw`.
 
 **Database is deleted on reinstall**
-→ Configure a persistent `dbPath` outside the plugin directory in `~/.openclaw/openclaw.json` (see step 2).
+→ Make sure `dbPath` points outside the plugin directory. Run `financialclaw-setup` to configure it automatically.
+
+**Channel stops working after install**
+→ `plugins.allow` was set without including the channel. Run `financialclaw-setup` again — it will add the missing entries.
 
 **`better-sqlite3` fails with `NODE_MODULE_VERSION` or `ERR_DLOPEN_FAILED`**
 → The native binary was compiled for a different Node version. Run:
