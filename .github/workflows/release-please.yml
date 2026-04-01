@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       tag_name:
-        description: "Tag a publicar (ej: v0.5.1)"
+        description: "Tag a publicar (ej: financialclaw-v0.5.1)"
         required: true
         type: string
 
