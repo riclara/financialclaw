@@ -25,22 +25,26 @@ openclaw plugins install @riclara/financialclaw
 
 ## 2. Configurar OpenClaw
 
-Después de instalar, reiniciar el gateway para cargar el plugin (ver paso 3).
+Ejecutar el comando de configuración:
 
-Para usar una ruta personalizada para la BD (por defecto: `~/.openclaw/workspace/financialclaw.db`), agregarla en `~/.openclaw/openclaw.json`:
+```bash
+npx @riclara/financialclaw financialclaw-setup
+```
 
-```json
-{
-  "plugins": {
-    "entries": {
-      "financialclaw": {
-        "config": {
-          "dbPath": "/tu/ruta/financialclaw.db"
-        }
-      }
-    }
-  }
-}
+Esto configura dos campos requeridos en `~/.openclaw/openclaw.json`:
+
+**`plugins.allow`** — una vez que este campo existe, OpenClaw lo usa como allowlist explícita: todo lo que no esté listado deja de funcionar, incluyendo canales activos como Telegram. El comando descubre todos los canales y plugins activos y agrega `financialclaw` junto a ellos para que nada deje de funcionar.
+
+**`plugins.entries.financialclaw.config.dbPath`** — sin esto, la base de datos se crea dentro del directorio del plugin y se borra al reinstalar. Por defecto: `~/.openclaw/workspace/financialclaw.db`.
+
+### Opciones
+
+```bash
+# Ruta personalizada para la BD
+npx @riclara/financialclaw financialclaw-setup --db-path /tu/ruta/financialclaw.db
+
+# Si el config de OpenClaw está en una ubicación no estándar
+npx @riclara/financialclaw financialclaw-setup --config /ruta/openclaw.json
 ```
 
 ---
@@ -106,10 +110,13 @@ El sync diario también te notificará automáticamente cuando haya una nueva ve
 ## Solución de problemas
 
 **Los tools del plugin no están disponibles para el agente**
-→ Reiniciar el gateway con `openclaw gateway restart`. Si el problema persiste, verificar que el plugin esté habilitado en `~/.openclaw/openclaw.json`.
+→ Ejecutar `financialclaw-setup` y reiniciar el gateway. Verificar que `plugins.allow` incluya `financialclaw`.
 
 **La base de datos se borra al reinstalar**
-→ Configurar un `dbPath` persistente fuera del directorio del plugin en `~/.openclaw/openclaw.json` (ver paso 2).
+→ Asegurarse de que `dbPath` apunte fuera del directorio del plugin. Ejecutar `financialclaw-setup` para configurarlo automáticamente.
+
+**El canal deja de funcionar después de instalar**
+→ `plugins.allow` fue creado sin incluir el canal. Ejecutar `financialclaw-setup` nuevamente — agregará las entradas faltantes.
 
 **`better-sqlite3` falla con `NODE_MODULE_VERSION` o `ERR_DLOPEN_FAILED`**
 → El binario nativo fue compilado para otra versión de Node. Ejecutar:

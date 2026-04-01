@@ -22,23 +22,24 @@ Si necesitas el detalle de avance por tarea, revisa [docs/hitos.md](docs/hitos.m
 
 ```bash
 openclaw plugins install @riclara/financialclaw
+npx @riclara/financialclaw financialclaw-setup
 openclaw gateway restart
 ```
 
-Para usar una ruta personalizada para la BD (por defecto: `~/.openclaw/workspace/financialclaw.db`), agregarla en `~/.openclaw/openclaw.json`:
+### ¿Por qué es necesario `financialclaw-setup`?
 
-```json
-{
-  "plugins": {
-    "entries": {
-      "financialclaw": {
-        "config": {
-          "dbPath": "/tu/ruta/financialclaw.db"
-        }
-      }
-    }
-  }
-}
+`openclaw plugins install` registra el plugin pero no lo agrega a `plugins.allow`. Una vez que ese campo existe, OpenClaw lo usa como allowlist explícita — todo lo que no esté listado deja de funcionar, incluyendo canales activos como Telegram.
+
+`financialclaw-setup` lee el config actual, descubre todos los canales y plugins activos, y agrega `financialclaw` junto a ellos para que nada deje de funcionar. También configura `plugins.entries.financialclaw.config.dbPath` para que la BD persista entre reinstalaciones (por defecto: `~/.openclaw/workspace/financialclaw.db`).
+
+### Opciones
+
+```bash
+# Ruta personalizada para la BD
+npx @riclara/financialclaw financialclaw-setup --db-path /tu/ruta/financialclaw.db
+
+# Si el config de OpenClaw está en una ubicación no estándar
+npx @riclara/financialclaw financialclaw-setup --config /ruta/openclaw.json
 ```
 
 La guía completa está en [docs/setup.es.md](docs/setup.es.md).

@@ -11,23 +11,24 @@ Personal finance plugin for OpenClaw. Registers expenses, income, recurring paym
 
 ```bash
 openclaw plugins install @riclara/financialclaw
+npx @riclara/financialclaw financialclaw-setup
 openclaw gateway restart
 ```
 
-To use a custom database path (default: `~/.openclaw/workspace/financialclaw.db`), add it to `~/.openclaw/openclaw.json`:
+### Why is `financialclaw-setup` needed?
 
-```json
-{
-  "plugins": {
-    "entries": {
-      "financialclaw": {
-        "config": {
-          "dbPath": "/your/path/financialclaw.db"
-        }
-      }
-    }
-  }
-}
+`openclaw plugins install` registers the plugin but does not add it to `plugins.allow`. Once that field exists, OpenClaw uses it as an explicit allowlist — anything not listed stops working, including active channels like Telegram.
+
+`financialclaw-setup` reads your current config, discovers all active channels and plugins, and adds `financialclaw` alongside them so nothing breaks. It also sets `plugins.entries.financialclaw.config.dbPath` so the database persists across reinstalls (default: `~/.openclaw/workspace/financialclaw.db`).
+
+### Options
+
+```bash
+# Custom database path
+npx @riclara/financialclaw financialclaw-setup --db-path /your/path/financialclaw.db
+
+# If the OpenClaw config is in a non-standard location
+npx @riclara/financialclaw financialclaw-setup --config /path/to/openclaw.json
 ```
 
 ## Available tools
