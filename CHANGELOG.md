@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.5.3](https://github.com/riclara/financialclaw/compare/financialclaw-v0.5.2...financialclaw-v0.5.3) (2026-04-01)
+
+
+### Fixed
+
+* replace file read with version constants to clear security scanner ([#19](https://github.com/riclara/financialclaw/issues/19)) ([2e6a90f](https://github.com/riclara/financialclaw/commit/2e6a90fc364bcf325e31575937beaab5bc909708))
+
 ## [0.5.2](https://github.com/riclara/financialclaw/compare/financialclaw-v0.5.1...financialclaw-v0.5.2) (2026-04-01)
 
 
