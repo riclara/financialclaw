@@ -2,71 +2,90 @@
 
 [![CI](https://github.com/riclara/financialclaw/actions/workflows/ci.yml/badge.svg)](https://github.com/riclara/financialclaw/actions/workflows/ci.yml)
 
-Plugin de OpenClaw para finanzas personales vía Telegram. Expone un set de tools para registrar gastos, ingresos, pagos recurrentes y generar resúmenes sobre una base SQLite embebida. OCR de recibos delegado al agente OpenClaw (arquitectura agéntica). Soporte multi-moneda.
+> [Documentación en español](README.es.md)
 
-## Estado del proyecto
+Personal finance plugin for OpenClaw. Registers expenses, income, recurring payments, and generates summaries. Works with any OpenClaw-supported channel (Telegram, WhatsApp, etc.). Receipt OCR is handled agentically — if your channel supports sending images, you can photograph a receipt and the agent will extract the data automatically. Embedded SQLite database. Multi-currency support.
 
-El plugin quedó cerrado como plugin **tools-only**: registra 10 tools en OpenClaw y no corre automatizaciones dentro del runtime del plugin.
-
-Los reminders viven en un runner externo one-shot (`src/bin/daily-reminder-runner.ts`) que ejecuta `dailySync()` y entrega mensajes mediante `openclaw message send`. La programación periódica queda fuera del repositorio (`cron`, `systemd`, `launchd`, etc.).
-
-Si necesitas el detalle de avance por tarea, revisa [docs/hitos.md](docs/hitos.md).
-
-## Capacidades principales
-
-- Tools de OpenClaw para gastos, ingresos, reglas recurrentes y consultas.
-- OCR de recibos agéntico: el agente OpenClaw extrae los datos y los pasa al tool `log_expense_from_receipt`.
-- Persistencia en SQLite embebida.
-- Resolución explícita de moneda con soporte multi-moneda y placeholder inicial `XXX`.
-
-## Instalación rápida
-
-La guía completa está en [docs/setup.md](docs/setup.md).
+## Installation
 
 ```bash
-# 1. Instalar el plugin en OpenClaw
-openclaw plugins install /ruta/al/financialclaw
-
-# 2. Configurar plugins.allow y dbPath en el config de OpenClaw
-#    (openclaw plugins install no hace esto automáticamente)
-node scripts/ensure-plugins-allow.mjs
-# El script detecta el config en ~/.openclaw/openclaw.json automáticamente.
-# Si está en otro lado, usar --config:
-# node scripts/ensure-plugins-allow.mjs --config /ruta/openclaw.json
-# Con ruta personalizada para la BD:
-# node scripts/ensure-plugins-allow.mjs --db-path /tu/ruta/financialclaw.db
-
-# 3. Reiniciar el gateway
-openclaw gateway stop && openclaw gateway
+openclaw plugins install @riclara/financialclaw
+npx @riclara/financialclaw financialclaw-setup
+openclaw gateway restart
 ```
 
-Para dejar listo el runner externo de reminders:
+### Why is `financialclaw-setup` needed?
+
+`openclaw plugins install` registers the plugin but does not fully activate it. Two things must be configured manually in `~/openclaw.json` (or `~/.openclaw/openclaw.json`):
+
+1. **`plugins.allow`** — once this field exists, OpenClaw uses it as an explicit allowlist: anything not listed will stop working, including active channels like Telegram. The setup script discovers all currently active channels and plugins and includes them alongside `financialclaw`, so nothing breaks.
+2. **`plugins.entries.financialclaw.config.dbPath`** — without this, the database is created in a temporary path that gets deleted on reinstall.
+
+`financialclaw-setup` handles both automatically.
+
+### Manual verification
+
+To confirm the config was applied correctly:
 
 ```bash
-npx tsx src/bin/daily-reminder-runner.ts --target "<chat-o-destino>"
+# Check plugins.allow includes financialclaw
+node -e "const c=require(require('os').homedir()+'/.openclaw/openclaw.json'); console.log(c.plugins.allow)"
+
+# Check dbPath is set
+node -e "const c=require(require('os').homedir()+'/.openclaw/openclaw.json'); console.log(c.plugins.entries.financialclaw.config)"
 ```
 
-## Importante sobre Node.js y `better-sqlite3`
+Or open `~/.openclaw/openclaw.json` directly and look for:
 
-Este proyecto usa `better-sqlite3`, que es un addon nativo. Eso significa que el binario compilado depende de la versión activa de Node.js.
+```json
+"plugins": {
+  "allow": ["financialclaw", "...other active channels..."],
+  "entries": {
+    "financialclaw": {
+      "enabled": true,
+      "config": {
+        "dbPath": "/home/youruser/.openclaw/workspace/financialclaw.db"
+      }
+    }
+  }
+}
+```
 
-- Si cambias de versión de Node, vuelve a ejecutar `npm install` antes de correr tests o usar el plugin.
-- `package.json` ejecuta `npm rebuild better-sqlite3` en `postinstall` para recompilar automáticamente el binario nativo con el Node activo.
-- Si ves errores como `NODE_MODULE_VERSION` o `ERR_DLOPEN_FAILED`, casi siempre se resuelve con `npm install`.
-
-## Verificación mínima
-
-Después de instalar dependencias:
+### Options
 
 ```bash
-npx tsc --noEmit
-npm run test:unit
-npm run test:integration
-npm run build
+# Custom database path (default: ~/.openclaw/workspace/financialclaw.db)
+npx @riclara/financialclaw financialclaw-setup --db-path /your/path/financialclaw.db
+
+# If the OpenClaw config is in a non-standard location
+npx @riclara/financialclaw financialclaw-setup --config /path/to/openclaw.json
 ```
 
-## Documentación
+## Available tools
 
-- [docs/setup.md](docs/setup.md): instalación y troubleshooting
-- [docs/hitos.md](docs/hitos.md): estado final de implementación
-- [docs/testing.md](docs/testing.md): estrategia de pruebas
+| Tool | Description |
+|---|---|
+| `manage_currency` | Add currencies, list them, set the default |
+| `log_expense_from_receipt` | Record an expense from structured OCR data |
+| `log_expense_manual` | Record an expense manually |
+| `log_income` | Record income |
+| `log_income_receipt` | Record a payment received linked to an income |
+| `add_recurring_expense` | Create a recurring expense rule |
+| `mark_expense_paid` | Mark an existing expense as paid |
+| `get_financial_summary` | Get a financial summary for a period |
+| `list_expenses` | List expenses with filters |
+| `list_incomes` | List incomes with filters |
+
+## About Node.js and `better-sqlite3`
+
+This project uses `better-sqlite3`, a native addon. The compiled binary depends on the active Node.js version.
+
+- If you change Node versions, run `npm install` again before running tests or using the plugin.
+- If you see `NODE_MODULE_VERSION` or `ERR_DLOPEN_FAILED` errors, running `npm install` usually fixes it.
+
+## Documentation
+
+- [README.es.md](README.es.md): documentación en español
+- [docs/setup.md](docs/setup.md): full setup guide and troubleshooting — [español](docs/setup.es.md)
+- [docs/hitos.md](docs/hitos.md): implementation status
+- [docs/testing.md](docs/testing.md): testing strategy

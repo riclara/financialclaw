@@ -5,3 +5,4 @@ financialclaw.db
 *.db
 .env
 test-rel-*/
+docs/bitacora.md
