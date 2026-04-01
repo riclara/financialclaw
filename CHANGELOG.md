@@ -2,6 +2,22 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.5.0](https://github.com/riclara/financialclaw/compare/financialclaw-v0.4.0...financialclaw-v0.5.0) (2026-04-01)
+
+
+### Added
+
+* check for updates in daily sync and update plugin update docs ([00c7e19](https://github.com/riclara/financialclaw/commit/00c7e1975fda128ac17ea74de082d58efef4dd26))
+* check for updates in daily sync and update plugin update docs ([2964468](https://github.com/riclara/financialclaw/commit/296446870065d1f1129ae8f0357f45f24d6dc16c))
+
+
+### Fixed
+
+* guard version check with try-catch and use semver comparison ([ed64ea7](https://github.com/riclara/financialclaw/commit/ed64ea79b1882e13c6243da8306364d3f26a2091))
+* remove daily-reminder-runner to eliminate child_process security warning ([5a2b40c](https://github.com/riclara/financialclaw/commit/5a2b40c0707ae4b49a1b0369cb637360971b5aa6))
+* sync openclaw.plugin.json version to 0.4.0 ([3a137fa](https://github.com/riclara/financialclaw/commit/3a137fa7d8ee19e7595c0bc81b8fae039b061fd5))
+* trigger npm publish on tag push instead of release event ([f704850](https://github.com/riclara/financialclaw/commit/f70485016155f12e823223156cc271024a1dd5dc))
+
 ## [0.4.0](https://github.com/riclara/financialclaw/compare/financialclaw-v0.3.2...financialclaw-v0.4.0) (2026-04-01)
 
 
