@@ -62,6 +62,20 @@ async function fetchLatestVersion(packageName: string): Promise<string | null> {
   }
 }
 
+function isNewerVersion(current: string, candidate: string): boolean {
+  const parse = (v: string): [number, number, number] => {
+    const [major = 0, minor = 0, patch = 0] = v.split(".").map(Number);
+    return [major, minor, patch];
+  };
+
+  const [cMaj, cMin, cPat] = parse(current);
+  const [lMaj, lMin, lPat] = parse(candidate);
+
+  if (lMaj !== cMaj) return lMaj > cMaj;
+  if (lMin !== cMin) return lMin > cMin;
+  return lPat > cPat;
+}
+
 function markRemindersSent(
   db: Database.Database,
   reminderIds: string[],
@@ -136,16 +150,20 @@ export async function executeRunDailySync(
     }
   }
 
-  const pkg = readPackageJson();
-  const latestVersion = await fetchLatestVersion(pkg.name);
+  try {
+    const pkg = readPackageJson();
+    const latestVersion = await fetchLatestVersion(pkg.name);
 
-  if (latestVersion !== null && latestVersion !== pkg.version) {
-    lines.push(
-      `\n⚠️ Actualización disponible: v${pkg.version} → v${latestVersion}`,
-    );
-    lines.push(
-      `   Para actualizar: openclaw plugins update financialclaw && openclaw gateway restart`,
-    );
+    if (latestVersion !== null && isNewerVersion(pkg.version, latestVersion)) {
+      lines.push(
+        `\n⚠️ Actualización disponible: v${pkg.version} → v${latestVersion}`,
+      );
+      lines.push(
+        `   Para actualizar: openclaw plugins update financialclaw && openclaw gateway restart`,
+      );
+    }
+  } catch {
+    // La verificación de actualizaciones es no-crítica — nunca debe romper el sync
   }
 
   return lines.join("\n");
