@@ -1,7 +1,3 @@
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
-
 import { Type } from "@sinclair/typebox";
 import type { Static } from "@sinclair/typebox";
 import Database from "better-sqlite3";
@@ -9,6 +5,7 @@ import Database from "better-sqlite3";
 import { getDb } from "../db/database.js";
 import { dailySync } from "../services/daily-sync.js";
 import { formatAmount, resolveCurrency } from "./helpers/currency-utils.js";
+import { PACKAGE_NAME, PACKAGE_VERSION } from "../version.js";
 
 export const InputSchema = Type.Object({});
 
@@ -18,22 +15,11 @@ interface MarkSentStmt {
   run(sentAt: string, reminderId: string): void;
 }
 
-interface PackageJson {
-  name: string;
-  version: string;
-}
-
 interface NpmLatestResponse {
   version: string;
 }
 
 const UPDATE_CHECK_TIMEOUT_MS = 3_000;
-
-function readPackageJson(): PackageJson {
-  const currentDir = dirname(fileURLToPath(import.meta.url));
-  const pkgPath = join(currentDir, "../../package.json");
-  return JSON.parse(readFileSync(pkgPath, "utf-8")) as PackageJson;
-}
 
 async function fetchLatestVersion(packageName: string): Promise<string | null> {
   const controller = new AbortController();
@@ -151,12 +137,11 @@ export async function executeRunDailySync(
   }
 
   try {
-    const pkg = readPackageJson();
-    const latestVersion = await fetchLatestVersion(pkg.name);
+    const latestVersion = await fetchLatestVersion(PACKAGE_NAME);
 
-    if (latestVersion !== null && isNewerVersion(pkg.version, latestVersion)) {
+    if (latestVersion !== null && isNewerVersion(PACKAGE_VERSION, latestVersion)) {
       lines.push(
-        `\n⚠️ Actualización disponible: v${pkg.version} → v${latestVersion}`,
+        `\n⚠️ Actualización disponible: v${PACKAGE_VERSION} → v${latestVersion}`,
       );
       lines.push(
         `   Para actualizar: openclaw plugins update financialclaw && openclaw gateway restart`,
