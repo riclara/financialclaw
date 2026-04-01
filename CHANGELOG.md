@@ -2,6 +2,16 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.5.1](https://github.com/riclara/financialclaw/compare/financialclaw-v0.5.0...financialclaw-v0.5.1) (2026-04-01)
+
+
+### Fixed
+
+* move npm publish into release-please workflow ([830b611](https://github.com/riclara/financialclaw/commit/830b611989ccdef94280095df8c5fb86c5e2d5cb))
+* move npm publish into release-please workflow to bypass GITHUB_TOKEN trigger restriction ([2f1f0b1](https://github.com/riclara/financialclaw/commit/2f1f0b1a5e1644e83f82e9799d5bb6c0e3f44a67))
+* use PAT for release-please so pull_request CI events fire on release PRs ([ee5791b](https://github.com/riclara/financialclaw/commit/ee5791be0623917f90ce848aa98babe8e5515927))
+* use PAT for release-please to trigger CI on release PRs ([aa64659](https://github.com/riclara/financialclaw/commit/aa64659022e67db13a34ec6508c93c2e1f053715))
+
 ## [0.5.0](https://github.com/riclara/financialclaw/compare/financialclaw-v0.4.0...financialclaw-v0.5.0) (2026-04-01)
 
 
