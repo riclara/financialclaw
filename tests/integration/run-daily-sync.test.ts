@@ -36,15 +36,15 @@ function seedRecurringRule(
 }
 
 describe("run_daily_sync — integración", () => {
-  it("retorna mensaje de finanzas al día cuando no hay recurrentes", () => {
+  it("retorna mensaje de finanzas al día cuando no hay recurrentes", async () => {
     const db = createTestDb();
-    const result = executeRunDailySync({}, db);
+    const result = await executeRunDailySync({}, db);
 
     assert.ok(result.includes("Sync diario completado"), "debe incluir cabecera");
     assert.ok(result.includes("al día"), "debe indicar que no hay pendientes");
   });
 
-  it("genera gastos recurrentes y los reporta correctamente", () => {
+  it("genera gastos recurrentes y los reporta correctamente", async () => {
     const db = createTestDb();
     insertCop(db);
     setDefault(db, "COP");
@@ -55,7 +55,7 @@ describe("run_daily_sync — integración", () => {
     // y luego corremos el tool para verificar el formato de salida.
     dailySync(db, "2026-02-01");
 
-    const result = executeRunDailySync({}, db);
+    const result = await executeRunDailySync({}, db);
 
     assert.ok(result.includes("Sync diario completado"), "debe incluir cabecera");
     assert.ok(
@@ -64,7 +64,7 @@ describe("run_daily_sync — integración", () => {
     );
   });
 
-  it("lista recordatorios pendientes y los marca como enviados", () => {
+  it("lista recordatorios pendientes y los marca como enviados", async () => {
     const db = createTestDb();
     insertCop(db);
     setDefault(db, "COP");
@@ -80,7 +80,7 @@ describe("run_daily_sync — integración", () => {
     // Generamos la instancia del gasto para que el reminder quede pendiente
     dailySync(db, dueDate);
 
-    const result = executeRunDailySync({}, db);
+    const result = await executeRunDailySync({}, db);
 
     assert.ok(
       result.includes("Recordatorios pendientes"),
@@ -96,9 +96,9 @@ describe("run_daily_sync — integración", () => {
     assert.equal(unsent.cnt, 0, "todos los reminders deben quedar marcados como enviados");
   });
 
-  it("no marca reminders como enviados si no hay ninguno pendiente", () => {
+  it("no marca reminders como enviados si no hay ninguno pendiente", async () => {
     const db = createTestDb();
-    const result = executeRunDailySync({}, db);
+    const result = await executeRunDailySync({}, db);
 
     const sent = db
       .prepare(`SELECT COUNT(*) AS cnt FROM reminders WHERE sent = 1`)
