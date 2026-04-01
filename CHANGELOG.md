@@ -2,6 +2,44 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.4.0](https://github.com/riclara/financialclaw/compare/financialclaw-v0.3.2...financialclaw-v0.4.0) (2026-04-01)
+
+
+### Added
+
+* add run_daily_sync tool and automatic cron setup via SKILL ([d248720](https://github.com/riclara/financialclaw/commit/d248720a281bfb25ae5e892d4e1bc177e411348a))
+* agentic OCR + OpenClaw skills (v0.3.0) ([0528e74](https://github.com/riclara/financialclaw/commit/0528e7418bc02df3f5059c1052a05903282e5b48))
+* agregar skills para el agente OpenClaw ([d1b2bd2](https://github.com/riclara/financialclaw/commit/d1b2bd24d147b31a9362817cb8d460249e842566))
+* expose ensure-plugins-allow.mjs as financialclaw-setup bin ([6617f5f](https://github.com/riclara/financialclaw/commit/6617f5f2daeae9d3a9eaddd9c73f7f6c58368d53))
+* implement TASK-21 Refactorización a OCR Agéntico ([7834425](https://github.com/riclara/financialclaw/commit/78344251148e0f9290350683943f0a78d2071495))
+* implement TASK-21 Refactorización a OCR Agéntico ([594f92b](https://github.com/riclara/financialclaw/commit/594f92beca5e0facd9db1bef7e27b881fa70a381))
+* initialize financialclaw plugin ([6ce4918](https://github.com/riclara/financialclaw/commit/6ce4918e59617607a3611de139ab8ef940af3624))
+* migrate to agentic OCR, rename log tool, and bump version to 0.2.0 ([dcdda56](https://github.com/riclara/financialclaw/commit/dcdda56c0398f08a97be4213030ec3757a4026a8))
+* **skills:** botón inline de Telegram para confirmar gasto desde foto ([412f3e8](https://github.com/riclara/financialclaw/commit/412f3e87dd9a4b7fa5e00dbab6d578154db99878))
+* **skills:** pedir confirmación antes de guardar gasto desde foto ([8f05df3](https://github.com/riclara/financialclaw/commit/8f05df37a6188caaaee211534138b5eeeb1b6cc9))
+* **skills:** traducir todos los skills al inglés ([f4a048a](https://github.com/riclara/financialclaw/commit/f4a048a02e1e50e5f9559dda72d12cf518fea239))
+
+
+### Fixed
+
+* address Devin review comments on PR [#6](https://github.com/riclara/financialclaw/issues/6) ([2d81e56](https://github.com/riclara/financialclaw/commit/2d81e56a4323a592eccce97af445bb05486a0e72))
+* address review feedback on plugins.allow script ([761dd9d](https://github.com/riclara/financialclaw/commit/761dd9d54440d784f76d04437436328128d9f366))
+* auto-add financialclaw to plugins.allow on install ([42323e1](https://github.com/riclara/financialclaw/commit/42323e1bfeb27d933ccf8e064d78798107fb6ba3))
+* auto-add plugin to plugins.allow on install ([0984224](https://github.com/riclara/financialclaw/commit/09842248ad4350dd540f08f22675c26efacda498))
+* correct config path detection, remove broken openclaw config path call ([d327484](https://github.com/riclara/financialclaw/commit/d327484b5587f846b63c343c13318ba880d45dd7))
+* correct import statements in src/index.ts for consistency ([7845e6f](https://github.com/riclara/financialclaw/commit/7845e6f6377e5d133cad685c625a2dbcecddd568))
+* ensure-plugins-allow.mjs manual + dbPath config ([187763e](https://github.com/riclara/financialclaw/commit/187763ea93893a0ce56493ccba097cbd5f3fd8ce))
+* include openclaw.plugin.json in published files ([d1b1c2d](https://github.com/riclara/financialclaw/commit/d1b1c2d8a56d8ab7b0b142cf97f576b5c2c5a814))
+* make ensure-plugins-allow.mjs manual, add dbPath config ([b742e4f](https://github.com/riclara/financialclaw/commit/b742e4fa97c8a11acc6da92c7248a93f3af2e389))
+* scope package name to @riclara/financialclaw ([bdb05fe](https://github.com/riclara/financialclaw/commit/bdb05fe33ad49a0963a8d176036bcdd1d6b02418))
+* **skills:** cambiar value del botón de confirmar a si ([0048144](https://github.com/riclara/financialclaw/commit/004814477e48c5321bbc51c8d6fd708c17341a80))
+* support custom OpenClaw config path in ensure-plugins-allow.mjs ([596dc30](https://github.com/riclara/financialclaw/commit/596dc3003bca3eacd7e978ce11f4ebe6b339f852))
+* update openclaw.plugin.json and src/index.ts for TASK-21 ([84ae174](https://github.com/riclara/financialclaw/commit/84ae17423d0fe8b68f9ab30d41df721769724e93))
+* use absolute default path for SQLite database ([929e017](https://github.com/riclara/financialclaw/commit/929e0177aa7a9a6a6b4cc704c1f7562ba1a1e49a))
+* use absolute default path for SQLite database ([ea48c1a](https://github.com/riclara/financialclaw/commit/ea48c1a57ad8723b28948aa5e9699897946ef838))
+* use explicit date ranges in list-expenses tests to avoid Date mock race conditions ([4cade7f](https://github.com/riclara/financialclaw/commit/4cade7ffa8446f8f6eddec80aa1a13d70140a61b))
+* use openclaw gateway restart in post-install message ([a423e99](https://github.com/riclara/financialclaw/commit/a423e998636db6414535e472cd8ed62561b1d651))
+
 ## [0.3.2] - 2026-03-31
 ### Added
 - Nuevo comando `financialclaw-setup` expuesto como bin de npm. Ejecutar con `npx @riclara/financialclaw financialclaw-setup` (o `--db-path` / `--config` para rutas personalizadas) tras instalar el plugin. Agrega `financialclaw` a `plugins.allow` preservando channels y plugins activos, y configura `dbPath`.
