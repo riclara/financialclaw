@@ -5,51 +5,6 @@ import { executeListExpenses } from "../../src/tools/list-expenses.js";
 import { executeLogExpenseManual } from "../../src/tools/log-expense-manual.js";
 import { createTestDb } from "../helpers/test-db.js";
 
-const FIXED_NOW = "2026-03-28T12:00:00.000Z";
-
-function withFixedDate<T>(callback: () => T): T {
-  const RealDate = Date;
-
-  class FixedDate extends Date {
-    constructor(value?: string | number | Date) {
-      if (arguments.length === 0) {
-        super(FIXED_NOW);
-        return;
-      }
-
-      super(value as string | number);
-    }
-
-    static now(): number {
-      return new RealDate(FIXED_NOW).valueOf();
-    }
-
-    static parse(dateString: string): number {
-      return RealDate.parse(dateString);
-    }
-
-    static UTC(
-      year: number,
-      monthIndex?: number,
-      date?: number,
-      hours?: number,
-      minutes?: number,
-      seconds?: number,
-      ms?: number,
-    ): number {
-      return RealDate.UTC(year, monthIndex, date, hours, minutes, seconds, ms);
-    }
-  }
-
-  globalThis.Date = FixedDate as DateConstructor;
-
-  try {
-    return callback();
-  } finally {
-    globalThis.Date = RealDate;
-  }
-}
-
 function seedExpenses(db: ReturnType<typeof createTestDb>) {
   const today = "2026-03-28";
   const yesterday = "2026-03-27";
@@ -95,16 +50,16 @@ function seedExpenses(db: ReturnType<typeof createTestDb>) {
 describe("list_expenses", () => {
   it("retorna mensaje claro cuando no hay resultados", () => {
     const db = createTestDb();
-    const result = executeListExpenses({}, db);
+    const result = executeListExpenses({ period: "all" }, db);
 
     assert.match(result, /No hay gastos registrados/);
   });
 
-  it("lista gastos sin filtros (default this_month, limit 20)", () => {
+  it("lista gastos sin filtros de período (period: all)", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const result = executeListExpenses({}, db);
+    const result = executeListExpenses({ period: "all" }, db);
 
     assert.match(result, /Gastos/);
     assert.match(result, /2026-03-28/);
@@ -116,7 +71,7 @@ describe("list_expenses", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const result = executeListExpenses({ category: "SUPERMARKET" }, db);
+    const result = executeListExpenses({ period: "all", category: "SUPERMARKET" }, db);
 
     assert.match(result, /Supermercado/);
     assert.doesNotMatch(result, /Uber/);
@@ -126,10 +81,9 @@ describe("list_expenses", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const today = "2026-03-28";
     db.prepare("UPDATE expenses SET status = ? WHERE description = ?").run("OVERDUE", "Arriendo marzo");
 
-    const result = executeListExpenses({ status: "OVERDUE" }, db);
+    const result = executeListExpenses({ period: "all", status: "OVERDUE" }, db);
 
     assert.match(result, /Arriendo/);
     assert.doesNotMatch(result, /Supermercado/);
@@ -149,27 +103,33 @@ describe("list_expenses", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const result = executeListExpenses({ search: "ANDRES" }, db);
+    const result = executeListExpenses({ search: "ANDRES", period: "all" }, db);
 
     assert.match(result, /Restaurante ANDRES/);
   });
 
-  it("filtra por período this_month", () => {
+  it("filtra por período this_month con rango explícito", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const result = executeListExpenses({ period: "this_month" }, db);
+    const result = executeListExpenses({
+      start_date: "2026-03-01",
+      end_date: "2026-03-31",
+    }, db);
 
     assert.match(result, /2026-03-28/);
     assert.match(result, /2026-03-27/);
     assert.doesNotMatch(result, /2026-02-15/);
   });
 
-  it("filtra por período last_month", () => {
+  it("filtra por período last_month con rango explícito", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const result = executeListExpenses({ period: "last_month" }, db);
+    const result = executeListExpenses({
+      start_date: "2026-02-01",
+      end_date: "2026-02-28",
+    }, db);
 
     assert.match(result, /2026-02-15/);
     assert.doesNotMatch(result, /2026-03-28/);
@@ -234,8 +194,8 @@ describe("list_expenses", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const page1 = executeListExpenses({ limit: 2, offset: 0 }, db);
-    const page2 = executeListExpenses({ limit: 2, offset: 2 }, db);
+    const page1 = executeListExpenses({ period: "all", limit: 2, offset: 0 }, db);
+    const page2 = executeListExpenses({ period: "all", limit: 2, offset: 2 }, db);
 
     assert.match(page1, /2026-03-28/);
     assert.doesNotMatch(page1, /2026-02-15/);
@@ -247,18 +207,18 @@ describe("list_expenses", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const result = executeListExpenses({ limit: 2, offset: 0 }, db);
+    const result = executeListExpenses({ period: "all", limit: 2, offset: 0 }, db);
 
-    assert.match(result, /4 total/);
+    assert.match(result, /5 total/);
   });
 
   it("retorna lista vacía con total correcto cuando offset está fuera del rango", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const result = executeListExpenses({ limit: 10, offset: 100 }, db);
+    const result = executeListExpenses({ period: "all", limit: 10, offset: 100 }, db);
 
-    assert.match(result, /total: 4/);
+    assert.match(result, /total: 5/);
     assert.match(result, /No hay gastos en la página/);
   });
 
@@ -266,7 +226,7 @@ describe("list_expenses", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const result = executeListExpenses({}, db);
+    const result = executeListExpenses({ period: "all" }, db);
 
     assert.match(result, /ID: [a-f0-9-]{36}/);
   });
@@ -275,7 +235,7 @@ describe("list_expenses", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const result = executeListExpenses({ source: "MANUAL" }, db);
+    const result = executeListExpenses({ period: "all", source: "MANUAL" }, db);
 
     assert.match(result, /Gastos/);
   });
@@ -285,7 +245,8 @@ describe("list_expenses", () => {
     seedExpenses(db);
 
     const result = executeListExpenses({
-      period: "this_month",
+      start_date: "2026-03-01",
+      end_date: "2026-03-31",
       category: "TRANSPORT",
     }, db);
 
@@ -297,7 +258,7 @@ describe("list_expenses", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const result = executeListExpenses({ limit: 2, offset: 0 }, db);
+    const result = executeListExpenses({ period: "all", limit: 2, offset: 0 }, db);
 
     assert.match(result, /offset=2/);
   });
@@ -306,7 +267,7 @@ describe("list_expenses", () => {
     const db = createTestDb();
     seedExpenses(db);
 
-    const result = executeListExpenses({ limit: 10, offset: 3 }, db);
+    const result = executeListExpenses({ period: "all", limit: 10, offset: 4 }, db);
 
     assert.match(result, /Fin de los resultados/);
   });
