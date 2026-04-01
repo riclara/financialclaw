@@ -211,15 +211,19 @@ launchctl load ~/Library/LaunchAgents/dev.riclara.financialclaw.reminders.plist
 ## 6. Actualizar el plugin
 
 ```bash
-openclaw plugins uninstall financialclaw
-openclaw plugins install @riclara/financialclaw
-npx @riclara/financialclaw financialclaw-setup
+openclaw plugins update financialclaw
 openclaw gateway restart
 ```
 
-`financialclaw-setup` detecta que `dbPath` ya está configurado y lo omite. La base de datos se preserva entre actualizaciones.
+La base de datos y todos los datos se preservan entre actualizaciones. Las migraciones de schema se ejecutan automáticamente al arrancar.
 
-Las migraciones de schema se ejecutan automáticamente al arrancar — no se pierden datos.
+Para previsualizar qué cambiaría antes de actualizar:
+
+```bash
+openclaw plugins update financialclaw --dry-run
+```
+
+El sync diario también te notificará automáticamente cuando haya una nueva versión disponible.
 
 ---
 

@@ -1,3 +1,7 @@
+import { readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
 import { Type } from "@sinclair/typebox";
 import type { Static } from "@sinclair/typebox";
 import Database from "better-sqlite3";
@@ -12,6 +16,50 @@ export type Input = Static<typeof InputSchema>;
 
 interface MarkSentStmt {
   run(sentAt: string, reminderId: string): void;
+}
+
+interface PackageJson {
+  name: string;
+  version: string;
+}
+
+interface NpmLatestResponse {
+  version: string;
+}
+
+const UPDATE_CHECK_TIMEOUT_MS = 3_000;
+
+function readPackageJson(): PackageJson {
+  const currentDir = dirname(fileURLToPath(import.meta.url));
+  const pkgPath = join(currentDir, "../../package.json");
+  return JSON.parse(readFileSync(pkgPath, "utf-8")) as PackageJson;
+}
+
+async function fetchLatestVersion(packageName: string): Promise<string | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(
+    () => { controller.abort(); },
+    UPDATE_CHECK_TIMEOUT_MS,
+  );
+
+  try {
+    const encoded = encodeURIComponent(packageName).replace(/^%40/, "@");
+    const response = await fetch(
+      `https://registry.npmjs.org/${encoded}/latest`,
+      { signal: controller.signal },
+    );
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json() as NpmLatestResponse;
+    return data.version ?? null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 function markRemindersSent(
@@ -52,10 +100,10 @@ function formatReminderLine(
   return `• ${description}: ${formattedAmount} — ${timing}`;
 }
 
-export function executeRunDailySync(
+export async function executeRunDailySync(
   _params: Input,
   db: Database.Database = getDb(),
-): string {
+): Promise<string> {
   const result = dailySync(db);
 
   markRemindersSent(
@@ -66,12 +114,8 @@ export function executeRunDailySync(
   const lines: string[] = [];
 
   lines.push(`Sync diario completado:`);
-  lines.push(
-    `• Gastos recurrentes generados: ${result.expensesGenerated}`,
-  );
-  lines.push(
-    `• Gastos marcados como vencidos: ${result.expensesMarkedOverdue}`,
-  );
+  lines.push(`• Gastos recurrentes generados: ${result.expensesGenerated}`);
+  lines.push(`• Gastos marcados como vencidos: ${result.expensesMarkedOverdue}`);
 
   if (result.remindersDue.length === 0) {
     lines.push(`• Sin recordatorios pendientes — finanzas al día ✓`);
@@ -90,6 +134,18 @@ export function executeRunDailySync(
         ),
       );
     }
+  }
+
+  const pkg = readPackageJson();
+  const latestVersion = await fetchLatestVersion(pkg.name);
+
+  if (latestVersion !== null && latestVersion !== pkg.version) {
+    lines.push(
+      `\n⚠️ Actualización disponible: v${pkg.version} → v${latestVersion}`,
+    );
+    lines.push(
+      `   Para actualizar: openclaw plugins update financialclaw && openclaw gateway restart`,
+    );
   }
 
   return lines.join("\n");
