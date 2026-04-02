@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.6.2](https://github.com/riclara/financialclaw/compare/financialclaw-v0.6.1...financialclaw-v0.6.2) (2026-04-02)
+
+
+### Fixed
+
+* exclude test files from published npm package ([#29](https://github.com/riclara/financialclaw/issues/29)) ([eb107fd](https://github.com/riclara/financialclaw/commit/eb107fd32ca1e8a165a1b2849fc0dbaa88d4163f))
+
 ## [0.6.1](https://github.com/riclara/financialclaw/compare/financialclaw-v0.6.0...financialclaw-v0.6.1) (2026-04-02)
 
 
