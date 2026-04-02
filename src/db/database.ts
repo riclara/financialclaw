@@ -51,7 +51,7 @@ function initializeDb(db: DatabaseSync): void {
 export function configureDb(dbPath: string): void {
   if (_db !== undefined) {
     throw new Error(
-      "No se puede reconfigurar la base de datos después de inicializar el singleton.",
+      "Cannot reconfigure the database after the singleton has been initialized.",
     );
   }
 

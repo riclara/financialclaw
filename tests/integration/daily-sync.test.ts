@@ -17,7 +17,7 @@ function setDefault(db: ReturnType<typeof createTestDb>, code: string): void {
 }
 
 function extractRuleId(message: string): string {
-  const match = /regla: ([a-f0-9-]+)\)/.exec(message);
+  const match = /rule: ([a-f0-9-]+)\)/.exec(message);
 
   if (match === null) {
     throw new Error(`No se encontró rule ID en: ${message}`);

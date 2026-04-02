@@ -40,7 +40,7 @@ describe("currency-utils", () => {
 
     assert.throws(
       () => resolveCurrency("EUR", db),
-      /La moneda EUR no está registrada\./,
+      /Currency EUR is not registered\./,
     );
   });
 

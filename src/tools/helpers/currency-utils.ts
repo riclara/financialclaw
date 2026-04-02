@@ -60,7 +60,7 @@ export function resolveCurrency(
 
   if (currency === undefined) {
     throw new Error(
-      `La moneda ${normalizedCode} no está registrada. Usa manage_currency para agregarla primero.`,
+      `Currency ${normalizedCode} is not registered. Use manage_currency to add it first.`,
     );
   }
 

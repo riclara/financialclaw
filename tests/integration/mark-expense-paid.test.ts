@@ -130,7 +130,7 @@ describe("mark_expense_paid", () => {
       updated_at: string;
     };
 
-    assert.equal(result, 'Gasto "expense-pending" marcado como pagado con fecha 2026-03-29.');
+    assert.equal(result, 'Expense "expense-pending" marked as paid on 2026-03-29.');
     assert.equal(expense.status, "PAID");
     assert.equal(expense.payment_date, "2026-03-29");
     assert.equal(expense.updated_at, FIXED_NOW);
@@ -160,7 +160,7 @@ describe("mark_expense_paid", () => {
       updated_at: string;
     };
 
-    assert.equal(result, 'Gasto "expense-overdue" marcado como pagado con fecha 2026-03-28.');
+    assert.equal(result, 'Expense "expense-overdue" marked as paid on 2026-03-28.');
     assert.equal(expense.status, "PAID");
     assert.equal(expense.payment_date, "2026-03-28");
     assert.equal(expense.updated_at, FIXED_NOW);
@@ -171,7 +171,7 @@ describe("mark_expense_paid", () => {
 
     assert.throws(
       () => executeMarkExpensePaid({ expense_id: "expense-missing" }, db),
-      /No existe un gasto con el ID "expense-missing"\./,
+      /No expense found with ID "expense-missing"\./,
     );
   });
 
@@ -200,7 +200,7 @@ describe("mark_expense_paid", () => {
       updated_at: string;
     };
 
-    assert.equal(result, 'El gasto "expense-paid" ya estaba marcado como pagado.');
+    assert.equal(result, 'Expense "expense-paid" was already marked as paid.');
     assert.equal(expense.status, "PAID");
     assert.equal(expense.payment_date, "2026-03-15");
     assert.equal(expense.updated_at, "2026-03-15T07:45:00.000Z");
@@ -229,7 +229,7 @@ describe("mark_expense_paid", () => {
 
     assert.equal(
       result,
-      'Gasto "expense-default-date" marcado como pagado con fecha 2026-03-28.',
+      'Expense "expense-default-date" marked as paid on 2026-03-28.',
     );
     assert.equal(expense.status, "PAID");
     assert.equal(expense.payment_date, "2026-03-28");

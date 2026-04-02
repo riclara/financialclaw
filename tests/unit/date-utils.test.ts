@@ -23,7 +23,7 @@ describe("date-utils", () => {
   it("lanza un error descriptivo si la frecuencia no existe", () => {
     assert.throws(
       () => computeNextDate("2026-03-01", "DAILY"),
-      /La frecuencia "DAILY" no es válida\./,
+      /The frequency "DAILY" is not valid\./,
     );
   });
 
@@ -49,7 +49,7 @@ describe("date-utils", () => {
   it("lanza un error descriptivo si el período no existe", () => {
     assert.throws(
       () => resolvePeriodRange("quarter" as never, "2026-03-28"),
-      /El período "quarter" no es válido\./,
+      /The period "quarter" is not valid\./,
     );
   });
 

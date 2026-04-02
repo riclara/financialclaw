@@ -36,7 +36,7 @@ export type Input = Static<typeof InputSchema>;
 function assertValidInput(input: Input): void {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
-      "Parámetros inválidos: verifica los tipos de period, status, source, limit, offset y el formato de fechas (YYYY-MM-DD).",
+      "Invalid parameters: check the types of period, status, source, limit, offset, and date format (YYYY-MM-DD).",
     );
   }
 }
@@ -57,14 +57,14 @@ interface ExpenseRow {
 
 function validateDateRange(startDate?: string, endDate?: string): void {
   if (startDate !== undefined && endDate === undefined) {
-    throw new Error("Si proporcionas start_date, también debes proporcionar end_date.");
+    throw new Error("If you provide start_date, you must also provide end_date.");
   }
   if (startDate === undefined && endDate !== undefined) {
-    throw new Error("Si proporcionas end_date, también debes proporcionar start_date.");
+    throw new Error("If you provide end_date, you must also provide start_date.");
   }
   if (startDate !== undefined && endDate !== undefined) {
     if (startDate > endDate) {
-      throw new Error("start_date no puede ser mayor que end_date.");
+      throw new Error("start_date cannot be greater than end_date.");
     }
   }
 }
@@ -143,9 +143,9 @@ export function executeListExpenses(input: Input, db: DatabaseSync = getDb()): s
 
   if (rows.length === 0) {
     const hint = total === 0
-      ? "No hay gastos registrados."
-      : `No hay gastos en la página solicitada (total: ${total}).`;
-    return `${hint}\n\nUsa filtros diferentes o cambia el offset.`;
+      ? "No expenses recorded."
+      : `No expenses on the requested page (total: ${total}).`;
+    return `${hint}\n\nTry different filters or change the offset.`;
   }
 
   const currencyCache = new Map<string, CurrencyRow>();
@@ -158,7 +158,7 @@ export function executeListExpenses(input: Input, db: DatabaseSync = getDb()): s
   }
 
   const lines: string[] = [
-    `📋 Gastos (${rows.length} de ${total} total)`,
+    `📋 Expenses (${rows.length} of ${total} total)`,
     "",
   ];
 
@@ -166,7 +166,7 @@ export function executeListExpenses(input: Input, db: DatabaseSync = getDb()): s
     const curr = getCurrencyRow(row.currency);
     const formattedAmount = formatAmount(row.amount, curr, db);
     const date = row.due_date;
-    const category = row.category || "SIN_CATEGORÍA";
+    const category = row.category || "UNCATEGORIZED";
     const merchant = row.merchant ? ` - ${row.merchant}` : "";
     const statusIcon = row.status === "PAID" ? "✓" : row.status === "OVERDUE" ? "⚠" : "○";
     const sourceTag = row.source === "OCR" ? " [OCR]" : "";
@@ -182,9 +182,9 @@ export function executeListExpenses(input: Input, db: DatabaseSync = getDb()): s
 
   if (total > limit + offset) {
     const nextOffset = offset + limit;
-    lines.push(`→ Hay más resultados. Usa offset=${nextOffset} para ver la siguiente página.`);
+    lines.push(`→ More results available. Use offset=${nextOffset} to see the next page.`);
   } else if (offset > 0) {
-    lines.push("← Fin de los resultados.");
+    lines.push("← End of results.");
   }
 
   return lines.join("\n");

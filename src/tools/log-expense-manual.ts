@@ -31,7 +31,7 @@ export type LogExpenseManualInput = Static<typeof InputSchema>;
 function assertValidInput(input: LogExpenseManualInput): void {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
-      "Parámetros inválidos: amount debe ser mayor que 0, description no puede estar vacío, y due_date debe tener formato YYYY-MM-DD.",
+      "Invalid parameters: amount must be greater than 0, description must not be empty, and due_date must be in YYYY-MM-DD format.",
     );
   }
 }
@@ -93,16 +93,16 @@ export function executeLogExpenseManual(
   );
 
   const formattedAmount = formatAmount(input.amount, currency);
-  const statusLabel = status === "PAID" ? "pagado" : "pendiente";
+  const statusLabel = status === "PAID" ? "paid" : "pending";
   const merchantPart =
     input.merchant != null ? ` — ${input.merchant}` : "";
 
   let message =
-    `Gasto registrado: ${formattedAmount} · ${input.description}${merchantPart} · ${input.due_date} · ${statusLabel} (ID: ${id})`;
+    `Expense logged: ${formattedAmount} · ${input.description}${merchantPart} · ${input.due_date} · ${statusLabel} (ID: ${id})`;
 
   if (isPlaceholderCurrency(db)) {
     message +=
-      "\n\nSugerencia: aún no has configurado una moneda real. Usa manage_currency para agregar la tuya y establecerla como moneda por defecto.";
+      "\n\nHint: you haven't configured a real currency yet. Use manage_currency to add yours and set it as default.";
   }
 
   return message;

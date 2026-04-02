@@ -109,9 +109,9 @@ describe("get-financial-summary — integración", () => {
     const result = executeGetFinancialSummary({}, db);
 
     assert.ok(result.length > 0, "resultado no debe estar vacío");
-    assert.ok(result.includes("Período:"), result);
-    assert.ok(result.includes("Sin movimientos"), result);
-    assert.ok(result.includes("Compromisos fijos activos: 0"), result);
+    assert.ok(result.includes("Period:"), result);
+    assert.ok(result.includes("No transactions"), result);
+    assert.ok(result.includes("Active recurring commitments: 0"), result);
   });
 
   // ── resumen con gastos en una moneda ──────────────────────────────────────
@@ -169,7 +169,7 @@ describe("get-financial-summary — integración", () => {
 
     const result = executeGetFinancialSummary({ period: "this_month" }, db);
 
-    assert.ok(result.includes("Ingresos recibidos"), result);
+    assert.ok(result.includes("Income received"), result);
     assert.ok(result.includes("2.000.000"), result);
   });
 
@@ -186,7 +186,7 @@ describe("get-financial-summary — integración", () => {
 
     assert.ok(result.includes("Arriendo"), result);
     assert.ok(!result.includes("Cancelada"), result);
-    assert.ok(result.includes("Compromisos fijos activos: 1"), result);
+    assert.ok(result.includes("Active recurring commitments: 1"), result);
   });
 
   // ── filtro por this_month ─────────────────────────────────────────────────
@@ -278,7 +278,7 @@ describe("get-financial-summary — integración", () => {
 
     assert.throws(
       () => executeGetFinancialSummary({ currency: "JPY" }, db),
-      /JPY.*no está registrada|no está registrada.*JPY/i,
+      /JPY.*is not registered|is not registered.*JPY/i,
     );
   });
 
@@ -294,7 +294,7 @@ describe("get-financial-summary — integración", () => {
     const result = executeGetFinancialSummary({ period: "this_month" }, db);
 
     assert.ok(result.includes("Internet"), result);
-    assert.ok(result.includes("Compromisos fijos activos: 1"), result);
+    assert.ok(result.includes("Active recurring commitments: 1"), result);
   });
 
   // ── balance recibido se calcula correctamente ─────────────────────────────

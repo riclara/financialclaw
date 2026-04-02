@@ -26,12 +26,12 @@ type ExpenseRow = {
 function assertValidInput(input: MarkExpensePaidInput): void {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
-      "Parámetros inválidos: expense_id es obligatorio y payment_date debe usar formato YYYY-MM-DD.",
+      "Invalid parameters: expense_id is required and payment_date must be in YYYY-MM-DD format.",
     );
   }
 
   if (input.expense_id.trim() === "") {
-    throw new Error("El campo expense_id es obligatorio.");
+    throw new Error("The expense_id field is required.");
   }
 }
 
@@ -53,11 +53,11 @@ export function executeMarkExpensePaid(
     .get(expenseId) as ExpenseRow | undefined;
 
   if (expense === undefined) {
-    throw new Error(`No existe un gasto con el ID "${expenseId}".`);
+    throw new Error(`No expense found with ID "${expenseId}".`);
   }
 
   if (expense.status === "PAID") {
-    return `El gasto "${expenseId}" ya estaba marcado como pagado.`;
+    return `Expense "${expenseId}" was already marked as paid.`;
   }
 
   const paymentDate = input.payment_date ?? new Date().toISOString().slice(0, 10);
@@ -74,5 +74,5 @@ export function executeMarkExpensePaid(
     `,
   ).run(paymentDate, updatedAt, expenseId);
 
-  return `Gasto "${expenseId}" marcado como pagado con fecha ${paymentDate}.`;
+  return `Expense "${expenseId}" marked as paid on ${paymentDate}.`;
 }

@@ -18,7 +18,7 @@ export type Input = Static<typeof InputSchema>;
 function assertValidInput(input: Input): void {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
-      "Parámetros inválidos: verifica los tipos de recurring, search, currency, limit, offset e include_receipts.",
+      "Invalid parameters: check the types of recurring, search, currency, limit, offset, and include_receipts.",
     );
   }
 }
@@ -94,7 +94,7 @@ export function executeListIncomes(input: Input, db: DatabaseSync = getDb()): st
   const incomes = db.prepare(listSql).all(...params, limit, offset) as unknown as IncomeRow[];
 
   if (incomes.length === 0) {
-    return `No hay ingresos registrados${total > 0 ? ` (total: ${total})` : ""}.`;
+    return `No income entries recorded${total > 0 ? ` (total: ${total})` : ""}.`;
   }
 
   const currencyCache = new Map<string, CurrencyRow>();
@@ -130,24 +130,24 @@ export function executeListIncomes(input: Input, db: DatabaseSync = getDb()): st
   }
 
   const lines: string[] = [];
-  lines.push(`📋 Ingresos (${incomes.length}${total > limit ? ` de ${total}` : ""}):`);
+  lines.push(`📋 Income (${incomes.length}${total > limit ? ` of ${total}` : ""}):`);
 
   for (const income of incomes) {
     const currency = getCurrency(income.currency);
     const formattedAmount = formatAmount(income.expected_amount, currency);
 
     const recurrence = income.is_recurring === 1
-      ? ` [${income.frequency}${income.interval_days ? ` (cada ${income.interval_days} días)` : ""}]`
+      ? ` [${income.frequency}${income.interval_days ? ` (every ${income.interval_days} days)` : ""}]`
       : "";
 
     const nextDate = income.next_expected_receipt_date
-      ? ` | Próxima: ${income.next_expected_receipt_date}`
+      ? ` | Next: ${income.next_expected_receipt_date}`
       : "";
 
-    const status = income.is_active === 1 ? "" : " (INACTIVO)";
+    const status = income.is_active === 1 ? "" : " (INACTIVE)";
 
     lines.push(
-      `- ${income.reason}${recurrence}${status}: ${formattedAmount} (esperado: ${income.date})${nextDate}`,
+      `- ${income.reason}${recurrence}${status}: ${formattedAmount} (expected: ${income.date})${nextDate}`,
     );
     lines.push(`  ID: ${income.id}`);
 
@@ -158,20 +158,20 @@ export function executeListIncomes(input: Input, db: DatabaseSync = getDb()): st
           const recCurrency = getCurrency(receipt.currency);
           const recAmount = formatAmount(receipt.amount, recCurrency);
           const note = receipt.notes ? ` - ${receipt.notes}` : "";
-          lines.push(`  └─ Recibido: ${recAmount} (${receipt.date})${note}`);
+          lines.push(`  └─ Received: ${recAmount} (${receipt.date})${note}`);
         }
       } else {
-        lines.push(`  └─ Sin receipts registrados`);
+        lines.push(`  └─ No receipts recorded`);
       }
     }
   }
 
   if (total > limit + offset) {
     lines.push("");
-    lines.push(`💡 Hay más resultados. Usa offset=${offset + limit} para ver más.`);
+    lines.push(`💡 More results available. Use offset=${offset + limit} to see more.`);
   } else if (offset > 0 && incomes.length > 0) {
     lines.push("");
-    lines.push("ℹ️ Has llegado al final de los resultados.");
+    lines.push("ℹ️ End of results.");
   }
 
   return lines.join("\n");

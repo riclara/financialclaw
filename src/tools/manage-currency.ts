@@ -28,7 +28,7 @@ function requireText(value: string | undefined, fieldName: string, action: strin
   const normalized = value?.trim();
 
   if (normalized === undefined || normalized === "") {
-    throw new Error(`La acción ${action} requiere el campo "${fieldName}".`);
+    throw new Error(`Action ${action} requires the "${fieldName}" field.`);
   }
 
   return normalized;
@@ -55,7 +55,7 @@ function addCurrency(input: ManageCurrencyInput, db: DatabaseSync): string {
     .get(code) as Pick<CurrencyRow, "code"> | undefined;
 
   if (existingCurrency !== undefined) {
-    throw new Error(`La moneda ${code} ya existe. Usa otro código o elige set_default.`);
+    throw new Error(`Currency ${code} already exists. Use a different code or choose set_default.`);
   }
 
   db.prepare(
@@ -65,7 +65,7 @@ function addCurrency(input: ManageCurrencyInput, db: DatabaseSync): string {
     `,
   ).run(code, name, symbol);
 
-  return `Moneda ${code} agregada correctamente.`;
+  return `Currency ${code} added successfully.`;
 }
 
 function listCurrencies(db: DatabaseSync): string {
@@ -80,7 +80,7 @@ function listCurrencies(db: DatabaseSync): string {
     .all() as unknown as CurrencyRow[];
 
   if (currencies.length === 0) {
-    return "No hay monedas registradas.";
+    return "No currencies registered.";
   }
 
   const lines = currencies.map((currency) => {
@@ -89,7 +89,7 @@ function listCurrencies(db: DatabaseSync): string {
     return `${prefix} ${currency.code} - ${currency.name} (${currency.symbol})${suffix}`;
   });
 
-  return ["Monedas registradas:", ...lines].join("\n");
+  return ["Registered currencies:", ...lines].join("\n");
 }
 
 function setDefaultCurrency(input: ManageCurrencyInput, db: DatabaseSync): string {
@@ -107,7 +107,7 @@ function setDefaultCurrency(input: ManageCurrencyInput, db: DatabaseSync): strin
     .get(code) as Pick<CurrencyRow, "code"> | undefined;
 
   if (existingCurrency === undefined) {
-    throw new Error(`No existe una moneda registrada con el código ${code}.`);
+    throw new Error(`No registered currency found with code ${code}.`);
   }
 
   db.exec("BEGIN");
@@ -132,7 +132,7 @@ function setDefaultCurrency(input: ManageCurrencyInput, db: DatabaseSync): strin
     throw err;
   }
 
-  return `La moneda ${code} quedó configurada como moneda por defecto.`;
+  return `Currency ${code} set as default.`;
 }
 
 export function executeManageCurrency(
@@ -148,7 +148,7 @@ export function executeManageCurrency(
       return setDefaultCurrency(input, db);
     default: {
       const exhaustiveCheck: never = input.action;
-      throw new Error(`Acción no soportada: ${exhaustiveCheck}`);
+      throw new Error(`Unsupported action: ${exhaustiveCheck}`);
     }
   }
 }

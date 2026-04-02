@@ -44,7 +44,7 @@ function parseIsoDate(date: string): Date {
     parsed.getUTCMonth() !== month - 1 ||
     parsed.getUTCDate() !== day
   ) {
-    throw new Error(`La fecha "${date}" no es válida.`);
+    throw new Error(`The date "${date}" is not valid.`);
   }
 
   return parsed;
@@ -95,7 +95,7 @@ export function computeNextDate(
     case "INTERVAL_DAYS":
       return formatDateUtc(addDays(baseDate, intervalDays));
     default:
-      throw new Error(`La frecuencia "${frequency}" no es válida.`);
+      throw new Error(`The frequency "${frequency}" is not valid.`);
   }
 }
 
@@ -138,6 +138,6 @@ export function resolvePeriodRange(
         end: formatDateUtc(reference),
       };
     default:
-      throw new Error(`El período "${period}" no es válido.`);
+      throw new Error(`The period "${period}" is not valid.`);
   }
 }

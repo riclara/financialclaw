@@ -27,7 +27,7 @@ function wrapExecute<T>(
 export default definePluginEntry({
   id: "financialclaw",
   name: "FinancialClaw",
-  description: "Plugin de finanzas personales: gastos, ingresos, recurrentes y OCR de recibos",
+  description: "Personal finance plugin: expenses, income, recurring payments, and receipt OCR",
 
   register(api) {
     const config = api.pluginConfig ?? {};
@@ -41,7 +41,7 @@ export default definePluginEntry({
     api.registerTool({
       name: "manage_currency",
       label: "Manage Currency",
-      description: "Gestionar las monedas configuradas (agregar, listar, establecer default)",
+      description: "Manage configured currencies (add, list, set default)",
       parameters: ManageCurrencyInputSchema,
       execute: wrapExecute(executeManageCurrency),
     });
@@ -51,7 +51,7 @@ export default definePluginEntry({
     api.registerTool({
       name: "log_expense_from_receipt",
       label: "Log Expense From Receipt",
-      description: "Registrar gasto a partir de datos estructurados de OCR provistos por el agente",
+      description: "Log an expense from structured OCR data provided by the agent",
       parameters: LogExpenseFromReceiptInputSchema,
       execute: wrapExecute(executeLogExpenseFromReceipt),
     });
@@ -59,7 +59,7 @@ export default definePluginEntry({
     api.registerTool({
       name: "log_expense_manual",
       label: "Log Expense Manual",
-      description: "Registrar gasto manualmente",
+      description: "Log an expense manually",
       parameters: LogExpenseManualInputSchema,
       execute: wrapExecute(executeLogExpenseManual),
     });
@@ -67,7 +67,7 @@ export default definePluginEntry({
     api.registerTool({
       name: "log_income",
       label: "Log Income",
-      description: "Registrar un ingreso",
+      description: "Log an income entry",
       parameters: LogIncomeInputSchema,
       execute: wrapExecute(executeLogIncome),
     });
@@ -75,7 +75,7 @@ export default definePluginEntry({
     api.registerTool({
       name: "log_income_receipt",
       label: "Log Income Receipt",
-      description: "Registrar un pago recibido vinculado a un ingreso",
+      description: "Log a received payment linked to an income entry",
       parameters: LogIncomeReceiptInputSchema,
       execute: wrapExecute(executeLogIncomeReceipt),
     });
@@ -83,7 +83,7 @@ export default definePluginEntry({
     api.registerTool({
       name: "add_recurring_expense",
       label: "Add Recurring Expense",
-      description: "Crear regla de gasto recurrente",
+      description: "Create a recurring expense rule",
       parameters: AddRecurringExpenseInputSchema,
       execute: wrapExecute(executeAddRecurringExpense),
     });
@@ -91,7 +91,7 @@ export default definePluginEntry({
     api.registerTool({
       name: "mark_expense_paid",
       label: "Mark Expense Paid",
-      description: "Marcar un gasto existente como pagado",
+      description: "Mark an existing expense as paid",
       parameters: MarkExpensePaidInputSchema,
       execute: wrapExecute(executeMarkExpensePaid),
     });
@@ -99,7 +99,7 @@ export default definePluginEntry({
     api.registerTool({
       name: "get_financial_summary",
       label: "Get Financial Summary",
-      description: "Obtener resumen financiero del período",
+      description: "Get a financial summary for a given period",
       parameters: GetFinancialSummaryInputSchema,
       execute: wrapExecute(executeGetFinancialSummary),
     });
@@ -107,7 +107,7 @@ export default definePluginEntry({
     api.registerTool({
       name: "list_expenses",
       label: "List Expenses",
-      description: "Listar gastos con filtros por período, estado, categoría o búsqueda",
+      description: "List expenses with filters by period, status, category, or search term",
       parameters: ListExpensesInputSchema,
       execute: wrapExecute(executeListExpenses),
     });
@@ -115,7 +115,7 @@ export default definePluginEntry({
     api.registerTool({
       name: "list_incomes",
       label: "List Incomes",
-      description: "Listar ingresos con filtros",
+      description: "List income entries with filters",
       parameters: ListIncomesInputSchema,
       execute: wrapExecute(executeListIncomes),
     });
@@ -124,7 +124,7 @@ export default definePluginEntry({
       name: "run_daily_sync",
       label: "Run Daily Sync",
       description:
-        "Ejecutar el sync diario: genera instancias de gastos recurrentes pendientes, marca vencidos y retorna los recordatorios de pago del día. Invocar desde el cron automático o cuando el usuario quiera ver qué tiene pendiente.",
+        "Run the daily sync: generates pending recurring expense instances, marks overdue ones, and returns payment reminders for the day. Invoke from automatic cron or when the user wants to see pending items.",
       parameters: RunDailySyncInputSchema,
       execute: wrapExecute(executeRunDailySync),
     });

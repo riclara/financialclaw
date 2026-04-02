@@ -56,30 +56,30 @@ export function executeLogIncome(
 ): string {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
-      "Parámetros inválidos: reason no puede estar vacío, expected_amount debe ser mayor o igual a 0, y date debe tener formato YYYY-MM-DD.",
+      "Invalid parameters: reason must not be empty, expected_amount must be >= 0, and date must be in YYYY-MM-DD format.",
     );
   }
 
   const trimmedReason = input.reason.trim();
   if (trimmedReason.length === 0) {
-    throw new Error("El campo reason no puede estar vacío o contener solo espacios.");
+    throw new Error("The reason field must not be empty or blank.");
   }
 
   if (!isValidCalendarDate(input.date)) {
-    throw new Error(`La fecha "${input.date}" no es una fecha válida en el calendario.`);
+    throw new Error(`The date "${input.date}" is not a valid calendar date.`);
   }
 
   const isRecurring = input.recurring ?? false;
 
   if (isRecurring && !input.frequency) {
     throw new Error(
-      "El campo frequency es obligatorio para ingresos recurrentes.",
+      "The frequency field is required for recurring income.",
     );
   }
 
   if (input.frequency === "INTERVAL_DAYS" && !input.interval_days) {
     throw new Error(
-      "El campo interval_days es obligatorio cuando frequency es INTERVAL_DAYS.",
+      "The interval_days field is required when frequency is INTERVAL_DAYS.",
     );
   }
 
@@ -154,15 +154,15 @@ export function executeLogIncome(
   }
 
   const formattedAmount = formatAmount(input.expected_amount, currency);
-  let message = `Ingreso registrado: ${formattedAmount} · ${trimmedReason} · ${input.date} (ID: ${incomeId})`;
+  let message = `Income logged: ${formattedAmount} · ${trimmedReason} · ${input.date} (ID: ${incomeId})`;
 
   if (nextDate !== null) {
-    message += `\nPróxima recepción esperada: ${nextDate}`;
+    message += `\nNext expected receipt: ${nextDate}`;
   }
 
   if (isPlaceholderCurrency(db)) {
     message +=
-      "\n\nSugerencia: aún no has configurado una moneda real. Usa manage_currency para agregar la tuya y establecerla como moneda por defecto.";
+      "\n\nHint: you haven't configured a real currency yet. Use manage_currency to add yours and set it as default.";
   }
 
   return message;
