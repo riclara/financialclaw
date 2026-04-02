@@ -65,7 +65,7 @@ Referencia completa de todos los documentos (NO leer todos — usar la tabla del
 - **Imports**: extensión `.js` obligatoria en todos los imports relativos
 - **IDs**: `crypto.randomUUID()`
 - **Fechas**: ISO `YYYY-MM-DD` como TEXT en SQLite, `new Date().toISOString()` para timestamps
-- **Errores**: lanzar `Error` con mensaje descriptivo en español; OpenClaw lo muestra al usuario
+- **Errores**: lanzar `Error` con mensaje descriptivo en inglés; OpenClaw lo muestra al usuario
 
 ## Multi-moneda (IMPORTANTE)
 
@@ -111,7 +111,7 @@ interface ToolResult {
 
 api.registerTool({
   name: "tool_name",                          // snake_case
-  description: "Descripción en español",      // para el agente LLM
+  description: "Description in English",       // for the LLM agent
   parameters: Type.Object({ ... }),           // TypeBox schema
   async execute(_id: string, params: T): Promise<ToolResult> {
     // _id = identificador de invocación (ignorar)
@@ -143,7 +143,7 @@ api.registerTool({
 
 Reglas:
 - Nombres de tools en `snake_case`
-- Descripción en español, clara para que el LLM sepa cuándo usarlo
+- Descripción en inglés, clara para que el LLM sepa cuándo usarlo
 - Parámetros nuevos siempre `Type.Optional` con default sensato
 - No renombrar ni eliminar tools existentes sin bump de versión MAJOR
 - No cambiar el tipo de parámetros existentes

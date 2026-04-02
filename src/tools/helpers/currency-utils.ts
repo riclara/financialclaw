@@ -31,7 +31,7 @@ function getDefaultCurrency(db: DbLike): CurrencyRow {
     .get() as CurrencyRow | undefined;
 
   if (currency === undefined) {
-    throw new Error("No hay una moneda por defecto configurada.");
+    throw new Error("No default currency configured.");
   }
 
   return currency;

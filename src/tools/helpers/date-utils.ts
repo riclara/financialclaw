@@ -30,7 +30,7 @@ function parseIsoDate(date: string): Date {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date);
 
   if (match === null) {
-    throw new Error(`La fecha "${date}" no tiene el formato YYYY-MM-DD.`);
+    throw new Error(`The date "${date}" does not match the YYYY-MM-DD format.`);
   }
 
   const [, yearPart, monthPart, dayPart] = match;
