@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.6.1](https://github.com/riclara/financialclaw/compare/financialclaw-v0.6.0...financialclaw-v0.6.1) (2026-04-02)
+
+
+### Fixed
+
+* ship compiled JS and tighten setup check ([#26](https://github.com/riclara/financialclaw/issues/26)) ([1cf8779](https://github.com/riclara/financialclaw/commit/1cf8779c09f57fe5ecfdb11d7e264a9f5978126e))
+
 ## [0.6.0](https://github.com/riclara/financialclaw/compare/financialclaw-v0.5.4...financialclaw-v0.6.0) (2026-04-02)
 
 
