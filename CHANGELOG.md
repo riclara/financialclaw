@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.6.0](https://github.com/riclara/financialclaw/compare/financialclaw-v0.5.4...financialclaw-v0.6.0) (2026-04-02)
+
+
+### Added
+
+* migrate from better-sqlite3 to node:sqlite built-in ([#24](https://github.com/riclara/financialclaw/issues/24)) ([0a9b1a4](https://github.com/riclara/financialclaw/commit/0a9b1a40daa4ccfa67b16982732f7f412125b8c6))
+
 ## [0.5.4](https://github.com/riclara/financialclaw/compare/financialclaw-v0.5.3...financialclaw-v0.5.4) (2026-04-02)
 
 
