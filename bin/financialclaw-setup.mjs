@@ -72,17 +72,10 @@ const cfg = JSON.parse(readFileSync(configPath, "utf-8"));
 const plugins = (cfg.plugins ??= {});
 
 // 1. Ensure plugins.allow includes financialclaw and all active entries
-if (plugins.allow) {
-  if (!plugins.allow.includes("financialclaw")) {
-    plugins.allow.push("financialclaw");
-    console.log(`Added financialclaw to plugins.allow`);
-  } else {
-    console.log(`financialclaw already in plugins.allow`);
-  }
-} else {
-  // plugins.allow did not exist — discover all active entries to avoid
-  // breaking channels (telegram, etc.) and other plugins
-  const allow = new Set(["financialclaw"]);
+// Always rediscover active channels and plugins so re-runs fix missing entries
+{
+  const allow = new Set(plugins.allow ?? []);
+  allow.add("financialclaw");
 
   if (cfg.channels) {
     for (const [name, ch] of Object.entries(cfg.channels)) {
@@ -97,7 +90,7 @@ if (plugins.allow) {
   }
 
   plugins.allow = [...allow];
-  console.log(`Created plugins.allow:`, JSON.stringify(plugins.allow));
+  console.log(`Updated plugins.allow:`, JSON.stringify(plugins.allow));
 }
 
 // 2. Set dbPath in plugins.entries.financialclaw.config if not already set
