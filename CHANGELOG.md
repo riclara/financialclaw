@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.5.4](https://github.com/riclara/financialclaw/compare/financialclaw-v0.5.3...financialclaw-v0.5.4) (2026-04-02)
+
+
+### Fixed
+
+* restore financialclaw-setup bin in dedicated bin/ directory ([#21](https://github.com/riclara/financialclaw/issues/21)) ([57add2d](https://github.com/riclara/financialclaw/commit/57add2d2e8dc51cf0027ec6b31a1c075d2c0f60d))
+
 ## [0.5.3](https://github.com/riclara/financialclaw/compare/financialclaw-v0.5.2...financialclaw-v0.5.3) (2026-04-01)
 
 
