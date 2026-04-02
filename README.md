@@ -47,12 +47,9 @@ npx @riclara/financialclaw financialclaw-setup --config /path/to/openclaw.json
 | `list_incomes` | List incomes with filters |
 | `run_daily_sync` | Run the daily sync: generate recurring expenses, mark overdue, send reminders |
 
-## About Node.js and `better-sqlite3`
+## Requirements
 
-This project uses `better-sqlite3`, a native addon. The compiled binary depends on the active Node.js version.
-
-- If you change Node versions, run `npm install` again before running tests or using the plugin.
-- If you see `NODE_MODULE_VERSION` or `ERR_DLOPEN_FAILED` errors, running `npm install` usually fixes it.
+Node.js 24+ is required. The plugin uses `node:sqlite`, the built-in SQLite module available since Node.js 24 — no native addons or compilation needed.
 
 ## Documentation
 
