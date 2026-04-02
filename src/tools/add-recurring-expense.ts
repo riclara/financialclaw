@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { type Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
@@ -67,7 +67,7 @@ export type AddRecurringExpenseInput = Static<typeof InputSchema>;
 
 export function executeAddRecurringExpense(
   input: AddRecurringExpenseInput,
-  db: Database.Database = getDb(),
+  db: DatabaseSync = getDb(),
 ): string {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
@@ -125,7 +125,8 @@ export function executeAddRecurringExpense(
   const expenseId = randomUUID();
   const now = new Date().toISOString();
 
-  db.transaction(() => {
+  db.exec("BEGIN");
+  try {
     // 1. Insert recurring rule
     // day_of_month stays NULL (MONTHLY anchors to the day of starts_on)
     db.prepare(
@@ -191,7 +192,11 @@ export function executeAddRecurringExpense(
         now,
       );
     }
-  })();
+    db.exec("COMMIT");
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
 
   // Format response
   const formattedAmount = formatAmount(input.amount, currency);

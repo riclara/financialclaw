@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { type Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
@@ -52,7 +52,7 @@ export type LogIncomeInput = Static<typeof InputSchema>;
 
 export function executeLogIncome(
   input: LogIncomeInput,
-  db: Database.Database = getDb(),
+  db: DatabaseSync = getDb(),
 ): string {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
@@ -94,7 +94,8 @@ export function executeLogIncome(
   const incomeId = randomUUID();
   const receiptId = randomUUID();
 
-  db.transaction(() => {
+  db.exec("BEGIN");
+  try {
     db.prepare(
       `
         INSERT INTO incomes (
@@ -146,7 +147,11 @@ export function executeLogIncome(
       null,
       now,
     );
-  })();
+    db.exec("COMMIT");
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
 
   const formattedAmount = formatAmount(input.expected_amount, currency);
   let message = `Ingreso registrado: ${formattedAmount} · ${trimmedReason} · ${input.date} (ID: ${incomeId})`;

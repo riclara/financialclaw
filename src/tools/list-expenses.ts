@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { type Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { getDb } from "../db/database.js";
@@ -69,7 +69,7 @@ function validateDateRange(startDate?: string, endDate?: string): void {
   }
 }
 
-export function executeListExpenses(input: Input, db: Database.Database = getDb()): string {
+export function executeListExpenses(input: Input, db: DatabaseSync = getDb()): string {
   assertValidInput(input);
 
   const limit = input.limit ?? 20;
@@ -90,7 +90,7 @@ export function executeListExpenses(input: Input, db: Database.Database = getDb(
     ? resolveCurrency(input.currency, db)
     : null;
 
-  const params: unknown[] = [];
+  const params: (string | number | null | bigint | Uint8Array)[] = [];
   const conditions: string[] = ["is_active = 1"];
 
   if (dateRange) {
@@ -127,7 +127,7 @@ export function executeListExpenses(input: Input, db: Database.Database = getDb(
   const whereClause = conditions.join(" AND ");
 
   const countSql = `SELECT COUNT(*) as total FROM expenses WHERE ${whereClause}`;
-  const countResult = db.prepare(countSql).get(...params) as { total: number };
+  const countResult = db.prepare(countSql).get(...params) as unknown as { total: number };
   const total = countResult.total;
 
   const orderClause = "ORDER BY due_date DESC";
@@ -139,7 +139,7 @@ export function executeListExpenses(input: Input, db: Database.Database = getDb(
   ${orderClause}
   LIMIT ? OFFSET ?`;
 
-  const rows = db.prepare(sql).all(...paginatedParams) as ExpenseRow[];
+  const rows = db.prepare(sql).all(...paginatedParams) as unknown as ExpenseRow[];
 
   if (rows.length === 0) {
     const hint = total === 0

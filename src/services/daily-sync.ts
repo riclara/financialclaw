@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 
 import { getDb } from "../db/database.js";
 import { computeNextDate, todayISO } from "../tools/helpers/date-utils.js";
@@ -76,7 +76,7 @@ function nextDueDate(
 }
 
 export function dailySync(
-  db: Database.Database = getDb(),
+  db: DatabaseSync = getDb(),
   today = todayISO(),
 ): DailySyncResult {
   const selectRulesStmt = db.prepare(`
@@ -155,16 +155,18 @@ export function dailySync(
     ORDER BY e.due_date ASC, r.scheduled_date ASC, r.id ASC
   `);
 
-  const mutationResult = db.transaction((referenceDate: string) => {
-    const recurringRules = selectRulesStmt.all() as RecurringExpenseRuleRow[];
-    let expensesGenerated = 0;
+  db.exec("BEGIN");
+  let expensesGenerated = 0;
+  let expensesMarkedOverdue = 0;
+  try {
+    const recurringRules = selectRulesStmt.all() as unknown as RecurringExpenseRuleRow[];
     const now = new Date().toISOString();
 
     for (const rule of recurringRules) {
       const lastExpense = selectLastDateStmt.get(rule.id) as LastDateRow | undefined;
       let dueDate = nextDueDate(rule, lastExpense?.last_date ?? null);
 
-      while (dueDate <= referenceDate) {
+      while (dueDate <= today) {
         if (rule.ends_on !== null && dueDate > rule.ends_on) {
           break;
         }
@@ -209,15 +211,17 @@ export function dailySync(
       }
     }
 
-    const overdueResult = markOverdueStmt.run(now, referenceDate);
+    const overdueResult = markOverdueStmt.run(now, today);
+    expensesMarkedOverdue = overdueResult.changes as number;
 
-    return {
-      expensesGenerated,
-      expensesMarkedOverdue: overdueResult.changes,
-    };
-  })(today);
+    db.exec("COMMIT");
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
+  const mutationResult = { expensesGenerated, expensesMarkedOverdue };
 
-  const remindersDue = selectRemindersDueStmt.all(today) as DailySyncReminder[];
+  const remindersDue = selectRemindersDueStmt.all(today) as unknown as DailySyncReminder[];
 
   return {
     expensesGenerated: mutationResult.expensesGenerated,

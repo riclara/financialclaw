@@ -10,7 +10,7 @@ This guide covers everything needed to get the plugin running: prerequisites, in
 
 | Requirement | Minimum version | How to check |
 |---|---|---|
-| Node.js | 22.14+ (recommended: 24) | `node --version` |
+| Node.js | 24+ | `node --version` |
 | OpenClaw CLI | installed and configured | `openclaw --version` |
 
 ---
@@ -118,18 +118,5 @@ The daily sync will also notify you automatically when a new version is availabl
 **Channel stops working after install**
 → `plugins.allow` was set without including the channel. Run `financialclaw-setup` again — it will add the missing entries.
 
-**`better-sqlite3` fails with `NODE_MODULE_VERSION` or `ERR_DLOPEN_FAILED`**
-→ The native binary was compiled for a different Node version. Run:
-```bash
-npm install
-```
-
-**`better-sqlite3` fails to build from source**
-→ Install build tools:
-```bash
-# macOS
-xcode-select --install
-
-# Ubuntu / Debian
-sudo apt install build-essential
-```
+**Plugin fails to load with a SQLite error**
+→ Make sure you are running Node.js 24+. The plugin uses `node:sqlite`, which is built into Node.js 24 and does not require any native compilation.

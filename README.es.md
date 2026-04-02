@@ -44,13 +44,9 @@ npx @riclara/financialclaw financialclaw-setup --config /ruta/openclaw.json
 
 La guía completa está en [docs/setup.es.md](docs/setup.es.md).
 
-## Importante sobre Node.js y `better-sqlite3`
+## Requisitos
 
-Este proyecto usa `better-sqlite3`, que es un addon nativo. Eso significa que el binario compilado depende de la versión activa de Node.js.
-
-- Si cambias de versión de Node, vuelve a ejecutar `npm install` antes de correr tests o usar el plugin.
-- `package.json` ejecuta `npm rebuild better-sqlite3` en `postinstall` para recompilar automáticamente el binario nativo con el Node activo.
-- Si ves errores como `NODE_MODULE_VERSION` o `ERR_DLOPEN_FAILED`, casi siempre se resuelve con `npm install`.
+Se requiere Node.js 24+. El plugin usa `node:sqlite`, el módulo SQLite integrado disponible desde Node.js 24 — no requiere addons nativos ni compilación.
 
 ## Verificación mínima
 

@@ -10,6 +10,28 @@ metadata:
 
 # financialclaw — Personal finance
 
+## First-time setup check
+
+On the **very first financial interaction** with a user (before responding to their request), silently call `manage_currency` with `action: "list"`.
+
+- If the call **succeeds**: proceed normally. Do not mention this check.
+- If the call **fails with a database error** (e.g. cannot open database, no such file, module not found): stop and inform the user:
+
+  > "It looks like financialclaw hasn't been fully set up yet. Please run the following command and then restart the OpenClaw gateway:
+  >
+  > ```
+  > npx @riclara/financialclaw financialclaw-setup
+  > openclaw gateway restart
+  > ```
+  >
+  > This configures the plugin in your OpenClaw config and sets up the database. Once done, come back and I'll be ready to help."
+
+  Do not attempt any other tool calls until the user confirms setup is complete.
+
+Only perform this check once per session. If a tool call already succeeded earlier in the session, skip it.
+
+---
+
 ## Expense logging
 
 ### Manual expense

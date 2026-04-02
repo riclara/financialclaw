@@ -13,7 +13,7 @@ describe("currency-utils", () => {
   it("retorna la moneda default del seed cuando no recibe código", () => {
     const db = createTestDb();
 
-    assert.deepEqual(resolveCurrency(undefined, db), {
+    assert.deepEqual({ ...resolveCurrency(undefined, db) }, {
       code: PLACEHOLDER_CURRENCY,
       name: "Sin configurar",
       symbol: "¤",
@@ -31,7 +31,7 @@ describe("currency-utils", () => {
       `,
     ).run("USD", "Dólar estadounidense", "US$");
 
-    assert.deepEqual(resolveCurrency("usd", db), {
+    assert.deepEqual({ ...resolveCurrency("usd", db) }, {
       code: "USD",
       name: "Dólar estadounidense",
       symbol: "US$",

@@ -37,7 +37,7 @@ describe("manage_currency", () => {
       )
       .get() as CurrencyRow | undefined;
 
-    assert.deepEqual(row, {
+    assert.deepEqual({ ...row }, {
       code: "USD",
       name: "Dólar estadounidense",
       symbol: "$",

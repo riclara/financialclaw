@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { mkdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join, dirname } from "node:path";
@@ -7,7 +7,7 @@ import { ALL_MIGRATIONS, ALL_SEEDS } from "./schema.js";
 
 const DEFAULT_DB_PATH = join(homedir(), ".openclaw", "workspace", "financialclaw.db");
 
-let _db: Database.Database | undefined;
+let _db: DatabaseSync | undefined;
 let _dbPath: string | undefined;
 
 function shouldIgnoreMigrationError(error: unknown): boolean {
@@ -18,7 +18,7 @@ function shouldIgnoreMigrationError(error: unknown): boolean {
   return /duplicate column name: (updated_at|status|failure_code)/i.test(message);
 }
 
-function runMigrations(db: Database.Database): void {
+function runMigrations(db: DatabaseSync): void {
   for (const sql of ALL_MIGRATIONS) {
     try {
       db.exec(sql);
@@ -30,19 +30,22 @@ function runMigrations(db: Database.Database): void {
   }
 }
 
-function initializeDb(db: Database.Database): void {
-  db.pragma("journal_mode = WAL");
-  db.pragma("foreign_keys = ON");
+function initializeDb(db: DatabaseSync): void {
+  db.exec("PRAGMA journal_mode = WAL");
+  db.exec("PRAGMA foreign_keys = ON");
 
-  const setup = db.transaction(() => {
+  db.exec("BEGIN");
+  try {
     runMigrations(db);
 
     for (const sql of ALL_SEEDS) {
       db.exec(sql);
     }
-  });
-
-  setup();
+    db.exec("COMMIT");
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
 }
 
 export function configureDb(dbPath: string): void {
@@ -55,11 +58,11 @@ export function configureDb(dbPath: string): void {
   _dbPath = dbPath;
 }
 
-export function getDb(): Database.Database {
+export function getDb(): DatabaseSync {
   if (_db === undefined) {
     _dbPath = _dbPath ?? process.env.FINANCIALCLAW_DB_PATH ?? DEFAULT_DB_PATH;
     mkdirSync(dirname(_dbPath), { recursive: true });
-    _db = new Database(_dbPath);
+    _db = new DatabaseSync(_dbPath);
     initializeDb(_db);
   }
 

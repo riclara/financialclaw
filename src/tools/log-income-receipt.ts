@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { type Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
@@ -56,7 +56,7 @@ interface IncomeRow {
 
 export function executeLogIncomeReceipt(
   input: LogIncomeReceiptInput,
-  db: Database.Database = getDb(),
+  db: DatabaseSync = getDb(),
 ): string {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
@@ -117,7 +117,8 @@ export function executeLogIncomeReceipt(
   const receiptId = randomUUID();
   const now = new Date().toISOString();
 
-  db.transaction(() => {
+  db.exec("BEGIN");
+  try {
     db.prepare(
       `INSERT INTO income_receipts (id, income_id, amount, currency, date, notes, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -136,7 +137,11 @@ export function executeLogIncomeReceipt(
         `UPDATE incomes SET next_expected_receipt_date = ? WHERE id = ?`,
       ).run(nextDate, input.income_id);
     }
-  })();
+    db.exec("COMMIT");
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
 
   // 5. Format response
   const formattedReceived = formatAmount(input.received_amount, currency);

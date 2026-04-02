@@ -14,21 +14,19 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "postinstall": "npm rebuild better-sqlite3",
+    "postinstall": "node bin/postinstall-message.mjs",
     "test": "tsx --test tests/**/*.test.ts",
     "test:unit": "tsx --test tests/unit/**/*.test.ts",
     "test:integration": "tsx --test tests/integration/**/*.test.ts"
   },
   "dependencies": {
-    "@sinclair/typebox": "^0.34.0",
-    "better-sqlite3": "^12.8.0"
+    "@sinclair/typebox": "^0.34.0"
   },
   "peerDependencies": {
     "openclaw": ">=2026.3.0"
   },
   "devDependencies": {
-    "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^22.0.0",
+    "@types/node": "^24.0.0",
     "openclaw": "^2026.3.0",
     "tsx": "^4.19.0",
     "typescript": "^5.5.0",
@@ -41,6 +39,6 @@
     "openclaw.plugin.json"
   ],
   "engines": {
-    "node": ">=22.14.0"
+    "node": ">=24.0.0"
   }
 }

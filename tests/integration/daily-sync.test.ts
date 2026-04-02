@@ -282,7 +282,7 @@ describe("daily-sync — integración", () => {
       .all() as Array<{ id: string; status: string }>;
 
     assert.equal(result.expensesMarkedOverdue, 1);
-    assert.deepEqual(statuses, [
+    assert.deepEqual(statuses.map((s) => ({ ...s })), [
       { id: "expense-overdue", status: "OVERDUE" },
       { id: "expense-paid", status: "PAID" },
       { id: "expense-pending", status: "OVERDUE" },
@@ -307,7 +307,7 @@ describe("daily-sync — integración", () => {
 
     assert.equal(result.expensesGenerated, 1);
     assert.equal(result.remindersDue.length, 2);
-    assert.deepEqual(result.remindersDue, [
+    assert.deepEqual(result.remindersDue.map((r) => ({ ...r })), [
       {
         expense_id: result.remindersDue[0].expense_id,
         reminder_id: result.remindersDue[0].reminder_id,

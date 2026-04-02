@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 
 import { ALL_MIGRATIONS, ALL_SEEDS } from "../../src/db/schema.js";
 
@@ -10,10 +10,10 @@ function shouldIgnoreMigrationError(error: unknown): boolean {
   return /duplicate column name: (updated_at|status|failure_code)/i.test(message);
 }
 
-export function createTestDb(): Database.Database {
-  const db = new Database(":memory:");
-  db.pragma("journal_mode = WAL");
-  db.pragma("foreign_keys = ON");
+export function createTestDb(): DatabaseSync {
+  const db = new DatabaseSync(":memory:");
+  db.exec("PRAGMA journal_mode = WAL");
+  db.exec("PRAGMA foreign_keys = ON");
 
   for (const sql of ALL_MIGRATIONS) {
     try {

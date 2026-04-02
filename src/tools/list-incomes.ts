@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { type Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 import { getDb } from "../db/database.js";
@@ -47,7 +47,7 @@ interface ReceiptRow {
   created_at: string;
 }
 
-export function executeListIncomes(input: Input, db: Database.Database = getDb()): string {
+export function executeListIncomes(input: Input, db: DatabaseSync = getDb()): string {
   assertValidInput(input);
 
   const limit = input.limit ?? 20;
@@ -59,7 +59,7 @@ export function executeListIncomes(input: Input, db: Database.Database = getDb()
   }
 
   const conditions: string[] = ["1=1"];
-  const params: unknown[] = [];
+  const params: (string | number | null | bigint | Uint8Array)[] = [];
 
   if (input.recurring !== undefined) {
     conditions.push(`is_recurring = ?`);
@@ -79,7 +79,7 @@ export function executeListIncomes(input: Input, db: Database.Database = getDb()
   const whereClause = conditions.join(" AND ");
 
   const countSql = `SELECT COUNT(*) as total FROM incomes WHERE ${whereClause}`;
-  const countResult = db.prepare(countSql).get(...params) as { total: number };
+  const countResult = db.prepare(countSql).get(...params) as unknown as { total: number };
   const total = countResult.total;
 
   const listSql = `
@@ -91,7 +91,7 @@ export function executeListIncomes(input: Input, db: Database.Database = getDb()
     ORDER BY created_at DESC
     LIMIT ? OFFSET ?
   `;
-  const incomes = db.prepare(listSql).all(...params, limit, offset) as IncomeRow[];
+  const incomes = db.prepare(listSql).all(...params, limit, offset) as unknown as IncomeRow[];
 
   if (incomes.length === 0) {
     return `No hay ingresos registrados${total > 0 ? ` (total: ${total})` : ""}.`;
@@ -118,7 +118,7 @@ export function executeListIncomes(input: Input, db: Database.Database = getDb()
         ) WHERE rn <= 5
         ORDER BY income_id, date DESC
       `;
-      const allReceipts = db.prepare(receiptsSql).all(...incomeIds) as ReceiptRow[];
+      const allReceipts = db.prepare(receiptsSql).all(...incomeIds) as unknown as ReceiptRow[];
 
       receiptsByIncomeId = new Map();
       for (const receipt of allReceipts) {
