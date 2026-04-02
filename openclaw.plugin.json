@@ -2,8 +2,6 @@
   "id": "financialclaw",
   "name": "FinancialClaw",
   "description": "Personal finance plugin: expenses, income, recurring payments, and receipt OCR",
-  "version": "0.7.0",
-  "enabledByDefault": true,
   "configSchema": {
     "type": "object",
     "properties": {
@@ -13,22 +11,14 @@
     },
     "additionalProperties": false
   },
+  "uiHints": {
+    "dbPath": {
+      "label": "Database path",
+      "help": "Absolute path to the SQLite database file. Defaults to ~/.openclaw/workspace/financialclaw.db",
+      "placeholder": "/home/user/.openclaw/workspace/financialclaw.db"
+    }
+  },
   "skills": [
     "skills/financialclaw"
-  ],
-  "contracts": {
-    "tools": [
-      "manage_currency",
-      "log_expense_from_receipt",
-      "log_expense_manual",
-      "log_income",
-      "log_income_receipt",
-      "add_recurring_expense",
-      "mark_expense_paid",
-      "get_financial_summary",
-      "list_expenses",
-      "list_incomes",
-      "run_daily_sync"
-    ]
-  }
+  ]
 }

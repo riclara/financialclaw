@@ -1,7 +1,7 @@
 {
-  "name": "@riclara/financialclaw",
+  "name": "financialclaw",
   "version": "0.7.0",
-  "description": "Plugin OpenClaw para finanzas personales via Telegram",
+  "description": "Personal finance plugin for OpenClaw: expenses, income, recurring payments, and receipt OCR",
   "type": "module",
   "bin": {
     "financialclaw-setup": "bin/financialclaw-setup.mjs"
@@ -9,7 +9,15 @@
   "openclaw": {
     "extensions": [
       "./dist/src/index.js"
-    ]
+    ],
+    "compat": {
+      "pluginApi": ">=2026.3.24",
+      "minGatewayVersion": "2026.3.24"
+    },
+    "build": {
+      "openclawVersion": "2026.3.24",
+      "pluginSdkVersion": "2026.3.24"
+    }
   },
   "scripts": {
     "build": "tsc",

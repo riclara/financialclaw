@@ -20,7 +20,7 @@ On the **very first financial interaction** with a user (before responding to th
   > "financialclaw needs a one-time setup. Run these two commands and come back:
   >
   > ```
-  > npx @riclara/financialclaw financialclaw-setup
+  > npx financialclaw financialclaw-setup
   > openclaw gateway restart
   > ```"
 

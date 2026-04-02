@@ -21,8 +21,8 @@ Si necesitas el detalle de avance por tarea, revisa [docs/hitos.md](docs/hitos.m
 ## Instalación
 
 ```bash
-openclaw plugins install @riclara/financialclaw
-npx @riclara/financialclaw financialclaw-setup
+openclaw plugins install financialclaw
+npx financialclaw financialclaw-setup
 openclaw gateway restart
 ```
 
@@ -30,16 +30,22 @@ openclaw gateway restart
 
 `openclaw plugins install` registra el plugin pero no lo agrega a `plugins.allow`. Una vez que ese campo existe, OpenClaw lo usa como allowlist explícita — todo lo que no esté listado deja de funcionar, incluyendo canales activos como Telegram.
 
-`financialclaw-setup` lee el config actual, descubre todos los canales y plugins activos, y agrega `financialclaw` junto a ellos para que nada deje de funcionar. También configura `dbPath` para que la BD persista entre reinstalaciones (por defecto: `~/.openclaw/workspace/financialclaw.db`).
+`financialclaw-setup` lee el config actual y aplica tres cambios requeridos:
+
+1. **`plugins.allow`** — agrega `financialclaw` junto a todos los canales y plugins activos para que nada deje de funcionar.
+2. **`tools.profile`** — lo cambia a `"full"`. Profiles como `"coding"` o `"minimal"` excluyen tools de plugins, haciéndolos invisibles para el agente.
+3. **`tools.allow`** — agrega `"financialclaw"` como entrada explícita en el allowlist de tools.
+
+También configura `dbPath` para que la BD persista entre reinstalaciones (por defecto: `~/.openclaw/workspace/financialclaw.db`).
 
 ### Opciones
 
 ```bash
 # Ruta personalizada para la BD
-npx @riclara/financialclaw financialclaw-setup --db-path /tu/ruta/financialclaw.db
+npx financialclaw financialclaw-setup --db-path /tu/ruta/financialclaw.db
 
 # Si el config de OpenClaw está en una ubicación no estándar
-npx @riclara/financialclaw financialclaw-setup --config /ruta/openclaw.json
+npx financialclaw financialclaw-setup --config /ruta/openclaw.json
 ```
 
 La guía completa está en [docs/setup.es.md](docs/setup.es.md).
