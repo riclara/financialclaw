@@ -32,20 +32,20 @@ export type LogExpenseFromReceiptInput = Static<typeof InputSchema>;
 function assertValidInput(input: LogExpenseFromReceiptInput): void {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
-      "Parámetros inválidos: amount es requerido y debe ser mayor que 0, date es requerido con formato YYYY-MM-DD.",
+      "Invalid parameters: amount is required and must be greater than 0, date is required in YYYY-MM-DD format.",
     );
   }
   if (input.description !== undefined && input.description.trim().length === 0) {
-    throw new Error("description no puede contener solo espacios en blanco.");
+    throw new Error("description must not be blank.");
   }
   if (input.merchant !== undefined && input.merchant.trim().length === 0) {
-    throw new Error("merchant no puede contener solo espacios en blanco.");
+    throw new Error("merchant must not be blank.");
   }
   if (input.category !== undefined && input.category.trim().length === 0) {
-    throw new Error("category no puede contener solo espacios en blanco.");
+    throw new Error("category must not be blank.");
   }
   if (input.raw_text !== undefined && input.raw_text.trim().length === 0) {
-    throw new Error("raw_text no puede contener solo espacios en blanco.");
+    throw new Error("raw_text must not be blank.");
   }
 }
 
@@ -69,7 +69,7 @@ export function executeLogExpenseFromReceipt(
   // Determine description if not provided
   const descriptionFinal =
     description ??
-    (merchant ? `Gasto en ${merchant}` : "Gasto por OCR");
+    (merchant ? `Expense at ${merchant}` : "OCR expense");
 
   // Generate IDs
   const extractionId = randomUUID();
@@ -145,11 +145,11 @@ export function executeLogExpenseFromReceipt(
   const categoryPart = category !== "OTHER" ? ` [${category}]` : "";
 
   let message =
-    `Gasto registrado por OCR: ${formattedAmount}${categoryPart} · ${descriptionFinal}${merchantPart} · ${date} · Pagado (ID: ${expenseId})`;
+    `OCR expense logged: ${formattedAmount}${categoryPart} · ${descriptionFinal}${merchantPart} · ${date} · Paid (ID: ${expenseId})`;
 
   if (isPlaceholderCurrency(db)) {
     message +=
-      "\n\nSugerencia: aún no has configurado una moneda real. Usa manage_currency para agregar la tuya y establecerla como moneda por defecto.";
+      "\n\nHint: you haven't configured a real currency yet. Use manage_currency to add yours and set it as default.";
   }
 
   return message;

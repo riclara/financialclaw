@@ -31,7 +31,7 @@ function getDefaultCurrency(db: DbLike): CurrencyRow {
     .get() as CurrencyRow | undefined;
 
   if (currency === undefined) {
-    throw new Error("No hay una moneda por defecto configurada.");
+    throw new Error("No default currency configured.");
   }
 
   return currency;
@@ -60,7 +60,7 @@ export function resolveCurrency(
 
   if (currency === undefined) {
     throw new Error(
-      `La moneda ${normalizedCode} no está registrada. Usa manage_currency para agregarla primero.`,
+      `Currency ${normalizedCode} is not registered. Use manage_currency to add it first.`,
     );
   }
 

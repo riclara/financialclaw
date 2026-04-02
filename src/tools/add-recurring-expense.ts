@@ -71,38 +71,38 @@ export function executeAddRecurringExpense(
 ): string {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
-      "Parámetros inválidos: revisa description, amount, frequency y starts_on.",
+      "Invalid parameters: check description, amount, frequency, and starts_on.",
     );
   }
 
   const trimmedDescription = input.description.trim();
   if (trimmedDescription.length === 0) {
     throw new Error(
-      "El campo description no puede estar vacío o contener solo espacios.",
+      "The description field must not be empty or blank.",
     );
   }
 
   if (!isValidCalendarDate(input.starts_on)) {
     throw new Error(
-      `La fecha starts_on "${input.starts_on}" no es una fecha válida en el calendario.`,
+      `The starts_on date "${input.starts_on}" is not a valid calendar date.`,
     );
   }
 
   if (input.ends_on !== undefined && !isValidCalendarDate(input.ends_on)) {
     throw new Error(
-      `La fecha ends_on "${input.ends_on}" no es una fecha válida en el calendario.`,
+      `The ends_on date "${input.ends_on}" is not a valid calendar date.`,
     );
   }
 
   if (input.ends_on !== undefined && input.starts_on > input.ends_on) {
     throw new Error(
-      `La fecha starts_on "${input.starts_on}" no puede ser posterior a ends_on "${input.ends_on}".`,
+      `The starts_on date "${input.starts_on}" cannot be later than ends_on "${input.ends_on}".`,
     );
   }
 
   if (input.frequency === "INTERVAL_DAYS" && !input.interval_days) {
     throw new Error(
-      "El campo interval_days es obligatorio cuando frequency es INTERVAL_DAYS.",
+      "The interval_days field is required when frequency is INTERVAL_DAYS.",
     );
   }
 
@@ -200,24 +200,24 @@ export function executeAddRecurringExpense(
 
   // Format response
   const formattedAmount = formatAmount(input.amount, currency);
-  let message = `Regla creada: ${formattedAmount} · ${trimmedDescription} · ${input.frequency} desde ${input.starts_on} (regla: ${ruleId})`;
-  message += `\nPrimer gasto generado con vencimiento ${input.starts_on} (gasto: ${expenseId})`;
+  let message = `Rule created: ${formattedAmount} · ${trimmedDescription} · ${input.frequency} from ${input.starts_on} (rule: ${ruleId})`;
+  message += `\nFirst expense generated due on ${input.starts_on} (expense: ${expenseId})`;
 
   const nextDateWithinWindow =
     input.ends_on === undefined || nextDate <= input.ends_on;
   if (nextDateWithinWindow) {
-    message += `\nPróxima fecha: ${nextDate}`;
+    message += `\nNext date: ${nextDate}`;
   } else {
-    message += `\nNo hay próxima ocurrencia dentro de la ventana de vigencia (ends_on: ${input.ends_on}).`;
+    message += `\nNo next occurrence within the validity window (ends_on: ${input.ends_on}).`;
   }
 
   if (scheduledDate !== null) {
-    message += `\nReminder programado para ${scheduledDate} (${input.reminder_days_before} días antes)`;
+    message += `\nReminder scheduled for ${scheduledDate} (${input.reminder_days_before} days before)`;
   }
 
   if (currency.code === PLACEHOLDER_CURRENCY) {
     message +=
-      "\n\nSugerencia: aún no has configurado una moneda real. Usa manage_currency para agregar la tuya y establecerla como moneda por defecto.";
+      "\n\nHint: you haven't configured a real currency yet. Use manage_currency to add yours and set it as default.";
   }
 
   return message;

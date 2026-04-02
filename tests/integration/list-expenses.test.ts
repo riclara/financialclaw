@@ -52,7 +52,7 @@ describe("list_expenses", () => {
     const db = createTestDb();
     const result = executeListExpenses({ period: "all" }, db);
 
-    assert.match(result, /No hay gastos registrados/);
+    assert.match(result, /No expenses recorded/);
   });
 
   it("lista gastos sin filtros de período (period: all)", () => {
@@ -61,7 +61,7 @@ describe("list_expenses", () => {
 
     const result = executeListExpenses({ period: "all" }, db);
 
-    assert.match(result, /Gastos/);
+    assert.match(result, /Expenses/);
     assert.match(result, /2026-03-28/);
     assert.match(result, /2026-03-27/);
     assert.match(result, /Supermercado/);
@@ -186,7 +186,7 @@ describe("list_expenses", () => {
 
     assert.throws(
       () => executeListExpenses({ start_date: "2026-03-28", end_date: "2026-03-01" }, db),
-      /start_date no puede ser mayor/,
+      /start_date cannot be greater/,
     );
   });
 
@@ -219,7 +219,7 @@ describe("list_expenses", () => {
     const result = executeListExpenses({ period: "all", limit: 10, offset: 100 }, db);
 
     assert.match(result, /total: 5/);
-    assert.match(result, /No hay gastos en la página/);
+    assert.match(result, /No expenses on the requested page/);
   });
 
   it("incluye ID utilizable en la salida", () => {
@@ -237,7 +237,7 @@ describe("list_expenses", () => {
 
     const result = executeListExpenses({ period: "all", source: "MANUAL" }, db);
 
-    assert.match(result, /Gastos/);
+    assert.match(result, /Expenses/);
   });
 
   it("combina múltiples filtros", () => {
@@ -269,6 +269,6 @@ describe("list_expenses", () => {
 
     const result = executeListExpenses({ period: "all", limit: 10, offset: 4 }, db);
 
-    assert.match(result, /Fin de los resultados/);
+    assert.match(result, /End of results/);
   });
 });

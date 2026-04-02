@@ -341,7 +341,7 @@ describe("database", () => {
 
     assert.throws(
       () => databaseModule.configureDb(join(tempDir, "otra.sqlite")),
-      /No se puede reconfigurar la base de datos después de inicializar el singleton\./,
+      /Cannot reconfigure the database after the singleton has been initialized\./,
     );
   });
 });

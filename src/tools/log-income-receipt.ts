@@ -60,12 +60,12 @@ export function executeLogIncomeReceipt(
 ): string {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
-      "Parámetros inválidos: income_id no puede estar vacío, received_amount debe ser >= 0, y received_on debe tener formato YYYY-MM-DD.",
+      "Invalid parameters: income_id must not be empty, received_amount must be >= 0, and received_on must be in YYYY-MM-DD format.",
     );
   }
 
   if (!isValidCalendarDate(input.received_on)) {
-    throw new Error(`La fecha "${input.received_on}" no es una fecha válida en el calendario.`);
+    throw new Error(`The date "${input.received_on}" is not a valid calendar date.`);
   }
 
   // 1. Look up income by income_id
@@ -77,7 +77,7 @@ export function executeLogIncomeReceipt(
     .get(input.income_id) as IncomeRow | undefined;
 
   if (income === undefined) {
-    throw new Error(`El ingreso con ID "${input.income_id}" no existe.`);
+    throw new Error(`No income found with ID "${input.income_id}".`);
   }
 
   // 2. Resolve effective currency
@@ -96,7 +96,7 @@ export function executeLogIncomeReceipt(
 
     if (incomeCurrency === undefined) {
       throw new Error(
-        `La moneda del ingreso (${income.currency}) no está registrada en la base de datos.`,
+        `The income currency (${income.currency}) is not registered in the database.`,
       );
     }
     currency = incomeCurrency;
@@ -145,26 +145,26 @@ export function executeLogIncomeReceipt(
 
   // 5. Format response
   const formattedReceived = formatAmount(input.received_amount, currency);
-  let message = `Recepción registrada: ${formattedReceived} · ${income.reason} · ${input.received_on} (ID: ${receiptId})`;
+  let message = `Receipt logged: ${formattedReceived} · ${income.reason} · ${input.received_on} (ID: ${receiptId})`;
 
   // Difference vs expected_amount
   const diff = input.received_amount - income.expected_amount;
   if (diff !== 0) {
     const formattedDiff = formatAmount(Math.abs(diff), currency);
     if (diff > 0) {
-      message += `\nDiferencia: +${formattedDiff} sobre el monto esperado.`;
+      message += `\nDifference: +${formattedDiff} above expected amount.`;
     } else {
-      message += `\nDiferencia: -${formattedDiff} por debajo del monto esperado.`;
+      message += `\nDifference: -${formattedDiff} below expected amount.`;
     }
   }
 
   if (nextDate !== null) {
-    message += `\nPróxima recepción esperada: ${nextDate}`;
+    message += `\nNext expected receipt: ${nextDate}`;
   }
 
   if (currency.code === PLACEHOLDER_CURRENCY) {
     message +=
-      "\n\nSugerencia: aún no has configurado una moneda real. Usa manage_currency para agregar la tuya y establecerla como moneda por defecto.";
+      "\n\nHint: you haven't configured a real currency yet. Use manage_currency to add yours and set it as default.";
   }
 
   return message;

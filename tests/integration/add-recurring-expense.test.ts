@@ -18,13 +18,13 @@ function setDefault(db: ReturnType<typeof createTestDb>, code: string): void {
 }
 
 function extractRuleId(msg: string): string {
-  const match = /regla: ([a-f0-9-]+)\)/.exec(msg);
+  const match = /rule: ([a-f0-9-]+)\)/.exec(msg);
   if (!match) throw new Error(`No se encontró rule ID en: ${msg}`);
   return match[1];
 }
 
 function extractExpenseId(msg: string): string {
-  const match = /gasto: ([a-f0-9-]+)\)/.exec(msg);
+  const match = /expense: ([a-f0-9-]+)\)/.exec(msg);
   if (!match) throw new Error(`No se encontró expense ID en: ${msg}`);
   return match[1];
 }
@@ -201,7 +201,7 @@ describe("add-recurring-expense — integración", () => {
           },
           db,
         ),
-      /interval_days.*obligatorio|obligatorio.*interval_days/i,
+      /interval_days.*required|required.*interval_days/i,
     );
   });
 
@@ -265,7 +265,7 @@ describe("add-recurring-expense — integración", () => {
           },
           db,
         ),
-      /no es una fecha válida/i,
+      /not a valid calendar date/i,
     );
   });
 
@@ -285,7 +285,7 @@ describe("add-recurring-expense — integración", () => {
           },
           db,
         ),
-      /description.*vacío|vacío.*description/i,
+      /description.*empty.*blank|description.*must not be empty/i,
     );
   });
 
@@ -306,7 +306,7 @@ describe("add-recurring-expense — integración", () => {
           },
           db,
         ),
-      /starts_on.*posterior|posterior.*ends_on/i,
+      /starts_on.*later.*ends_on|starts_on.*cannot be later/i,
     );
   });
 
@@ -330,8 +330,8 @@ describe("add-recurring-expense — integración", () => {
       db,
     );
 
-    assert.ok(!msg.includes("Próxima fecha:"), `no debería incluir Próxima fecha en: ${msg}`);
-    assert.ok(msg.includes("ventana de vigencia"), `debería mencionar ventana en: ${msg}`);
+    assert.ok(!msg.includes("Next date:"), `no debería incluir Next date en: ${msg}`);
+    assert.ok(msg.includes("validity window"), `debería mencionar validity window en: ${msg}`);
   });
 
   // ── el índice único impide duplicate expense para la misma regla y fecha ──

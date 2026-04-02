@@ -10,7 +10,7 @@ describe("list_incomes — integración", () => {
   it("retorna mensaje claro cuando no hay ingresos", () => {
     const db = createTestDb();
     const result = executeListIncomes({}, db);
-    assert.match(result, /No hay ingresos registrados/);
+    assert.match(result, /No income entries recorded/);
   });
 
   it("lista ingresos sin filtros (default limit 20)", () => {
@@ -135,7 +135,7 @@ describe("list_incomes — integración", () => {
 
     assert.throws(
       () => executeListIncomes({ currency: "EUR" }, db),
-      /no está registrada/,
+      /is not registered/,
     );
   });
 
@@ -154,13 +154,13 @@ describe("list_incomes — integración", () => {
     }
 
     const page1 = executeListIncomes({ limit: 2, offset: 0 }, db);
-    assert.ok(page1.includes("Ingresos (2"), page1);
+    assert.ok(page1.includes("Income (2"), page1);
 
     const page2 = executeListIncomes({ limit: 2, offset: 2 }, db);
-    assert.ok(page2.includes("Ingresos (2"), page2);
+    assert.ok(page2.includes("Income (2"), page2);
 
     const page3 = executeListIncomes({ limit: 2, offset: 4 }, db);
-    assert.ok(page3.includes("Ingresos (1"), page3);
+    assert.ok(page3.includes("Income (1"), page3);
   });
 
   it("reporta total correcto aunque la página esté truncada", () => {
@@ -176,7 +176,7 @@ describe("list_incomes — integración", () => {
 
     const result = executeListIncomes({ limit: 2, offset: 0 }, db);
 
-    assert.ok(result.includes("de 5"), result);
+    assert.ok(result.includes("of 5"), result);
   });
 
   it("retorna lista vacía con total correcto cuando offset está fuera del rango", () => {
@@ -190,7 +190,7 @@ describe("list_incomes — integración", () => {
 
     const result = executeListIncomes({ limit: 10, offset: 100 }, db);
 
-    assert.ok(result.includes("No hay ingresos"), result);
+    assert.ok(result.includes("No income"), result);
     assert.ok(result.includes("total: 1"), result);
   });
 
@@ -227,7 +227,7 @@ describe("list_incomes — integración", () => {
 
     const result = executeListIncomes({ include_receipts: true }, db);
 
-    assert.ok(result.includes("Recibido:"), result);
+    assert.ok(result.includes("Received:"), result);
     assert.ok(result.includes("2026-03-01"), result);
     assert.ok(result.includes("2026-02-01"), result);
     assert.ok(result.includes("2026-01-01"), result);
@@ -244,7 +244,7 @@ describe("list_incomes — integración", () => {
 
     const result = executeListIncomes({ include_receipts: true }, db);
 
-    assert.ok(result.includes("Recibido:"), result);
+    assert.ok(result.includes("Received:"), result);
   });
 
   it("include_receipts=true limita a 5 receipts por cada income y en orden descendente", () => {
@@ -272,7 +272,7 @@ describe("list_incomes — integración", () => {
     const result = executeListIncomes({ include_receipts: true }, db);
 
     const lines = result.split("\n");
-    const receiptLines = lines.filter((l) => l.includes("Recibido:"));
+    const receiptLines = lines.filter((l) => l.includes("Received:"));
 
     assert.equal(receiptLines.length, 5, `Debe haber exactamente 5 receipts, hay ${receiptLines.length}`);
 
@@ -355,7 +355,7 @@ describe("list_incomes — integración", () => {
     assert.ok(salaryBBlock.includes("2026-02-01"), "Salario B debe incluir receipt de febrero");
     assert.ok(salaryBBlock.includes("2026-01-01"), "Salario B debe incluir receipt inicial de enero");
 
-    const receiptMatches = result.match(/Recibido:/g);
+    const receiptMatches = result.match(/Received:/g);
     const totalReceipts = receiptMatches ? receiptMatches.length : 0;
     assert.equal(totalReceipts, 9, `Total receipts: 5 de A + 4 de B (incluye receipt inicial) = 9, encontrado: ${totalReceipts}`);
   });
@@ -422,7 +422,7 @@ describe("list_incomes — integración", () => {
     const result = executeListIncomes({}, db);
 
     assert.ok(result.includes("[MONTHLY]"), result);
-    assert.ok(result.includes("Próxima:"), result);
+    assert.ok(result.includes("Next:"), result);
   });
 
   it("muestra información de ingresos no recurrentes sin confusión", () => {
@@ -437,7 +437,7 @@ describe("list_incomes — integración", () => {
     const result = executeListIncomes({}, db);
 
     assert.ok(result.includes("Freelance puntual"), result);
-    assert.ok(!result.includes("Próxima:"), result);
+    assert.ok(!result.includes("Next:"), result);
   });
 
   it("ingreso inactivo se marca claramente", () => {
@@ -455,7 +455,7 @@ describe("list_incomes — integración", () => {
 
     const result = executeListIncomes({}, db);
 
-    assert.ok(result.includes("INACTIVO"), result);
+    assert.ok(result.includes("INACTIVE"), result);
   });
 
   it("search sin matches retorna mensaje legible", () => {
@@ -469,7 +469,7 @@ describe("list_incomes — integración", () => {
 
     const result = executeListIncomes({ search: "xyzinexistente" }, db);
 
-    assert.ok(result.includes("No hay ingresos"), result);
+    assert.ok(result.includes("No income"), result);
   });
 
   it("hint de paginación cuando hay más resultados", () => {
@@ -485,7 +485,7 @@ describe("list_incomes — integración", () => {
 
     const result = executeListIncomes({ limit: 2, offset: 0 }, db);
 
-    assert.ok(result.includes("Hay más resultados"), result);
+    assert.ok(result.includes("More results available"), result);
   });
 
   it("mensaje de fin cuando no hay más resultados", () => {
@@ -500,9 +500,9 @@ describe("list_incomes — integración", () => {
     }
 
     const page1 = executeListIncomes({ limit: 2, offset: 0 }, db);
-    assert.ok(page1.includes("Hay más resultados"), page1);
+    assert.ok(page1.includes("More results available"), page1);
 
     const page2 = executeListIncomes({ limit: 2, offset: 2 }, db);
-    assert.ok(page2.includes("Has llegado al final"), page2);
+    assert.ok(page2.includes("End of results"), page2);
   });
 });

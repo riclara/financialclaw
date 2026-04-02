@@ -135,7 +135,7 @@ describe("log_expense_from_receipt", () => {
     assert.equal(expense.currency, "XXX"); // moneda default del seed
     assert.equal(expense.category, "GROCERIES");
     assert.equal(expense.merchant, "Supermercado");
-    assert.equal(expense.description, "Gasto en Supermercado"); // descripción generada
+    assert.equal(expense.description, "Expense at Supermercado"); // descripción generada
     assert.equal(expense.due_date, "2026-03-28");
     assert.equal(expense.payment_date, "2026-03-28");
     assert.equal(expense.status, "PAID");
@@ -157,7 +157,7 @@ describe("log_expense_from_receipt", () => {
     assert.equal(extraction.failure_code, null);
 
     // Verificar respuesta
-    assert.match(result, /Gasto registrado por OCR/);
+    assert.match(result, /OCR expense logged/);
     assert.match(result, /¤/); // símbolo de XXX
     assert.match(result, /15/); // parte del monto
     assert.match(result, /Supermercado/);
@@ -245,7 +245,7 @@ describe("log_expense_from_receipt", () => {
             db,
           ),
         ),
-      /amount es requerido y debe ser mayor que 0/
+      /amount is required and must be greater than 0/
     );
 
     assert.throws(
@@ -256,7 +256,7 @@ describe("log_expense_from_receipt", () => {
             db,
           ),
         ),
-      /amount es requerido y debe ser mayor que 0/
+      /amount is required and must be greater than 0/
     );
   });
 
@@ -271,7 +271,7 @@ describe("log_expense_from_receipt", () => {
             db,
           ),
         ),
-      /date es requerido con formato YYYY-MM-DD/
+      /date is required in YYYY-MM-DD format/
     );
   });
 
@@ -286,7 +286,7 @@ describe("log_expense_from_receipt", () => {
             db,
           ),
         ),
-      /description no puede contener solo espacios en blanco/
+      /description must not be blank/
     );
   });
 
@@ -306,7 +306,7 @@ describe("log_expense_from_receipt", () => {
             db,
           ),
         ),
-      /merchant no puede contener solo espacios en blanco/
+      /merchant must not be blank/
     );
   });
 
@@ -327,7 +327,7 @@ describe("log_expense_from_receipt", () => {
             db,
           ),
         ),
-      /category no puede contener solo espacios en blanco/
+      /category must not be blank/
     );
   });
 
@@ -347,7 +347,7 @@ describe("log_expense_from_receipt", () => {
             db,
           ),
         ),
-      /raw_text no puede contener solo espacios en blanco/
+      /raw_text must not be blank/
     );
   });
 });

@@ -208,7 +208,7 @@ describe("log_income", () => {
           },
           db,
         ),
-      /válida/,
+      /not a valid calendar date/,
     );
   });
 

@@ -65,7 +65,7 @@ describe("log-income-receipt — integración", () => {
       db,
     );
 
-    assert.ok(result.includes("Recepción registrada"), result);
+    assert.ok(result.includes("Receipt logged"), result);
     assert.ok(result.includes("Salario"), result);
     assert.ok(result.includes("2026-01-05"), result);
 
@@ -92,7 +92,7 @@ describe("log-income-receipt — integración", () => {
           { income_id: "id-inexistente", received_amount: 500, received_on: "2026-01-05" },
           db,
         ),
-      /no existe/i,
+      /No income found with ID/i,
     );
   });
 
@@ -114,7 +114,7 @@ describe("log-income-receipt — integración", () => {
       db,
     );
 
-    assert.ok(result.includes("Próxima recepción esperada: 2026-02-05"), result);
+    assert.ok(result.includes("Next expected receipt: 2026-02-05"), result);
 
     const income = db
       .prepare(`SELECT next_expected_receipt_date FROM incomes WHERE id = ?`)
@@ -162,8 +162,8 @@ describe("log-income-receipt — integración", () => {
       db,
     );
 
-    assert.ok(result.includes("Diferencia: +"), `esperaba '+' en: ${result}`);
-    assert.ok(result.includes("sobre el monto esperado"), result);
+    assert.ok(result.includes("Difference: +"), `esperaba '+' en: ${result}`);
+    assert.ok(result.includes("above expected amount"), result);
   });
 
   // ── diferencia negativa en la respuesta ───────────────────────────────────
@@ -180,8 +180,8 @@ describe("log-income-receipt — integración", () => {
       db,
     );
 
-    assert.ok(result.includes("Diferencia: -"), `esperaba '-' en: ${result}`);
-    assert.ok(result.includes("por debajo del monto esperado"), result);
+    assert.ok(result.includes("Difference: -"), `esperaba '-' en: ${result}`);
+    assert.ok(result.includes("below expected amount"), result);
   });
 
   // ── currency omitida => usa la del income ─────────────────────────────────
@@ -228,7 +228,7 @@ describe("log-income-receipt — integración", () => {
           },
           db,
         ),
-      /JPY.*no está registrada|no está registrada.*JPY/i,
+      /JPY.*is not registered|is not registered.*JPY/i,
     );
   });
 
@@ -263,7 +263,7 @@ describe("log-income-receipt — integración", () => {
           { income_id: incomeId, received_amount: 1_000_000, received_on: "2026-02-30" },
           db,
         ),
-      /no es una fecha válida/i,
+      /not a valid calendar date/i,
     );
   });
 

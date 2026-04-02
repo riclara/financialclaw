@@ -90,8 +90,8 @@ function formatReminderLine(
 
   const timing =
     daysBefore > 0
-      ? `vence en ${daysBefore} día${daysBefore > 1 ? "s" : ""} (${dueDate})`
-      : `vence hoy (${dueDate})`;
+      ? `due in ${daysBefore} day${daysBefore > 1 ? "s" : ""} (${dueDate})`
+      : `due today (${dueDate})`;
 
   return `• ${description}: ${formattedAmount} — ${timing}`;
 }
@@ -109,14 +109,14 @@ export async function executeRunDailySync(
 
   const lines: string[] = [];
 
-  lines.push(`Sync diario completado:`);
-  lines.push(`• Gastos recurrentes generados: ${result.expensesGenerated}`);
-  lines.push(`• Gastos marcados como vencidos: ${result.expensesMarkedOverdue}`);
+  lines.push(`Daily sync completed:`);
+  lines.push(`• Recurring expenses generated: ${result.expensesGenerated}`);
+  lines.push(`• Expenses marked as overdue: ${result.expensesMarkedOverdue}`);
 
   if (result.remindersDue.length === 0) {
-    lines.push(`• Sin recordatorios pendientes — finanzas al día ✓`);
+    lines.push(`• No pending reminders — finances up to date ✓`);
   } else {
-    lines.push(`\nRecordatorios pendientes (${result.remindersDue.length}):`);
+    lines.push(`\nPending reminders (${result.remindersDue.length}):`);
 
     for (const reminder of result.remindersDue) {
       lines.push(
@@ -137,14 +137,14 @@ export async function executeRunDailySync(
 
     if (latestVersion !== null && isNewerVersion(PACKAGE_VERSION, latestVersion)) {
       lines.push(
-        `\n⚠️ Actualización disponible: v${PACKAGE_VERSION} → v${latestVersion}`,
+        `\n⚠️ Update available: v${PACKAGE_VERSION} → v${latestVersion}`,
       );
       lines.push(
-        `   Para actualizar: openclaw plugins update financialclaw && openclaw gateway restart`,
+        `   To update: openclaw plugins update financialclaw && openclaw gateway restart`,
       );
     }
   } catch {
-    // La verificación de actualizaciones es no-crítica — nunca debe romper el sync
+    // Update check is non-critical — must never break the sync
   }
 
   return lines.join("\n");

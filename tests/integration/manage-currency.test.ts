@@ -25,7 +25,7 @@ describe("manage_currency", () => {
       db,
     );
 
-    assert.equal(result, "Moneda USD agregada correctamente.");
+    assert.equal(result, "Currency USD added successfully.");
 
     const row = db
       .prepare(
@@ -69,7 +69,7 @@ describe("manage_currency", () => {
           },
           db,
         ),
-      /La moneda USD ya existe\./,
+      /Currency USD already exists\./,
     );
   });
 
@@ -99,7 +99,7 @@ describe("manage_currency", () => {
     const result = executeManageCurrency({ action: "list" }, db);
     const lines = result.split("\n");
 
-    assert.equal(lines[0], "Monedas registradas:");
+    assert.equal(lines[0], "Registered currencies:");
     assert.equal(lines[1], "* XXX - Sin configurar (¤) [default]");
     assert.ok(lines.includes("- USD - Dólar estadounidense ($)"));
     assert.ok(lines.includes("- EUR - Euro (€)"));
@@ -126,7 +126,7 @@ describe("manage_currency", () => {
       db,
     );
 
-    assert.equal(result, "La moneda USD quedó configurada como moneda por defecto.");
+    assert.equal(result, "Currency USD set as default.");
 
     const currencies = db
       .prepare(
@@ -155,7 +155,7 @@ describe("manage_currency", () => {
           },
           db,
         ),
-      /No existe una moneda registrada con el código USD\./,
+      /No registered currency found with code USD/,
     );
   });
 });

@@ -1,7 +1,7 @@
 {
   "id": "financialclaw",
   "name": "FinancialClaw",
-  "description": "Plugin de finanzas personales: gastos, ingresos, recurrentes y OCR de recibos",
+  "description": "Personal finance plugin: expenses, income, recurring payments, and receipt OCR",
   "version": "0.6.2",
   "enabledByDefault": true,
   "configSchema": {

@@ -50,11 +50,11 @@ interface RuleRow {
 }
 
 const PERIOD_LABELS: Record<SupportedPeriod, string> = {
-  this_month: "este mes",
-  last_month: "mes anterior",
-  last_30_days: "últimos 30 días",
-  this_year: "este año",
-  all: "todos",
+  this_month: "this month",
+  last_month: "last month",
+  last_30_days: "last 30 days",
+  this_year: "this year",
+  all: "all",
 };
 
 function monthlyEquivalent(
@@ -82,14 +82,14 @@ export function executeGetFinancialSummary(
 ): string {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
-      "Parámetros inválidos: period debe ser uno de: this_month, last_month, last_30_days, this_year.",
+      "Invalid parameters: period must be one of: this_month, last_month, last_30_days, this_year.",
     );
   }
 
   const period = (input.period ?? "this_month") as SupportedPeriod;
   const range = resolvePeriodRange(period);
   if (!range) {
-    throw new Error("El período 'all' no es compatible con get_financial_summary.");
+    throw new Error("The 'all' period is not supported by get_financial_summary.");
   }
 
   // Validate currency filter if provided — throws descriptively if not registered
@@ -160,14 +160,14 @@ export function executeGetFinancialSummary(
 
   const periodLabel = PERIOD_LABELS[period];
   const lines: string[] = [
-    `Período: ${periodLabel} (${range.start} – ${range.end})`,
+    `Period: ${periodLabel} (${range.start} – ${range.end})`,
     "",
   ];
 
   if (allCurrencies.size === 0) {
-    lines.push("Sin movimientos registrados en el período.");
+    lines.push("No transactions recorded in this period.");
     lines.push("");
-    lines.push("Compromisos fijos activos: 0");
+    lines.push("Active recurring commitments: 0");
     return lines.join("\n");
   }
 
@@ -198,17 +198,17 @@ export function executeGetFinancialSummary(
     const balance = totalIncome - totalExpenses;
 
     lines.push(code);
-    lines.push(`Ingresos recibidos:  ${fmt(totalIncome)}`);
-    lines.push(`Gastos totales:      ${fmt(totalExpenses)}`);
-    lines.push(`Gastos pendientes:   ${fmt(totalPending)}`);
-    lines.push(`Balance recibido:    ${fmt(balance)}`);
+    lines.push(`Income received:     ${fmt(totalIncome)}`);
+    lines.push(`Total expenses:      ${fmt(totalExpenses)}`);
+    lines.push(`Pending expenses:    ${fmt(totalPending)}`);
+    lines.push(`Received balance:    ${fmt(balance)}`);
 
     if (catRows.length > 0) {
       lines.push("");
-      lines.push("Por categoría:");
+      lines.push("By category:");
       for (const cat of [...catRows].sort((a, b) => b.total - a.total)) {
         lines.push(
-          `  ${cat.category ?? "SIN CATEGORÍA"}  ${fmt(cat.total)}`,
+          `  ${cat.category ?? "UNCATEGORIZED"}  ${fmt(cat.total)}`,
         );
       }
     }
@@ -222,7 +222,7 @@ export function executeGetFinancialSummary(
       );
       lines.push("");
       lines.push(
-        `Compromisos fijos activos: ${currencyRules.length} (${fmt(totalMonthly)}/mes)`,
+        `Active recurring commitments: ${currencyRules.length} (${fmt(totalMonthly)}/mo)`,
       );
       for (const rule of currencyRules) {
         lines.push(`  ${rule.name}  ${fmt(rule.amount)} (${rule.frequency})`);
@@ -234,7 +234,7 @@ export function executeGetFinancialSummary(
 
   // If no active rules exist at all, append global zero count
   if (rules.length === 0) {
-    lines.push("Compromisos fijos activos: 0");
+    lines.push("Active recurring commitments: 0");
   }
 
   return lines.join("\n").trimEnd();

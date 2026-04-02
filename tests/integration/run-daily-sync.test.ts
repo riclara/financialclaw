@@ -40,8 +40,8 @@ describe("run_daily_sync — integración", () => {
     const db = createTestDb();
     const result = await executeRunDailySync({}, db);
 
-    assert.ok(result.includes("Sync diario completado"), "debe incluir cabecera");
-    assert.ok(result.includes("al día"), "debe indicar que no hay pendientes");
+    assert.ok(result.includes("Daily sync completed"), "debe incluir cabecera");
+    assert.ok(result.includes("up to date"), "debe indicar que no hay pendientes");
   });
 
   it("genera gastos recurrentes y los reporta correctamente", async () => {
@@ -57,9 +57,9 @@ describe("run_daily_sync — integración", () => {
 
     const result = await executeRunDailySync({}, db);
 
-    assert.ok(result.includes("Sync diario completado"), "debe incluir cabecera");
+    assert.ok(result.includes("Daily sync completed"), "debe incluir cabecera");
     assert.ok(
-      result.includes("Gastos recurrentes generados"),
+      result.includes("Recurring expenses generated"),
       "debe reportar gastos generados",
     );
   });
@@ -83,7 +83,7 @@ describe("run_daily_sync — integración", () => {
     const result = await executeRunDailySync({}, db);
 
     assert.ok(
-      result.includes("Recordatorios pendientes"),
+      result.includes("Pending reminders"),
       "debe listar recordatorios",
     );
     assert.ok(result.includes("Netflix"), "debe incluir el nombre del gasto");
@@ -105,6 +105,6 @@ describe("run_daily_sync — integración", () => {
       .get() as { cnt: number };
 
     assert.equal(sent.cnt, 0, "no debe haber reminders marcados si no había ninguno");
-    assert.ok(result.includes("al día"), "debe indicar finanzas al día");
+    assert.ok(result.includes("up to date"), "debe indicar finanzas al día");
   });
 });
