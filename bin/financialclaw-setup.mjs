@@ -57,8 +57,10 @@ const configPath = resolveConfigPath();
 
 if (!existsSync(configPath)) {
   console.error(`Config not found: ${configPath}`);
-  console.error(`Tried: ~/.openclaw/openclaw.json, ~/openclaw.json, ~/.config/openclaw/openclaw.json`);
-  console.error(`Use --config /ruta/al/config to specify the path explicitly.`);
+  if (!parseArg("--config") && !process.env.OPENCLAW_CONFIG) {
+    console.error(`Tried: ~/.openclaw/openclaw.json, ~/openclaw.json, ~/.config/openclaw/openclaw.json`);
+    console.error(`Use --config /ruta/al/config to specify the path explicitly.`);
+  }
   process.exit(1);
 }
 
