@@ -34,7 +34,7 @@
   },
   "files": [
     "bin/",
-    "dist/",
+    "dist/src/",
     "skills/",
     "openclaw.plugin.json"
   ],
