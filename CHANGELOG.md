@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [1.0.0](https://github.com/riclara/financialclaw/compare/financialclaw-v0.7.0...financialclaw-v1.0.0) (2026-04-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* package name changed from @riclara/financialclaw to financialclaw. Install with `openclaw plugins install financialclaw`.
+
+### Added
+
+* rename package from @riclara/financialclaw to financialclaw ([#33](https://github.com/riclara/financialclaw/issues/33)) ([9001d25](https://github.com/riclara/financialclaw/commit/9001d25ce3656cd765de053c0c7f0e26a3115150))
+
 ## [0.7.0](https://github.com/riclara/financialclaw/compare/financialclaw-v0.6.2...financialclaw-v0.7.0) (2026-04-02)
 
 
