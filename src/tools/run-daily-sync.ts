@@ -1,6 +1,6 @@
 import { Type } from "@sinclair/typebox";
 import type { Static } from "@sinclair/typebox";
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 
 import { getDb } from "../db/database.js";
 import { dailySync } from "../services/daily-sync.js";
@@ -10,10 +10,6 @@ import { PACKAGE_NAME, PACKAGE_VERSION } from "../version.js";
 export const InputSchema = Type.Object({});
 
 export type Input = Static<typeof InputSchema>;
-
-interface MarkSentStmt {
-  run(sentAt: string, reminderId: string): void;
-}
 
 interface NpmLatestResponse {
   version: string;
@@ -63,7 +59,7 @@ function isNewerVersion(current: string, candidate: string): boolean {
 }
 
 function markRemindersSent(
-  db: Database.Database,
+  db: DatabaseSync,
   reminderIds: string[],
 ): void {
   if (reminderIds.length === 0) {
@@ -72,7 +68,7 @@ function markRemindersSent(
 
   const stmt = db.prepare(
     `UPDATE reminders SET sent = 1, sent_at = ? WHERE id = ?`,
-  ) as unknown as MarkSentStmt;
+  );
 
   const now = new Date().toISOString();
 
@@ -87,7 +83,7 @@ function formatReminderLine(
   currency: string,
   dueDate: string,
   daysBefore: number,
-  db: Database.Database,
+  db: DatabaseSync,
 ): string {
   const resolvedCurrency = resolveCurrency(currency, db);
   const formattedAmount = formatAmount(amount, resolvedCurrency, db);
@@ -102,7 +98,7 @@ function formatReminderLine(
 
 export async function executeRunDailySync(
   _params: Input,
-  db: Database.Database = getDb(),
+  db: DatabaseSync = getDb(),
 ): Promise<string> {
   const result = dailySync(db);
 

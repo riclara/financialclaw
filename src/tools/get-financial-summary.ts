@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { type Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
@@ -78,7 +78,7 @@ function monthlyEquivalent(
 
 export function executeGetFinancialSummary(
   input: GetFinancialSummaryInput,
-  db: Database.Database = getDb(),
+  db: DatabaseSync = getDb(),
 ): string {
   if (!Value.Check(InputSchema, input)) {
     throw new Error(
@@ -110,7 +110,7 @@ export function executeGetFinancialSummary(
          AND (? IS NULL OR currency = ?)
        GROUP BY currency, category`,
     )
-    .all(range.start, range.end, filter, filter) as ExpenseCatRow[];
+    .all(range.start, range.end, filter, filter) as unknown as ExpenseCatRow[];
 
   // Pending expenses by currency within the period
   const pendingByCurrency = db
@@ -121,7 +121,7 @@ export function executeGetFinancialSummary(
          AND (? IS NULL OR currency = ?)
        GROUP BY currency`,
     )
-    .all(range.start, range.end, filter, filter) as CurrencyTotalRow[];
+    .all(range.start, range.end, filter, filter) as unknown as CurrencyTotalRow[];
 
   // Income received by currency within the period
   // (income_receipts.amount / income_receipts.date — real columns, not doc aliases)
@@ -133,7 +133,7 @@ export function executeGetFinancialSummary(
          AND (? IS NULL OR currency = ?)
        GROUP BY currency`,
     )
-    .all(range.start, range.end, filter, filter) as CurrencyTotalRow[];
+    .all(range.start, range.end, filter, filter) as unknown as CurrencyTotalRow[];
 
   // Active recurring rules — independent of the period
   // recurring_expense_rules.name = what the user called "description" in the input
@@ -144,7 +144,7 @@ export function executeGetFinancialSummary(
        WHERE is_active = 1
          AND (? IS NULL OR currency = ?)`,
     )
-    .all(filter, filter) as RuleRow[];
+    .all(filter, filter) as unknown as RuleRow[];
 
   // ── Collect all relevant currencies ───────────────────────────────────────
 
@@ -178,7 +178,7 @@ export function executeGetFinancialSummary(
       .prepare(
         `SELECT code, name, symbol, is_default FROM currencies WHERE code = ?`,
       )
-      .get(code) as CurrencyRow | undefined;
+      .get(code) as unknown as CurrencyRow | undefined;
     if (row) currencyCache.set(code, row);
   }
 

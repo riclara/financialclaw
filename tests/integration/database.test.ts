@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "node:test";
 
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 
 import { ALL_MIGRATIONS, ALL_SEEDS } from "../../src/db/schema.js";
 import { createTestDb } from "../helpers/test-db.js";
@@ -17,7 +17,7 @@ function shouldIgnoreMigrationError(error: unknown): boolean {
   return /duplicate column name: (updated_at|status|failure_code)/i.test(message);
 }
 
-function applyMigrationsAndSeeds(db: Database.Database): void {
+function applyMigrationsAndSeeds(db: DatabaseSync): void {
   for (const sql of ALL_MIGRATIONS) {
     try {
       db.exec(sql);
@@ -144,7 +144,7 @@ describe("database", () => {
       .prepare("SELECT COUNT(*) AS count FROM currencies WHERE code = 'XXX'")
       .get() as { count: number };
 
-    assert.deepEqual(placeholderCurrency, {
+    assert.deepEqual({ ...placeholderCurrency }, {
       code: "XXX",
       name: "Sin configurar",
       symbol: "¤",
@@ -154,9 +154,9 @@ describe("database", () => {
   });
 
   it("migra una tabla expenses legacy y agrega updated_at sin perder datos", () => {
-    const db = new Database(":memory:");
-    db.pragma("journal_mode = WAL");
-    db.pragma("foreign_keys = ON");
+    const db = new DatabaseSync(":memory:");
+    db.exec("PRAGMA journal_mode = WAL");
+    db.exec("PRAGMA foreign_keys = ON");
 
     db.exec(`
       CREATE TABLE currencies (
@@ -250,9 +250,9 @@ describe("database", () => {
   });
 
   it("migra una tabla ocr_extractions legacy y agrega status y failure_code sin perder datos", () => {
-    const db = new Database(":memory:");
-    db.pragma("journal_mode = WAL");
-    db.pragma("foreign_keys = ON");
+    const db = new DatabaseSync(":memory:");
+    db.exec("PRAGMA journal_mode = WAL");
+    db.exec("PRAGMA foreign_keys = ON");
 
     db.exec(`
       CREATE TABLE currencies (
@@ -336,8 +336,8 @@ describe("database", () => {
 
     assert.ok(existsSync(dbPath));
     assert.equal(databaseModule.getDb(), db);
-    assert.equal(db.pragma("journal_mode", { simple: true }), "wal");
-    assert.equal(db.pragma("foreign_keys", { simple: true }), 1);
+    assert.equal((db.prepare("PRAGMA journal_mode").get() as { journal_mode: string }).journal_mode, "wal");
+    assert.equal((db.prepare("PRAGMA foreign_keys").get() as { foreign_keys: number }).foreign_keys, 1);
 
     assert.throws(
       () => databaseModule.configureDb(join(tempDir, "otra.sqlite")),

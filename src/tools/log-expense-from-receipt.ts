@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { type Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
@@ -51,7 +51,7 @@ function assertValidInput(input: LogExpenseFromReceiptInput): void {
 
 export function executeLogExpenseFromReceipt(
   input: LogExpenseFromReceiptInput,
-  db: Database.Database = getDb(),
+  db: DatabaseSync = getDb(),
 ): string {
   assertValidInput(input);
 
@@ -76,7 +76,8 @@ export function executeLogExpenseFromReceipt(
   const expenseId = randomUUID();
 
   // Use transaction for atomicity
-  db.transaction(() => {
+  db.exec("BEGIN");
+  try {
     // Insert into ocr_extractions
     db.prepare(
       `
@@ -132,7 +133,11 @@ export function executeLogExpenseFromReceipt(
       now,
       now,
     );
-  })();
+    db.exec("COMMIT");
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
 
   // Format response
   const formattedAmount = formatAmount(amount, currency);

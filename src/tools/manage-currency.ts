@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { type Static, Type } from "@sinclair/typebox";
 
 import { getDb } from "../db/database.js";
@@ -38,7 +38,7 @@ function normalizeCode(code: string | undefined, action: string): string {
   return requireText(code, "code", action).toUpperCase();
 }
 
-function addCurrency(input: ManageCurrencyInput, db: Database.Database): string {
+function addCurrency(input: ManageCurrencyInput, db: DatabaseSync): string {
   const code = normalizeCode(input.code, "add");
   const name = requireText(input.name, "name", "add");
   const symbol = requireText(input.symbol, "symbol", "add");
@@ -68,7 +68,7 @@ function addCurrency(input: ManageCurrencyInput, db: Database.Database): string 
   return `Moneda ${code} agregada correctamente.`;
 }
 
-function listCurrencies(db: Database.Database): string {
+function listCurrencies(db: DatabaseSync): string {
   const currencies = db
     .prepare(
       `
@@ -77,7 +77,7 @@ function listCurrencies(db: Database.Database): string {
         ORDER BY is_default DESC, created_at ASC, code ASC
       `,
     )
-    .all() as CurrencyRow[];
+    .all() as unknown as CurrencyRow[];
 
   if (currencies.length === 0) {
     return "No hay monedas registradas.";
@@ -92,7 +92,7 @@ function listCurrencies(db: Database.Database): string {
   return ["Monedas registradas:", ...lines].join("\n");
 }
 
-function setDefaultCurrency(input: ManageCurrencyInput, db: Database.Database): string {
+function setDefaultCurrency(input: ManageCurrencyInput, db: DatabaseSync): string {
   const code = normalizeCode(input.code, "set_default");
 
   const existingCurrency = db
@@ -110,7 +110,8 @@ function setDefaultCurrency(input: ManageCurrencyInput, db: Database.Database): 
     throw new Error(`No existe una moneda registrada con el código ${code}.`);
   }
 
-  const changeDefault = db.transaction((currencyCode: string) => {
+  db.exec("BEGIN");
+  try {
     db.prepare(
       `
         UPDATE currencies
@@ -124,17 +125,19 @@ function setDefaultCurrency(input: ManageCurrencyInput, db: Database.Database): 
         SET is_default = 1
         WHERE code = ?
       `,
-    ).run(currencyCode);
-  });
-
-  changeDefault(code);
+    ).run(code);
+    db.exec("COMMIT");
+  } catch (err) {
+    db.exec("ROLLBACK");
+    throw err;
+  }
 
   return `La moneda ${code} quedó configurada como moneda por defecto.`;
 }
 
 export function executeManageCurrency(
   input: ManageCurrencyInput,
-  db: Database.Database = getDb(),
+  db: DatabaseSync = getDb(),
 ): string {
   switch (input.action) {
     case "add":

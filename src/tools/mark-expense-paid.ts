@@ -1,4 +1,4 @@
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { Type, type Static } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
@@ -37,7 +37,7 @@ function assertValidInput(input: MarkExpensePaidInput): void {
 
 export function executeMarkExpensePaid(
   input: MarkExpensePaidInput,
-  db: Database.Database = getDb(),
+  db: DatabaseSync = getDb(),
 ): string {
   assertValidInput(input);
 

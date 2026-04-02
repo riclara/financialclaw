@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import Database from "better-sqlite3";
+import { DatabaseSync } from "node:sqlite";
 import { type Static, Type } from "@sinclair/typebox";
 import { Value } from "@sinclair/typebox/value";
 
@@ -38,7 +38,7 @@ function assertValidInput(input: LogExpenseManualInput): void {
 
 export function executeLogExpenseManual(
   input: LogExpenseManualInput,
-  db: Database.Database = getDb(),
+  db: DatabaseSync = getDb(),
 ): string {
   assertValidInput(input);
 
