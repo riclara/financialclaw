@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [0.7.0](https://github.com/riclara/financialclaw/compare/financialclaw-v0.6.2...financialclaw-v0.7.0) (2026-04-02)
+
+
+### Added
+
+* translate all strings to english ([#31](https://github.com/riclara/financialclaw/issues/31)) ([124c935](https://github.com/riclara/financialclaw/commit/124c9358d2f904056f5d8cf4e1637386714daeae))
+
 ## [0.6.2](https://github.com/riclara/financialclaw/compare/financialclaw-v0.6.1...financialclaw-v0.6.2) (2026-04-02)
 
 
