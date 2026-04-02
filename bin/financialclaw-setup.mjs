@@ -9,6 +9,8 @@
  *   1. Adds "financialclaw" to plugins.allow (preserving active channels
  *      and plugins so they don't get blocked)
  *   2. Sets plugins.entries.financialclaw.config.dbPath if not already set
+ *   3. Sets tools.profile to "full" so plugin tools are visible to the agent
+ *   4. Adds "financialclaw" to tools.allow as explicit allowlist entry
  *
  * Usage:
  *   node scripts/ensure-plugins-allow.mjs [--config /ruta/openclaw.json] [--db-path /ruta/financialclaw.db]
@@ -106,6 +108,31 @@ if (!fc.config.dbPath) {
   console.log(`Set dbPath: ${dbPath}`);
 } else {
   console.log(`dbPath already set: ${fc.config.dbPath}`);
+}
+
+// 3. Ensure tools.profile is "full" so plugin tools are visible to the agent
+// Profiles like "coding" or "minimal" exclude plugin tools entirely
+{
+  const tools = (cfg.tools ??= {});
+  const prev = tools.profile;
+  if (prev && prev !== "full") {
+    tools.profile = "full";
+    console.log(`Updated tools.profile: "${prev}" -> "full" (required for plugin tools)`);
+  } else if (!prev) {
+    tools.profile = "full";
+    console.log(`Set tools.profile: "full"`);
+  } else {
+    console.log(`tools.profile already "full"`);
+  }
+}
+
+// 4. Ensure tools.allow includes "financialclaw" as explicit allowlist entry
+{
+  const tools = (cfg.tools ??= {});
+  const toolsAllow = new Set(tools.allow ?? []);
+  toolsAllow.add("financialclaw");
+  tools.allow = [...toolsAllow];
+  console.log(`Updated tools.allow:`, JSON.stringify(tools.allow));
 }
 
 writeFileSync(configPath, JSON.stringify(cfg, null, 2) + "\n");

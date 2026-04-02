@@ -18,7 +18,7 @@ This guide covers everything needed to get the plugin running: prerequisites, in
 ## 1. Install the plugin
 
 ```bash
-openclaw plugins install @riclara/financialclaw
+openclaw plugins install financialclaw
 ```
 
 ---
@@ -28,12 +28,16 @@ openclaw plugins install @riclara/financialclaw
 Run the setup command:
 
 ```bash
-npx @riclara/financialclaw financialclaw-setup
+npx financialclaw financialclaw-setup
 ```
 
-This configures two required fields in `~/.openclaw/openclaw.json`:
+This configures the following in `~/.openclaw/openclaw.json`:
 
 **`plugins.allow`** — once this field exists, OpenClaw uses it as an explicit allowlist: anything not listed stops working, including active channels like Telegram. The setup command discovers all currently active channels and plugins and adds `financialclaw` alongside them so nothing breaks.
+
+**`tools.profile`** — sets it to `"full"`. Profiles like `"coding"` or `"minimal"` exclude plugin tools entirely, making them invisible to the agent even if the plugin loads successfully.
+
+**`tools.allow`** — adds `"financialclaw"` as an explicit tool allowlist entry so the agent can call the plugin's tools.
 
 **`plugins.entries.financialclaw.config.dbPath`** — without this, the database is created inside the plugin directory and gets deleted on reinstall. Default: `~/.openclaw/workspace/financialclaw.db`.
 
@@ -41,10 +45,10 @@ This configures two required fields in `~/.openclaw/openclaw.json`:
 
 ```bash
 # Custom database path
-npx @riclara/financialclaw financialclaw-setup --db-path /your/path/financialclaw.db
+npx financialclaw financialclaw-setup --db-path /your/path/financialclaw.db
 
 # If the OpenClaw config is in a non-standard location
-npx @riclara/financialclaw financialclaw-setup --config /path/to/openclaw.json
+npx financialclaw financialclaw-setup --config /path/to/openclaw.json
 ```
 
 ---
@@ -110,7 +114,7 @@ The daily sync will also notify you automatically when a new version is availabl
 ## Troubleshooting
 
 **Plugin tools are not available to the agent**
-→ Run `financialclaw-setup` and restart the gateway. Check that `plugins.allow` includes `financialclaw`.
+→ Run `financialclaw-setup` and restart the gateway. Check that `plugins.allow` includes `financialclaw`. Also verify that `tools.profile` is set to `"full"` — profiles like `"coding"` or `"minimal"` exclude plugin tools entirely. The setup script handles this automatically.
 
 **Database is deleted on reinstall**
 → Make sure `dbPath` points outside the plugin directory. Run `financialclaw-setup` to configure it automatically.

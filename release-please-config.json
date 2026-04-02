@@ -5,11 +5,6 @@
     ".": {
       "extra-files": [
         {
-          "type": "json",
-          "path": "openclaw.plugin.json",
-          "jsonpath": "$.version"
-        },
-        {
           "type": "generic",
           "path": "src/version.ts"
         }

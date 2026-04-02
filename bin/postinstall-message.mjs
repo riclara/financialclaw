@@ -8,7 +8,7 @@ console.log(`
 ╠══════════════════════════════════════════════════════════════╣
 ║  Run this before restarting the gateway:                     ║
 ║                                                              ║
-║    npx @riclara/financialclaw financialclaw-setup            ║
+║    npx financialclaw financialclaw-setup                     ║
 ║                                                              ║
 ║  This adds financialclaw to plugins.allow and configures     ║
 ║  a persistent database path. Without it, active channels     ║
