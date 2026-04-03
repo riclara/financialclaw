@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [1.0.7](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.6...financialclaw-v1.0.7) (2026-04-03)
+
+
+### Fixed
+
+* add displayName to plugin manifest for clawhub registry ([#49](https://github.com/riclara/financialclaw/issues/49)) ([27bfa3e](https://github.com/riclara/financialclaw/commit/27bfa3ebe0d59484a982a61e2ff6e5690e358de8))
+
 ## [1.0.6](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.5...financialclaw-v1.0.6) (2026-04-03)
 
 
