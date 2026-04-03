@@ -22,8 +22,19 @@
  */
 
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
+import { createInterface } from "node:readline";
 import { homedir } from "node:os";
 import { join, dirname } from "node:path";
+
+function confirm(question) {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(`${question} [y/N] `, (answer) => {
+      rl.close();
+      resolve(answer.trim().toLowerCase() === "y");
+    });
+  });
+}
 
 function parseArg(name) {
   const i = process.argv.indexOf(name);
@@ -72,13 +83,17 @@ const dbPath =
   parseArg("--db-path") ??
   join(homedir(), ".openclaw", "workspace", "financialclaw.db");
 
+const skipConfirm = process.argv.includes("--yes") || process.argv.includes("-y");
+
 const cfg = JSON.parse(readFileSync(configPath, "utf-8"));
 const plugins = (cfg.plugins ??= {});
+const changes = [];
 
 // 1. Ensure plugins.allow includes financialclaw and all active entries
 // Always rediscover active channels and plugins so re-runs fix missing entries
 {
   const allow = new Set(plugins.allow ?? []);
+  const hadFinancialclaw = allow.has("financialclaw");
   allow.add("financialclaw");
 
   if (cfg.channels) {
@@ -94,7 +109,9 @@ const plugins = (cfg.plugins ??= {});
   }
 
   plugins.allow = [...allow];
-  console.log(`Updated plugins.allow:`, JSON.stringify(plugins.allow));
+  if (!hadFinancialclaw) {
+    changes.push(`Add "financialclaw" to plugins.allow`);
+  }
 }
 
 // 2. Set dbPath in plugins.entries.financialclaw.config if not already set
@@ -103,11 +120,8 @@ const fc = (entries.financialclaw ??= { enabled: true, config: {} });
 fc.config ??= {};
 
 if (!fc.config.dbPath) {
-  mkdirSync(dirname(dbPath), { recursive: true });
   fc.config.dbPath = dbPath;
-  console.log(`Set dbPath: ${dbPath}`);
-} else {
-  console.log(`dbPath already set: ${fc.config.dbPath}`);
+  changes.push(`Set database path: ${dbPath}`);
 }
 
 // 3. Ensure tools.profile is "full" so plugin tools are visible to the agent
@@ -115,14 +129,13 @@ if (!fc.config.dbPath) {
 {
   const tools = (cfg.tools ??= {});
   const prev = tools.profile;
-  if (prev && prev !== "full") {
+  if (prev !== "full") {
+    changes.push(
+      prev
+        ? `Change tools.profile: "${prev}" → "full" (required for plugin tools to be visible)`
+        : `Set tools.profile: "full" (required for plugin tools to be visible)`
+    );
     tools.profile = "full";
-    console.log(`Updated tools.profile: "${prev}" -> "full" (required for plugin tools)`);
-  } else if (!prev) {
-    tools.profile = "full";
-    console.log(`Set tools.profile: "full"`);
-  } else {
-    console.log(`tools.profile already "full"`);
   }
 }
 
@@ -130,10 +143,44 @@ if (!fc.config.dbPath) {
 {
   const tools = (cfg.tools ??= {});
   const toolsAllow = new Set(tools.allow ?? []);
+  if (!toolsAllow.has("financialclaw")) {
+    changes.push(`Add "financialclaw" to tools.allow`);
+  }
   toolsAllow.add("financialclaw");
   tools.allow = [...toolsAllow];
-  console.log(`Updated tools.allow:`, JSON.stringify(tools.allow));
+}
+
+// Show summary and confirm before writing
+if (changes.length === 0) {
+  console.log("Nothing to change — financialclaw is already configured.");
+  process.exit(0);
+}
+
+console.log(`\nThe following changes will be applied to ${configPath}:\n`);
+for (const change of changes) {
+  console.log(`  • ${change}`);
+}
+console.log();
+
+if (!skipConfirm) {
+  const ok = await confirm("Apply these changes?");
+  if (!ok) {
+    console.log("\nAborted. No changes were made.");
+    console.log("\nTo configure financialclaw manually, add the following to your OpenClaw config:\n");
+    console.log(`  1. Add "financialclaw" to plugins.allow`);
+    console.log(`  2. Add "financialclaw" to tools.allow`);
+    console.log(`  3. Set tools.profile to "full"`);
+    console.log(`  4. Set plugins.entries.financialclaw.config.dbPath to your desired path`);
+    console.log(`\nConfig file: ${configPath}`);
+    console.log(`After making changes, restart the gateway: openclaw gateway restart`);
+    process.exit(0);
+  }
+}
+
+// Create db directory only after confirmation
+if (!existsSync(dirname(dbPath))) {
+  mkdirSync(dirname(dbPath), { recursive: true });
 }
 
 writeFileSync(configPath, JSON.stringify(cfg, null, 2) + "\n");
-console.log("Done. Restart gateway: openclaw gateway restart");
+console.log("\nDone. Restart gateway: openclaw gateway restart");
