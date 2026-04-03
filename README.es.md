@@ -39,11 +39,12 @@ openclaw gateway restart
 
 `openclaw plugins install` registra el plugin pero no lo agrega a `plugins.allow`. Una vez que ese campo existe, OpenClaw lo usa como allowlist explícita — todo lo que no esté listado deja de funcionar, incluyendo canales activos como Telegram.
 
-`financialclaw-setup` lee el config actual y aplica tres cambios requeridos:
+`financialclaw-setup` lee el config actual y aplica dos cambios requeridos:
 
 1. **`plugins.allow`** — agrega `financialclaw` junto a todos los canales y plugins activos para que nada deje de funcionar.
-2. **`tools.profile`** — lo cambia a `"full"`. Profiles como `"coding"` o `"minimal"` excluyen tools de plugins, haciéndolos invisibles para el agente.
-3. **`tools.allow`** — agrega `"financialclaw"` como entrada explícita en el allowlist de tools.
+2. **`tools.allow`** — agrega `"financialclaw"` como entrada explícita en el allowlist de tools.
+
+> **Nota:** Si tu `tools.profile` está en algo distinto a `"full"` (ej. `"coding"`), los tools del plugin podrían no ser visibles para el agente. El script te avisará si es el caso — puedes cambiarlo manualmente si lo necesitas.
 
 También configura `dbPath` para que la BD persista entre reinstalaciones (por defecto: `~/.openclaw/workspace/financialclaw.db`).
 

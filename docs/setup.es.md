@@ -45,9 +45,9 @@ Esto configura lo siguiente en `~/.openclaw/openclaw.json`:
 
 **`plugins.allow`** — una vez que este campo existe, OpenClaw lo usa como allowlist explícita: todo lo que no esté listado deja de funcionar, incluyendo canales activos como Telegram. El comando descubre todos los canales y plugins activos y agrega `financialclaw` junto a ellos para que nada deje de funcionar.
 
-**`tools.profile`** — lo cambia a `"full"`. Profiles como `"coding"` o `"minimal"` excluyen tools de plugins por completo, haciéndolos invisibles para el agente aunque el plugin cargue correctamente.
-
 **`tools.allow`** — agrega `"financialclaw"` como entrada explícita en el allowlist de tools para que el agente pueda llamar las tools del plugin.
+
+> **Nota:** Si tu `tools.profile` está en algo distinto a `"full"` (ej. `"coding"` o `"minimal"`), los tools del plugin podrían no ser visibles para el agente. El script te avisará si es el caso. Puedes cambiarlo manualmente en tu config si lo necesitas.
 
 **`plugins.entries.financialclaw.config.dbPath`** — sin esto, la base de datos se crea dentro del directorio del plugin y se borra al reinstalar. Por defecto: `~/.openclaw/workspace/financialclaw.db`.
 
@@ -124,7 +124,7 @@ El sync diario también te notificará automáticamente cuando haya una nueva ve
 ## Solución de problemas
 
 **Los tools del plugin no están disponibles para el agente**
-→ Ejecutar `financialclaw-setup` y reiniciar el gateway. Verificar que `plugins.allow` incluya `financialclaw`. También verificar que `tools.profile` esté en `"full"` — profiles como `"coding"` o `"minimal"` excluyen tools de plugins por completo. El script de setup configura esto automáticamente.
+→ Ejecutar `financialclaw-setup` y reiniciar el gateway. Verificar que `plugins.allow` incluya `financialclaw`. También verificar que `tools.profile` esté en `"full"` — profiles como `"coding"` o `"minimal"` excluyen tools de plugins por completo.
 
 **La base de datos se borra al reinstalar**
 → Asegurarse de que `dbPath` apunte fuera del directorio del plugin. Ejecutar `financialclaw-setup` para configurarlo automáticamente.

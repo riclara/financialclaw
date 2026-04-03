@@ -45,9 +45,9 @@ This configures the following in `~/.openclaw/openclaw.json`:
 
 **`plugins.allow`** — once this field exists, OpenClaw uses it as an explicit allowlist: anything not listed stops working, including active channels like Telegram. The setup command discovers all currently active channels and plugins and adds `financialclaw` alongside them so nothing breaks.
 
-**`tools.profile`** — sets it to `"full"`. Profiles like `"coding"` or `"minimal"` exclude plugin tools entirely, making them invisible to the agent even if the plugin loads successfully.
-
 **`tools.allow`** — adds `"financialclaw"` as an explicit tool allowlist entry so the agent can call the plugin's tools.
+
+> **Note:** If your `tools.profile` is set to something other than `"full"` (e.g. `"coding"` or `"minimal"`), plugin tools may be hidden from the agent. The setup script will warn you if this is the case. You can change it manually in your config if needed.
 
 **`plugins.entries.financialclaw.config.dbPath`** — without this, the database is created inside the plugin directory and gets deleted on reinstall. Default: `~/.openclaw/workspace/financialclaw.db`.
 
@@ -124,7 +124,7 @@ The daily sync will also notify you automatically when a new version is availabl
 ## Troubleshooting
 
 **Plugin tools are not available to the agent**
-→ Run `financialclaw-setup` and restart the gateway. Check that `plugins.allow` includes `financialclaw`. Also verify that `tools.profile` is set to `"full"` — profiles like `"coding"` or `"minimal"` exclude plugin tools entirely. The setup script handles this automatically.
+→ Run `financialclaw-setup` and restart the gateway. Check that `plugins.allow` includes `financialclaw`. Also verify that `tools.profile` is set to `"full"` — profiles like `"coding"` or `"minimal"` exclude plugin tools entirely.
 
 **Database is deleted on reinstall**
 → Make sure `dbPath` points outside the plugin directory. Run `financialclaw-setup` to configure it automatically.
