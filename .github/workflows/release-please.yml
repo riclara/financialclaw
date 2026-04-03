@@ -56,7 +56,15 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Publish
+      - name: Publish to npm
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to ClawHub
+        run: |
+          npm install -g clawhub
+          clawhub login --token "$CLAWHUB_TOKEN"
+          clawhub package publish .
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}

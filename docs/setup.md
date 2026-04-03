@@ -18,6 +18,10 @@ This guide covers everything needed to get the plugin running: prerequisites, in
 ## 1. Install the plugin
 
 ```bash
+# From ClawHub (recommended)
+openclaw plugins install clawhub:financialclaw
+
+# Or from npm
 openclaw plugins install financialclaw
 ```
 
@@ -29,6 +33,12 @@ Run the setup command:
 
 ```bash
 npx financialclaw financialclaw-setup
+```
+
+The script will show a summary of the changes it will make and ask for confirmation before modifying your config. To skip the confirmation (e.g. in CI), use `--yes`:
+
+```bash
+npx financialclaw financialclaw-setup --yes
 ```
 
 This configures the following in `~/.openclaw/openclaw.json`:

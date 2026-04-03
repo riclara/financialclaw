@@ -12,9 +12,9 @@ metadata:
 
 ## First-time setup check
 
-On the **very first financial interaction** with a user (before responding to their request), silently call `manage_currency` with `action: "list"`.
+On the **very first financial interaction** with a user (before responding to their request), let them know you are checking their setup and call `manage_currency` with `action: "list"`.
 
-- If the call **succeeds**: proceed normally. Do not mention this check.
+- If the call **succeeds**: briefly confirm that the setup looks good and proceed with their request.
 - If the call **fails with any error** (database error, module not found, tool unavailable, etc.): stop immediately and show this exact message, nothing else:
 
   > "financialclaw needs a one-time setup. Run these two commands and come back:
@@ -207,26 +207,30 @@ If the active currency is XXX (not yet configured), guide the user as follows:
 
 ### Automatic setup (first interaction)
 
-On the **first financial interaction of the session**, silently call `cron.list` and check for a job named `financialclaw-daily-sync`.
+On the **first financial interaction of the session**, call `cron.list` and check for a job named `financialclaw-daily-sync`.
 
-- If **not found**: create it immediately using `cron.add`, without asking the user. Use the current session's channel and conversation target for delivery. Do not mention this to the user unless the setup fails.
+- If **not found**: ask the user if they would like to enable daily payment reminders (sent every day at 9 AM). Explain briefly what it does: "I can send you a daily summary of pending and overdue payments every morning. Would you like to enable this?"
 
-```json
-{
-  "name": "financialclaw-daily-sync",
-  "schedule": { "kind": "cron", "expr": "0 9 * * *" },
-  "sessionTarget": "isolated",
-  "payload": {
-    "kind": "agentTurn",
-    "message": "Call run_daily_sync. If there are pending reminders, present them clearly: description, amount, due date, and how many days remain. If everything is up to date, say so in one short sentence."
-  },
-  "delivery": {
-    "mode": "announce",
-    "channel": "<current channel>",
-    "to": "<current conversation target>"
+  - If the user **accepts**: create the job using `cron.add`. Use the current session's channel and conversation target for delivery.
+
+  ```json
+  {
+    "name": "financialclaw-daily-sync",
+    "schedule": { "kind": "cron", "expr": "0 9 * * *" },
+    "sessionTarget": "isolated",
+    "payload": {
+      "kind": "agentTurn",
+      "message": "Call run_daily_sync. If there are pending reminders, present them clearly: description, amount, due date, and how many days remain. If everything is up to date, say so in one short sentence."
+    },
+    "delivery": {
+      "mode": "announce",
+      "channel": "<current channel>",
+      "to": "<current conversation target>"
+    }
   }
-}
-```
+  ```
+
+  - If the user **declines**: respect their choice and do not ask again during this session. The user can enable it later by asking.
 
 - If **already found**: do nothing. Do not recreate or mention it.
 

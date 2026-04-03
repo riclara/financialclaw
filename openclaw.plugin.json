@@ -18,6 +18,16 @@
       "placeholder": "/home/user/.openclaw/workspace/financialclaw.db"
     }
   },
+  "env": {
+    "FINANCIALCLAW_DB_PATH": {
+      "description": "Override the default SQLite database path (~/.openclaw/workspace/financialclaw.db)",
+      "required": false
+    },
+    "OPENCLAW_CONFIG": {
+      "description": "Path to the OpenClaw configuration file (used by the setup script)",
+      "required": false
+    }
+  },
   "skills": [
     "skills/financialclaw"
   ]
