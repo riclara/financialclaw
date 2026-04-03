@@ -10,7 +10,16 @@ Personal finance plugin for OpenClaw. Registers expenses, income, recurring paym
 ## Installation
 
 ```bash
+# From ClawHub (recommended)
+openclaw plugins install clawhub:financialclaw
+
+# Or from npm
 openclaw plugins install financialclaw
+```
+
+Then run the setup and restart:
+
+```bash
 npx financialclaw financialclaw-setup
 openclaw gateway restart
 ```
