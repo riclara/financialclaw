@@ -1,6 +1,7 @@
 {
   "id": "financialclaw",
   "name": "FinancialClaw",
+  "displayName": "FinancialClaw",
   "description": "Personal finance plugin: expenses, income, recurring payments, and receipt OCR",
   "configSchema": {
     "type": "object",
