@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [1.0.6](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.5...financialclaw-v1.0.6) (2026-04-03)
+
+
+### Fixed
+
+* publish to clawhub from npm pack output to exclude test files ([#47](https://github.com/riclara/financialclaw/issues/47)) ([67fb9f5](https://github.com/riclara/financialclaw/commit/67fb9f573a67708a0cbcdfdee143b820e730782d))
+
 ## [1.0.5](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.4...financialclaw-v1.0.5) (2026-04-03)
 
 
