@@ -21,7 +21,16 @@ Si necesitas el detalle de avance por tarea, revisa [docs/hitos.md](docs/hitos.m
 ## Instalación
 
 ```bash
+# Desde ClawHub (recomendado)
+openclaw plugins install clawhub:financialclaw
+
+# O desde npm
 openclaw plugins install financialclaw
+```
+
+Luego ejecutar el setup y reiniciar:
+
+```bash
 npx financialclaw financialclaw-setup
 openclaw gateway restart
 ```
