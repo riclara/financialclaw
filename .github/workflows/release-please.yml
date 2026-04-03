@@ -64,5 +64,7 @@ jobs:
       - name: Publish to ClawHub
         run: |
           npm install -g clawhub
-          clawhub login --token ${{ secrets.CLAWHUB_TOKEN }}
+          clawhub login --token "$CLAWHUB_TOKEN"
           clawhub package publish .
+        env:
+          CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}

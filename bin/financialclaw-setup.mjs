@@ -120,8 +120,10 @@ const entries = (plugins.entries ??= {});
 const fc = (entries.financialclaw ??= { enabled: true, config: {} });
 fc.config ??= {};
 
+let dbPathChanged = false;
 if (!fc.config.dbPath) {
   fc.config.dbPath = dbPath;
+  dbPathChanged = true;
   changes.push(`Set database path: ${dbPath}`);
 }
 
@@ -178,8 +180,8 @@ if (!skipConfirm) {
   }
 }
 
-// Create db directory only after confirmation
-if (!existsSync(dirname(dbPath))) {
+// Create db directory only if dbPath was set in this run
+if (dbPathChanged && !existsSync(dirname(dbPath))) {
   mkdirSync(dirname(dbPath), { recursive: true });
 }
 
