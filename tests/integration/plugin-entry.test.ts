@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { describe, it } from "node:test";
+import { compileFunction } from "node:vm";
 
 import ts from "typescript";
 
@@ -139,14 +140,11 @@ async function loadPlugin(): Promise<LoadedPlugin> {
   }
 
   const module = { exports: {} as Record<string, unknown> };
-  const evaluator = new Function(
-    "require",
-    "module",
-    "exports",
-    compiledSource,
-  );
+  const fn = compileFunction(compiledSource, ["require", "module", "exports"], {
+    filename: "index.cjs",
+  });
 
-  evaluator(
+  fn(
     (specifier: string) => {
       const stubModule = stubModules.get(specifier);
       if (stubModule === undefined) {
