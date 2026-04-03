@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [1.0.4](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.3...financialclaw-v1.0.4) (2026-04-03)
+
+
+### Fixed
+
+* resolve clawhub static analysis finding in plugin entry test ([#43](https://github.com/riclara/financialclaw/issues/43)) ([3a60da9](https://github.com/riclara/financialclaw/commit/3a60da97fc1191fa332a45954eafef96012c32c2))
+
 ## [1.0.3](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.2...financialclaw-v1.0.3) (2026-04-03)
 
 
