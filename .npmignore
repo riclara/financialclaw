@@ -1,0 +1,11 @@
+tests/
+docs/
+scripts/
+src/
+.github/
+*.ts
+!dist/**
+tsconfig.json
+release-please-config.json
+.release-please-manifest.json
+CLAUDE.md
