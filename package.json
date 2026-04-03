@@ -1,6 +1,6 @@
 {
   "name": "financialclaw",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Personal finance plugin for OpenClaw: expenses, income, recurring payments, and receipt OCR",
   "type": "module",
   "bin": {
