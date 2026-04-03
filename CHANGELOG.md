@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [1.0.10](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.9...financialclaw-v1.0.10) (2026-04-03)
+
+
+### Fixed
+
+* add blog post links to README files ([#55](https://github.com/riclara/financialclaw/issues/55)) ([531912d](https://github.com/riclara/financialclaw/commit/531912dfd7dd3a164e1c5e982014fc6394af631c))
+
 ## [1.0.9](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.8...financialclaw-v1.0.9) (2026-04-03)
 
 
