@@ -71,6 +71,7 @@ jobs:
           clawhub login --token "$CLAWHUB_TOKEN"
           npm pack
           tar -xzf financialclaw-*.tgz
-          clawhub package publish package/ --name FinancialClaw --source-repo "${{ github.repository }}" --source-commit "${{ steps.get-sha.outputs.sha }}"
+          mv package financialclaw
+          clawhub package publish financialclaw/ --source-repo "${{ github.repository }}" --source-commit "${{ steps.get-sha.outputs.sha }}"
         env:
           CLAWHUB_TOKEN: ${{ secrets.CLAWHUB_TOKEN }}
