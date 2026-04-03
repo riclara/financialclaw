@@ -75,6 +75,10 @@ npm run test:integration
 npm run build
 ```
 
+## Blog
+
+- [Construyendo financialclaw: un plugin de finanzas personales para OpenClaw](https://ricardolara.dev/es/blog/financialclaw-openclaw-finanzas-personales/)
+
 ## Documentación
 
 - [docs/setup.es.md](docs/setup.es.md): instalación y troubleshooting — [English](docs/setup.md)
