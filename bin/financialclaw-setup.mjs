@@ -92,8 +92,8 @@ const changes = [];
 // 1. Ensure plugins.allow includes financialclaw and all active entries
 // Always rediscover active channels and plugins so re-runs fix missing entries
 {
-  const allow = new Set(plugins.allow ?? []);
-  const hadFinancialclaw = allow.has("financialclaw");
+  const prevAllow = new Set(plugins.allow ?? []);
+  const allow = new Set(prevAllow);
   allow.add("financialclaw");
 
   if (cfg.channels) {
@@ -109,8 +109,9 @@ const changes = [];
   }
 
   plugins.allow = [...allow];
-  if (!hadFinancialclaw) {
-    changes.push(`Add "financialclaw" to plugins.allow`);
+  const newEntries = [...allow].filter((e) => !prevAllow.has(e));
+  if (newEntries.length > 0) {
+    changes.push(`Add to plugins.allow: ${newEntries.join(", ")}`);
   }
 }
 
