@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [1.0.3](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.2...financialclaw-v1.0.3) (2026-04-03)
+
+
+### Fixed
+
+* warn about tools.profile instead of forcing it to full ([#39](https://github.com/riclara/financialclaw/issues/39)) ([6f161ce](https://github.com/riclara/financialclaw/commit/6f161ceaf9d5e63bf06d31cc89eedf2176de62d6))
+
 ## [1.0.2](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.1...financialclaw-v1.0.2) (2026-04-03)
 
 
