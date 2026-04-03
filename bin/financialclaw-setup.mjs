@@ -9,7 +9,7 @@
  *   1. Adds "financialclaw" to plugins.allow (preserving active channels
  *      and plugins so they don't get blocked)
  *   2. Sets plugins.entries.financialclaw.config.dbPath if not already set
- *   3. Sets tools.profile to "full" so plugin tools are visible to the agent
+ *   3. Warns if tools.profile is not "full" (does not modify it)
  *   4. Adds "financialclaw" to tools.allow as explicit allowlist entry
  *
  * Usage:
@@ -127,18 +127,16 @@ if (!fc.config.dbPath) {
   changes.push(`Set database path: ${dbPath}`);
 }
 
-// 3. Ensure tools.profile is "full" so plugin tools are visible to the agent
+// 3. Check tools.profile — warn if not "full" but don't modify it
 // Profiles like "coding" or "minimal" exclude plugin tools entirely
 {
   const tools = (cfg.tools ??= {});
   const prev = tools.profile;
-  if (prev !== "full") {
-    changes.push(
-      prev
-        ? `Change tools.profile: "${prev}" → "full" (required for plugin tools to be visible)`
-        : `Set tools.profile: "full" (required for plugin tools to be visible)`
-    );
-    tools.profile = "full";
+  if (prev && prev !== "full") {
+    console.log(`\n⚠ Warning: tools.profile is set to "${prev}".`);
+    console.log(`  Profiles other than "full" may hide plugin tools from the agent.`);
+    console.log(`  If financialclaw tools are not visible after setup, change it manually:`);
+    console.log(`  Set tools.profile to "full" in ${configPath}\n`);
   }
 }
 
@@ -172,8 +170,8 @@ if (!skipConfirm) {
     console.log("\nTo configure financialclaw manually, add the following to your OpenClaw config:\n");
     console.log(`  1. Add "financialclaw" to plugins.allow`);
     console.log(`  2. Add "financialclaw" to tools.allow`);
-    console.log(`  3. Set tools.profile to "full"`);
-    console.log(`  4. Set plugins.entries.financialclaw.config.dbPath to your desired path`);
+    console.log(`  3. Set plugins.entries.financialclaw.config.dbPath to your desired path`);
+    console.log(`  4. If plugin tools are not visible, set tools.profile to "full"`);
     console.log(`\nConfig file: ${configPath}`);
     console.log(`After making changes, restart the gateway: openclaw gateway restart`);
     process.exit(0);
