@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [1.0.1](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.0...financialclaw-v1.0.1) (2026-04-03)
+
+
+### Fixed
+
+* address clawhub security scan findings ([#35](https://github.com/riclara/financialclaw/issues/35)) ([00d0a6d](https://github.com/riclara/financialclaw/commit/00d0a6d537fb704cebc2f8a416a20946a1c54696))
+
 ## [1.0.0](https://github.com/riclara/financialclaw/compare/financialclaw-v0.7.0...financialclaw-v1.0.0) (2026-04-02)
 
 
