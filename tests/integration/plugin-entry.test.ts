@@ -139,6 +139,7 @@ async function loadPlugin(): Promise<LoadedPlugin> {
     });
   }
 
+  // vm.compileFunction avoids `new Function()` which triggers ClawHub static analysis
   const module = { exports: {} as Record<string, unknown> };
   const fn = compileFunction(compiledSource, ["require", "module", "exports"], {
     filename: "index.cjs",
