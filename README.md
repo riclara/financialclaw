@@ -67,6 +67,10 @@ npx financialclaw financialclaw-setup --config /path/to/openclaw.json
 
 Node.js 24+ is required. The plugin uses `node:sqlite`, the built-in SQLite module available since Node.js 24 — no native addons or compilation needed.
 
+## Blog
+
+- [Building financialclaw: a personal finance plugin for OpenClaw](https://ricardolara.dev/blog/financialclaw-openclaw-personal-finance/)
+
 ## Documentation
 
 - [README.es.md](README.es.md): documentación en español
