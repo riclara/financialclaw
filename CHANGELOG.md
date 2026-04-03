@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [1.0.8](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.7...financialclaw-v1.0.8) (2026-04-03)
+
+
+### Fixed
+
+* pass --name flag to clawhub publish for correct display name ([#51](https://github.com/riclara/financialclaw/issues/51)) ([7060dd2](https://github.com/riclara/financialclaw/commit/7060dd2f573400ebcaf9414d4f2e3c38c7409ab3))
+
 ## [1.0.7](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.6...financialclaw-v1.0.7) (2026-04-03)
 
 
