@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [1.2.0](https://github.com/riclara/financialclaw/compare/financialclaw-v1.1.0...financialclaw-v1.2.0) (2026-04-16)
+
+
+### Added
+
+* extend plan_allocation with funds support ([#59](https://github.com/riclara/financialclaw/issues/59)) ([77b3bd3](https://github.com/riclara/financialclaw/commit/77b3bd328f52c2ab26d3aa443f04b02f30219862))
+
 ## [1.1.0](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.10...financialclaw-v1.1.0) (2026-04-16)
 
 
