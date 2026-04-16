@@ -107,6 +107,7 @@ describe("plan-allocation — integración", () => {
     assert.ok(result.includes("No pending commitments"), "debe indicar que no hay compromisos");
     assert.ok(result.includes("fully available"), "debe decir que todo está disponible");
     assert.ok(!result.includes("Pending commitments this month:"), "no debe mostrar sección de pendientes");
+    assert.ok(!result.includes("Available:"), "no debe duplicar 'Available' cuando todo está disponible");
   });
 
   it("caso feliz: gastos pendientes correctamente distribuidos", () => {

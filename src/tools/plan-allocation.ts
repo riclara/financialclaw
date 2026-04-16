@@ -218,7 +218,7 @@ export function executePlanAllocation(
 
   if (available < 0) {
     lines.push(`⚠ Commitments (${fmt(totalPending)}) exceed income. Deficit: ${fmt(available)}`);
-  } else {
+  } else if (totalPending > 0) {
     lines.push(`Available: ${fmt(available)}`);
   }
 
