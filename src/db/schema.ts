@@ -145,6 +145,39 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_reminders_expense_schedule_days_before
 ON reminders (expense_id, scheduled_date, days_before);
 `;
 
+export const CREATE_FUNDS_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS funds (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('savings', 'account')),
+  currency TEXT NOT NULL,
+  initial_balance INTEGER NOT NULL DEFAULT 0,
+  contribution_amount INTEGER,
+  contribution_frequency TEXT,
+  contribution_interval_days INTEGER,
+  contribution_required INTEGER NOT NULL DEFAULT 0 CHECK (contribution_required IN (0, 1)),
+  contribution_starts_on TEXT,
+  target_amount INTEGER,
+  target_date TEXT,
+  is_active INTEGER NOT NULL DEFAULT 1 CHECK (is_active IN (0, 1)),
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (currency) REFERENCES currencies (code)
+);
+`;
+
+export const CREATE_FUND_TRANSACTIONS_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS fund_transactions (
+  id TEXT PRIMARY KEY,
+  fund_id TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('deposit', 'withdrawal')),
+  amount INTEGER NOT NULL CHECK (amount > 0),
+  date TEXT NOT NULL,
+  notes TEXT,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  FOREIGN KEY (fund_id) REFERENCES funds (id)
+);
+`;
+
 export const SEED_PLACEHOLDER_CURRENCY_SQL = `
 INSERT OR IGNORE INTO currencies (code, name, symbol, is_default)
 VALUES ('XXX', 'Sin configurar', '¤', 1);
@@ -162,6 +195,8 @@ export const ALL_MIGRATIONS = [
   CREATE_INCOME_RECEIPTS_TABLE_SQL,
   CREATE_REMINDERS_TABLE_SQL,
   CREATE_REMINDERS_UNIQUE_INDEX_SQL,
+  CREATE_FUNDS_TABLE_SQL,
+  CREATE_FUND_TRANSACTIONS_TABLE_SQL,
   ADD_OCR_EXTRACTIONS_STATUS_COLUMN_SQL,
   ADD_OCR_EXTRACTIONS_FAILURE_CODE_COLUMN_SQL,
 ] as const;

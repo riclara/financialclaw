@@ -7,7 +7,7 @@ Plugin de OpenClaw para finanzas personales. Registra gastos, ingresos, pagos re
 
 ## Estado del proyecto
 
-El plugin registra 11 tools en OpenClaw. Los reminders y el sync diario corren mediante el sistema de cron integrado de OpenClaw — no se requiere configuración externa.
+El plugin registra 13 tools en OpenClaw. Los reminders y el sync diario corren mediante el sistema de cron integrado de OpenClaw — no se requiere configuración externa.
 
 Si necesitas el detalle de avance por tarea, revisa [docs/hitos.md](docs/hitos.md).
 
@@ -17,6 +17,24 @@ Si necesitas el detalle de avance por tarea, revisa [docs/hitos.md](docs/hitos.m
 - OCR de recibos agéntico: el agente OpenClaw extrae los datos y los pasa al tool `log_expense_from_receipt`.
 - Persistencia en SQLite embebida.
 - Resolución explícita de moneda con soporte multi-moneda y placeholder inicial `XXX`.
+
+## Tools disponibles
+
+| Tool | Descripción |
+|---|---|
+| `manage_currency` | Agregar monedas, listarlas y definir la predeterminada |
+| `log_expense_from_receipt` | Registrar un gasto a partir de datos OCR estructurados |
+| `log_expense_manual` | Registrar un gasto manualmente |
+| `log_income` | Registrar un ingreso |
+| `log_income_receipt` | Registrar un pago recibido asociado a un ingreso |
+| `add_recurring_expense` | Crear una regla de gasto recurrente |
+| `mark_expense_paid` | Marcar un gasto existente como pagado |
+| `get_financial_summary` | Obtener un resumen financiero por período |
+| `list_expenses` | Listar gastos con filtros |
+| `list_incomes` | Listar ingresos con filtros |
+| `run_daily_sync` | Ejecutar el sync diario: generar gastos recurrentes, marcar vencidos y devolver recordatorios |
+| `manage_fund` | Crear, listar, depositar en, retirar o archivar fondos y cuentas |
+| `plan_allocation` | Dado un ingreso, mostrar compromisos del mes y saldo disponible por moneda |
 
 ## Instalación
 
