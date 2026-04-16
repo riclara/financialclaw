@@ -135,7 +135,7 @@ export default definePluginEntry({
       name: "manage_fund",
       label: "Manage Fund",
       description:
-        "Create, list, fund, withdraw from, or archive financial containers such as savings funds and bank accounts.",
+        "Create, list, deposit into, withdraw from, or archive financial containers such as savings funds and bank accounts.",
       parameters: ManageFundInputSchema,
       execute: wrapExecute(executeManageFund),
     });

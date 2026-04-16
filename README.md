@@ -64,7 +64,7 @@ The current shipped contract exposes 13 tools:
 | `list_expenses` | List expenses with filters |
 | `list_incomes` | List incomes with filters |
 | `run_daily_sync` | Run the daily sync: generate recurring expenses, mark overdue, send reminders |
-| `manage_fund` | Create, list, fund, withdraw from, or archive savings funds and accounts |
+| `manage_fund` | Create, list, deposit into, withdraw from, or archive savings funds and accounts |
 | `plan_allocation` | Given an income amount, show current-month commitments and remaining balance by currency |
 
 ## Requirements

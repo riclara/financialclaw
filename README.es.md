@@ -33,7 +33,7 @@ Si necesitas el detalle de avance por tarea, revisa [docs/hitos.md](docs/hitos.m
 | `list_expenses` | Listar gastos con filtros |
 | `list_incomes` | Listar ingresos con filtros |
 | `run_daily_sync` | Ejecutar el sync diario: generar gastos recurrentes, marcar vencidos y devolver recordatorios |
-| `manage_fund` | Crear, listar, fondear, retirar o archivar fondos y cuentas |
+| `manage_fund` | Crear, listar, depositar en, retirar o archivar fondos y cuentas |
 | `plan_allocation` | Dado un ingreso, mostrar compromisos del mes y saldo disponible por moneda |
 
 ## Instalación
