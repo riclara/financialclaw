@@ -17,6 +17,7 @@ const EXPECTED_TOOL_NAMES = [
   "list_expenses",
   "list_incomes",
   "run_daily_sync",
+  "manage_fund",
   "plan_allocation",
 ] as const;
 
@@ -111,6 +112,10 @@ async function loadPlugin(): Promise<LoadedPlugin> {
       tool: "run_daily_sync",
       executeExport: "executeRunDailySync",
     },
+    "./tools/manage-fund.js": {
+      tool: "manage_fund",
+      executeExport: "executeManageFund",
+    },
     "./tools/plan-allocation.js": {
       tool: "plan_allocation",
       executeExport: "executePlanAllocation",
@@ -170,7 +175,7 @@ async function loadPlugin(): Promise<LoadedPlugin> {
 }
 
 describe("plugin entry wiring", () => {
-  it("carga el plugin y registra exactamente los 12 tools esperados sin duplicados ni services", async () => {
+  it("carga el plugin y registra exactamente los 13 tools esperados sin duplicados ni services", async () => {
     const { plugin } = await loadPlugin();
     const registerToolCalls: RegisteredTool[] = [];
     const registerServiceCalls: unknown[] = [];

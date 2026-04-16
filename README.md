@@ -49,6 +49,8 @@ npx financialclaw financialclaw-setup --config /path/to/openclaw.json
 
 ## Available tools
 
+The current shipped contract exposes 13 tools:
+
 | Tool | Description |
 |---|---|
 | `manage_currency` | Add currencies, list them, set the default |
@@ -62,6 +64,8 @@ npx financialclaw financialclaw-setup --config /path/to/openclaw.json
 | `list_expenses` | List expenses with filters |
 | `list_incomes` | List incomes with filters |
 | `run_daily_sync` | Run the daily sync: generate recurring expenses, mark overdue, send reminders |
+| `manage_fund` | Create, list, fund, withdraw from, or archive savings funds and accounts |
+| `plan_allocation` | Given an income amount, show current-month commitments and remaining balance by currency |
 
 ## Requirements
 

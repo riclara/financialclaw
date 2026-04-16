@@ -390,12 +390,15 @@ Secuencial:
 ```
 
 ### TASK-23 — Tool: manage_fund — [ver detalle](tasks/task-23.md)
-- **Estado**: `TODO`
+- **Estado**: `DONE`
 - **Archivo(s)**: `src/db/schema.ts`, `src/tools/manage-fund.ts`, `tests/integration/manage-fund.test.ts`, `src/index.ts`, `tests/integration/plugin-entry.test.ts`
 - **Dependencias**: TASK-02, TASK-07
 - **Desbloquea**: TASK-24
 - **Descripción**: Crear tablas `funds` y `fund_transactions`. Implementar tool con acciones `create`, `list`, `deposit`, `withdraw`, `archive`. Saldo calculado desde transacciones. Fondos con `contribution_required = 1` serán leídos por `plan_allocation` como compromisos.
 - **Criterio de aceptación**: Tests de integración pasan. Tool registrado en `index.ts` (13 tools). Migraciones idempotentes.
+- **Timestamp inicio**: `2026-04-16T15:25:44-0500`
+- **Timestamp fin**: `2026-04-16T15:30:04-0500`
+- **Notas**: `Se agregan tablas funds/fund_transactions, tool manage_fund con 5 acciones, 11 tests de integración nuevos y el plugin queda con 13 tools registrados. Verificado con npx tsc --noEmit y npm run test:integration.`
 
 ### TASK-24 — Extender plan_allocation con fondos — [ver detalle](tasks/task-24.md)
 - **Estado**: `TODO`
