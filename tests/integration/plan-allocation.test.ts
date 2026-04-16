@@ -369,6 +369,35 @@ describe("plan-allocation — integración", () => {
     assert.ok(!result.includes("Already saved this month:"), "no debe marcarlo como ya aportado");
   });
 
+  it("fondo con contribution_starts_on futuro: no aparece como compromiso del mes actual", () => {
+    const db = createTestDb();
+    insertCurrency(db, "COP", "$", true);
+    setDefault(db, "COP");
+
+    // Fondo que empieza el mes que viene — no debe aparecer en compromisos de este mes
+    const today = todayISO();
+    const [year, month] = today.split("-").map(Number);
+    const nextMonth = month === 12
+      ? `${year + 1}-01-01`
+      : `${year}-${String(month + 1).padStart(2, "0")}-01`;
+
+    insertFund(db, {
+      name: "Fondo futuro",
+      type: "savings",
+      currency: "COP",
+      contributionAmount: 300_000,
+      contributionFrequency: "MONTHLY",
+      contributionRequired: true,
+      contributionStartsOn: nextMonth,
+    });
+
+    const result = executePlanAllocation({ amount: 2_000_000, currency: "COP" }, db);
+
+    assert.ok(!result.includes("Fondo futuro"), "fondo con starts_on futuro no debe aparecer");
+    assert.ok(result.includes("No pending commitments") || !result.includes("(savings - required)"),
+      "no debe inflar los compromisos del mes actual");
+  });
+
   it("fondo obligatorio con depósito ya realizado: aparece en Already saved y no en pendientes", () => {
     const db = createTestDb();
     insertCurrency(db, "COP", "$", true);

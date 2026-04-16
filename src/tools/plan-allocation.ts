@@ -224,6 +224,8 @@ export function executePlanAllocation(
          AND f.contribution_required = 1
          AND f.contribution_amount IS NOT NULL
          AND f.contribution_frequency IS NOT NULL
+         AND f.contribution_starts_on IS NOT NULL
+         AND f.contribution_starts_on <= ?
          AND NOT EXISTS (
            SELECT 1 FROM fund_transactions ft
            WHERE ft.fund_id = f.id
@@ -231,7 +233,7 @@ export function executePlanAllocation(
              AND ft.date BETWEEN ? AND ?
          )`
     )
-    .all(currency.code, monthStart, monthEnd) as unknown as FundRequiredPendingRow[];
+    .all(currency.code, monthEnd, monthStart, monthEnd) as unknown as FundRequiredPendingRow[];
 
   // 6. Required fund contributions already deposited this month
   const alreadySavedFunds = db
