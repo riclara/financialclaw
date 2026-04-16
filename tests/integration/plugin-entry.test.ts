@@ -17,6 +17,7 @@ const EXPECTED_TOOL_NAMES = [
   "list_expenses",
   "list_incomes",
   "run_daily_sync",
+  "plan_allocation",
 ] as const;
 
 type ToolName = (typeof EXPECTED_TOOL_NAMES)[number];
@@ -110,6 +111,10 @@ async function loadPlugin(): Promise<LoadedPlugin> {
       tool: "run_daily_sync",
       executeExport: "executeRunDailySync",
     },
+    "./tools/plan-allocation.js": {
+      tool: "plan_allocation",
+      executeExport: "executePlanAllocation",
+    },
   };
 
   const stubModules = new Map<string, Record<string, unknown>>([
@@ -165,7 +170,7 @@ async function loadPlugin(): Promise<LoadedPlugin> {
 }
 
 describe("plugin entry wiring", () => {
-  it("carga el plugin y registra exactamente los 11 tools esperados sin duplicados ni services", async () => {
+  it("carga el plugin y registra exactamente los 12 tools esperados sin duplicados ni services", async () => {
     const { plugin } = await loadPlugin();
     const registerToolCalls: RegisteredTool[] = [];
     const registerServiceCalls: unknown[] = [];
