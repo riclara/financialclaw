@@ -1,17 +1,3 @@
-## Agent Vault — Memoria Centralizada
-
-El vault en `/Users/riclara/agent-vault` contiene el contexto persistente de todos los
-proyectos del usuario. Antes de iniciar cualquier tarea, leer la nota del proyecto:
-
-  /usr/local/bin/obsidian read vault=agent-vault path="memory/projects/financialclaw.md"
-
-Para buscar contexto específico:
-
-  /usr/local/bin/obsidian search vault=agent-vault query="<término>" format=json
-
-Guardar en el vault cuando aprendas algo que deba persistir entre sesiones.
-Ver convenciones completas en `/Users/riclara/agent-vault/CLAUDE.md`.
-
 # AGENTS.md — Reglas para agentes implementadores
 
 Este archivo define las convenciones y restricciones que todo agente de código debe seguir al trabajar en financialclaw.
