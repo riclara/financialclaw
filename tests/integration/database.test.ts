@@ -53,8 +53,6 @@ describe("database", () => {
       [
         "currencies",
         "expenses",
-        "fund_transactions",
-        "funds",
         "income_receipts",
         "incomes",
         "ocr_extractions",

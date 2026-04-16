@@ -51,8 +51,6 @@ Hito 6: Tools de consulta   [DONE]     TASK-16, TASK-17
 Hito 7: Automatización      [DONE]     TASK-18, TASK-19
 Hito 8: Integración final   [DONE]     TASK-20
 Hito 9: OCR Agéntico        [DONE]     TASK-21
-Hito 10: Aprovisionamiento  [DONE]     TASK-22
-Hito 11: Fondos             [TODO]     TASK-23, TASK-24
 ```
 
 ---
@@ -359,54 +357,6 @@ Secuencial (depende también de TASK-03, TASK-04, TASK-06):
 - **Criterio de aceptación**: tests de integración pasan, dependencias eliminadas.
 - **Timestamp inicio**: `2026-03-29T10:30:00-05:00`
 - **Timestamp fin**: `2026-03-29T11:00:00-05:00`
-
----
-
-## Hito 10: Aprovisionamiento
-
-> Plan de distribución de ingresos contra compromisos pendientes. Primer tool prospectivo del plugin.
-
-### TASK-22 — Tool: plan_allocation — [ver detalle](tasks/task-22.md)
-- **Estado**: `DONE`
-- **Archivo(s)**: `src/tools/plan-allocation.ts`, `tests/integration/plan-allocation.test.ts`, `src/index.ts`, `tests/integration/plugin-entry.test.ts`
-- **Dependencias**: TASK-02, TASK-07
-- **Desbloquea**: nada (por ahora)
-- **Descripción**: Tool de solo lectura que, dado un monto de ingreso, calcula compromisos pendientes del mes (recurrentes + manuales), gastos ya pagados, y disponible. Cruza `recurring_expense_rules` con `expenses` para evitar doble conteo. Detecta reglas sin gasto generado por daily-sync.
-- **Criterio de aceptación**: Tests de integración pasan. Tool registrado en `index.ts` (12 tools). Output formateado con distribución clara.
-- **Timestamp inicio**: `2026-04-16T00:00:00-05:00`
-- **Timestamp fin**: `2026-04-16T00:00:00-05:00`
-- **Notas**: Tool de solo lectura implementado con 4 queries: (1) gastos PENDING/OVERDUE del mes, (2) reglas recurrentes sin gasto generado detectadas via NOT EXISTS, (3) pagados del mes como sección informativa, (4) compromisos en otras monedas como nota. `estimateDueDate()` calcula la fecha esperada para reglas sin expense generado según frequency. 8/8 tests de integración pasando, suite completa 145/145.
-
----
-
-## Hito 11: Fondos
-
-> Contenedores financieros con saldo, contribución recurrente y metas. Extiende `plan_allocation` para incluirlos en la distribución del ingreso.
-
-```
-Secuencial:
-  TASK-23  manage_fund   (schema + tool CRUD)
-  TASK-24  plan_allocation extendido   (depende de TASK-23)
-```
-
-### TASK-23 — Tool: manage_fund — [ver detalle](tasks/task-23.md)
-- **Estado**: `DONE`
-- **Archivo(s)**: `src/db/schema.ts`, `src/tools/manage-fund.ts`, `tests/integration/manage-fund.test.ts`, `src/index.ts`, `tests/integration/plugin-entry.test.ts`
-- **Dependencias**: TASK-02, TASK-07
-- **Desbloquea**: TASK-24
-- **Descripción**: Crear tablas `funds` y `fund_transactions`. Implementar tool con acciones `create`, `list`, `deposit`, `withdraw`, `archive`. Saldo calculado desde transacciones. Fondos con `contribution_required = 1` serán leídos por `plan_allocation` como compromisos.
-- **Criterio de aceptación**: Tests de integración pasan. Tool registrado en `index.ts` (13 tools). Migraciones idempotentes.
-- **Timestamp inicio**: `2026-04-16T15:25:44-0500`
-- **Timestamp fin**: `2026-04-16T15:30:04-0500`
-- **Notas**: `Se agregan tablas funds/fund_transactions, tool manage_fund con 5 acciones, 11 tests de integración nuevos y el plugin queda con 13 tools registrados. Verificado con npx tsc --noEmit y npm run test:integration.`
-
-### TASK-24 — Extender plan_allocation con fondos — [ver detalle](tasks/task-24.md)
-- **Estado**: `TODO`
-- **Archivo(s)**: `src/tools/plan-allocation.ts`, `tests/integration/plan-allocation.test.ts`
-- **Dependencias**: TASK-02, TASK-07, TASK-23
-- **Desbloquea**: nada (por ahora)
-- **Descripción**: Agregar 4 queries a `executePlanAllocation`: (5) contribuciones obligatorias pendientes este mes, (6) contribuciones obligatorias ya realizadas, (7) fondos opcionales con monto fijo (sugeridos), (8) fondos variables. Las contribuciones obligatorias reducen el disponible igual que los gastos. Sin fondos activos, el output es idéntico al de TASK-22.
-- **Criterio de aceptación**: Todos los tests de `plan-allocation.test.ts` pasan (incluyendo los de TASK-22). Fondos obligatorios aparecen en compromisos. Sin fondos, retrocompatibilidad total.
 
 ---
 

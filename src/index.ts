@@ -11,8 +11,6 @@ import { InputSchema as GetFinancialSummaryInputSchema, executeGetFinancialSumma
 import { InputSchema as ListExpensesInputSchema, executeListExpenses } from "./tools/list-expenses.js";
 import { InputSchema as ListIncomesInputSchema, executeListIncomes } from "./tools/list-incomes.js";
 import { InputSchema as RunDailySyncInputSchema, executeRunDailySync } from "./tools/run-daily-sync.js";
-import { InputSchema as ManageFundInputSchema, executeManageFund } from "./tools/manage-fund.js";
-import { InputSchema as PlanAllocationInputSchema, executePlanAllocation } from "./tools/plan-allocation.js";
 
 function wrapExecute<T>(
   fn: (input: T) => Promise<string> | string,
@@ -129,24 +127,6 @@ export default definePluginEntry({
         "Run the daily sync: generates pending recurring expense instances, marks overdue ones, and returns payment reminders for the day. Invoke from automatic cron or when the user wants to see pending items.",
       parameters: RunDailySyncInputSchema,
       execute: wrapExecute(executeRunDailySync),
-    });
-
-    api.registerTool({
-      name: "manage_fund",
-      label: "Manage Fund",
-      description:
-        "Create, list, deposit into, withdraw from, or archive financial containers such as savings funds and bank accounts.",
-      parameters: ManageFundInputSchema,
-      execute: wrapExecute(executeManageFund),
-    });
-
-    api.registerTool({
-      name: "plan_allocation",
-      label: "Plan Allocation",
-      description:
-        "Given an income amount, shows pending commitments for the current month (recurring + manual) and the remaining available balance. Use when the user receives a payment and wants to know how to allocate it. Operates per currency: if the user receives income in multiple currencies, call this tool once per currency. For example, if they receive COP salary and USD freelance income, call it twice with the corresponding amount and currency each time.",
-      parameters: PlanAllocationInputSchema,
-      execute: wrapExecute(executePlanAllocation),
     });
   },
 });
