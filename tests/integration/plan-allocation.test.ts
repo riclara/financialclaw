@@ -93,6 +93,71 @@ function insertRule(
   return id;
 }
 
+function insertFund(
+  db: ReturnType<typeof createTestDb>,
+  opts: {
+    name: string;
+    type?: "savings" | "account";
+    currency: string;
+    initialBalance?: number;
+    contributionAmount?: number | null;
+    contributionFrequency?: string | null;
+    contributionIntervalDays?: number | null;
+    contributionRequired?: boolean;
+    contributionStartsOn?: string | null;
+    targetAmount?: number | null;
+    targetDate?: string | null;
+    isActive?: boolean;
+  },
+): string {
+  const id = randomUUID();
+  const now = new Date().toISOString();
+  db.prepare(
+    `INSERT INTO funds (
+      id, name, type, currency, initial_balance, contribution_amount,
+      contribution_frequency, contribution_interval_days, contribution_required,
+      contribution_starts_on, target_amount, target_date, is_active, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(
+    id,
+    opts.name,
+    opts.type ?? "savings",
+    opts.currency,
+    opts.initialBalance ?? 0,
+    opts.contributionAmount ?? null,
+    opts.contributionFrequency ?? null,
+    opts.contributionIntervalDays ?? null,
+    opts.contributionRequired === true ? 1 : 0,
+    opts.contributionStartsOn ?? null,
+    opts.targetAmount ?? null,
+    opts.targetDate ?? null,
+    opts.isActive === false ? 0 : 1,
+    now,
+  );
+
+  return id;
+}
+
+function insertFundTransaction(
+  db: ReturnType<typeof createTestDb>,
+  opts: {
+    fundId: string;
+    type: "deposit" | "withdrawal";
+    amount: number;
+    date: string;
+    notes?: string;
+  },
+): string {
+  const id = randomUUID();
+  const now = new Date().toISOString();
+  db.prepare(
+    `INSERT INTO fund_transactions (id, fund_id, type, amount, date, notes, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  ).run(id, opts.fundId, opts.type, opts.amount, opts.date, opts.notes ?? null, now);
+
+  return id;
+}
+
 // ─── tests ────────────────────────────────────────────────────────────────────
 
 describe("plan-allocation — integración", () => {
@@ -277,5 +342,169 @@ describe("plan-allocation — integración", () => {
       result.includes("No pending commitments"),
       "sin otras deudas, el mes debe reportarse sin compromisos",
     );
+  });
+
+  it("fondo obligatorio sin depósito este mes: aparece en compromisos y reduce disponible", () => {
+    const db = createTestDb();
+    insertCurrency(db, "COP", "$", true);
+    setDefault(db, "COP");
+
+    insertFund(db, {
+      name: "Fondo emergencia",
+      type: "savings",
+      currency: "COP",
+      contributionAmount: 500_000,
+      contributionFrequency: "MONTHLY",
+      contributionRequired: true,
+      contributionStartsOn: monthStart(),
+    });
+
+    const result = executePlanAllocation({ amount: 4_000_000, currency: "COP" }, db);
+
+    assert.ok(result.includes("Pending commitments this month:"), "debe mostrar pendientes");
+    assert.ok(result.includes("Fondo emergencia"), "debe listar el fondo");
+    assert.ok(result.includes("(savings - required)"), "debe etiquetar el tipo requerido");
+    assert.ok(result.includes(`due ${monthStart()}`), "debe estimar fecha del mes actual");
+    assert.ok(result.includes("Available: $3.500.000 COP"), "debe descontar el aporte del disponible");
+    assert.ok(!result.includes("Already saved this month:"), "no debe marcarlo como ya aportado");
+  });
+
+  it("fondo obligatorio con depósito ya realizado: aparece en Already saved y no en pendientes", () => {
+    const db = createTestDb();
+    insertCurrency(db, "COP", "$", true);
+    setDefault(db, "COP");
+
+    const fundId = insertFund(db, {
+      name: "Vacaciones",
+      type: "account",
+      currency: "COP",
+      contributionAmount: 200_000,
+      contributionFrequency: "MONTHLY",
+      contributionRequired: true,
+      contributionStartsOn: monthStart(),
+    });
+    insertFundTransaction(db, {
+      fundId,
+      type: "deposit",
+      amount: 200_000,
+      date: todayISO(),
+    });
+
+    const result = executePlanAllocation({ amount: 2_000_000, currency: "COP" }, db);
+
+    assert.ok(result.includes("Already saved this month:"), "debe mostrar sección de ahorros realizados");
+    assert.ok(result.includes("Vacaciones"), "debe listar el fondo");
+    assert.ok(result.includes("saved"), "debe marcar la fecha del ahorro");
+    assert.ok(!result.includes("(account - required)"), "no debe aparecer como compromiso pendiente");
+    assert.ok(
+      result.includes("No pending commitments this month."),
+      "sin otros compromisos debe quedar el output base",
+    );
+  });
+
+  it("fondo opcional fijo: aparece en Suggested savings con saldo y progreso", () => {
+    const db = createTestDb();
+    insertCurrency(db, "COP", "$", true);
+    setDefault(db, "COP");
+
+    const fundId = insertFund(db, {
+      name: "Fondo viaje",
+      currency: "COP",
+      initialBalance: 500_000,
+      contributionAmount: 300_000,
+      contributionFrequency: "MONTHLY",
+      contributionRequired: false,
+      contributionStartsOn: monthStart(),
+      targetAmount: 2_000_000,
+    });
+    insertFundTransaction(db, {
+      fundId,
+      type: "deposit",
+      amount: 300_000,
+      date: todayISO(),
+    });
+
+    const result = executePlanAllocation({ amount: 4_000_000, currency: "COP" }, db);
+
+    assert.ok(result.includes("Suggested savings:"), "debe mostrar sección sugerida");
+    assert.ok(result.includes("Fondo viaje"), "debe listar el fondo");
+    assert.ok(result.includes("$300.000 COP suggested"), "debe mostrar el monto sugerido");
+    assert.ok(result.includes("balance: $800.000 COP"), "debe mostrar el saldo calculado");
+    assert.ok(result.includes("target: $2.000.000 COP (40%)"), "debe mostrar progreso de meta");
+    assert.ok(!result.includes("Available: $3.700.000 COP"), "las sugerencias no deben descontar disponible");
+  });
+
+  it("fondo variable: aparece en Variable savings con saldo actual", () => {
+    const db = createTestDb();
+    insertCurrency(db, "COP", "$", true);
+    setDefault(db, "COP");
+
+    const fundId = insertFund(db, {
+      name: "Inversiones",
+      type: "account",
+      currency: "COP",
+      initialBalance: 4_000_000,
+      contributionAmount: null,
+    });
+    insertFundTransaction(db, {
+      fundId,
+      type: "deposit",
+      amount: 2_000_000,
+      date: todayISO(),
+    });
+    insertFundTransaction(db, {
+      fundId,
+      type: "withdrawal",
+      amount: 1_000_000,
+      date: todayISO(),
+    });
+
+    const result = executePlanAllocation({ amount: 4_000_000, currency: "COP" }, db);
+
+    assert.ok(result.includes("Variable savings:"), "debe mostrar sección variable");
+    assert.ok(result.includes("Inversiones"), "debe listar el fondo");
+    assert.ok(result.includes("balance: $5.000.000 COP"), "debe mostrar saldo calculado");
+    assert.ok(
+      result.includes("How much do you want to set aside?"),
+      "debe invitar a decidir el monto variable",
+    );
+  });
+
+  it("sin fondos activos en la moneda pedida: output idéntico al comportamiento previo", () => {
+    const baselineDb = createTestDb();
+    const extendedDb = createTestDb();
+
+    insertCurrency(baselineDb, "COP", "$", true);
+    insertCurrency(extendedDb, "COP", "$", true);
+    insertCurrency(extendedDb, "USD", "US$");
+    setDefault(baselineDb, "COP");
+    setDefault(extendedDb, "COP");
+
+    const today = todayISO();
+    insertExpense(baselineDb, { currency: "COP", amount: 1_500_000, description: "Arriendo", dueDate: today });
+    insertExpense(extendedDb, { currency: "COP", amount: 1_500_000, description: "Arriendo", dueDate: today });
+
+    insertFund(extendedDb, {
+      name: "Fondo USD",
+      currency: "USD",
+      contributionAmount: 300,
+      contributionFrequency: "MONTHLY",
+      contributionRequired: true,
+      contributionStartsOn: monthStart(),
+    });
+    insertFund(extendedDb, {
+      name: "Fondo archivado",
+      currency: "COP",
+      contributionAmount: 200_000,
+      contributionFrequency: "MONTHLY",
+      contributionRequired: true,
+      contributionStartsOn: monthStart(),
+      isActive: false,
+    });
+
+    const baseline = executePlanAllocation({ amount: 4_000_000, currency: "COP" }, baselineDb);
+    const extended = executePlanAllocation({ amount: 4_000_000, currency: "COP" }, extendedDb);
+
+    assert.equal(extended, baseline, "sin fondos activos en COP el output debe mantenerse idéntico");
   });
 });
