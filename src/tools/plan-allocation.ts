@@ -67,9 +67,14 @@ function currentMonthRange(today: string): { start: string; end: string } {
 
 /**
  * Estimates the expected due date for a recurring rule that has no generated expense
- * in the current month. Returns the first occurrence within [monthStart, monthEnd].
+ * in the current month. Returns null when the rule's cycle skips the current month
+ * (possible for INTERVAL_DAYS with interval_days > 31) so the caller can exclude it.
  */
-function estimateDueDate(rule: RuleRow, monthStart: string, monthEnd: string): string {
+function estimateDueDate(
+  rule: RuleRow,
+  monthStart: string,
+  monthEnd: string,
+): string | null {
   const [syear, smonth, sday] = rule.starts_on.split("-").map(Number);
   const [year, month] = monthStart.split("-").map(Number);
 
@@ -90,20 +95,18 @@ function estimateDueDate(rule: RuleRow, monthStart: string, monthEnd: string): s
   const monthEndMs = Date.UTC(ey, em - 1, ed);
   const stepMs = stepDays * 86_400_000;
 
-  // Advance from starts_on until candidate >= monthStart
   let candidateMs = startMs;
   if (candidateMs < monthStartMs) {
     const steps = Math.ceil((monthStartMs - candidateMs) / stepMs);
     candidateMs += steps * stepMs;
   }
 
-  if (candidateMs <= monthEndMs) {
-    const d = new Date(candidateMs);
-    return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
+  if (candidateMs > monthEndMs) {
+    return null;
   }
 
-  // Fallback: shouldn't happen if query filters correctly
-  return monthStart;
+  const d = new Date(candidateMs);
+  return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
 }
 
 export function executePlanAllocation(
@@ -175,8 +178,12 @@ export function executePlanAllocation(
 
   // ── Calculations ───────────────────────────────────────────────────────────
 
+  const unsyncedRulesWithDates = unsyncedRules
+    .map((rule) => ({ rule, dueDate: estimateDueDate(rule, monthStart, monthEnd) }))
+    .filter((entry): entry is { rule: RuleRow; dueDate: string } => entry.dueDate !== null);
+
   const totalFromExpenses = pendingExpenses.reduce((sum, e) => sum + e.amount, 0);
-  const totalFromRules = unsyncedRules.reduce((sum, r) => sum + r.amount, 0);
+  const totalFromRules = unsyncedRulesWithDates.reduce((sum, e) => sum + e.rule.amount, 0);
   const totalPending = totalFromExpenses + totalFromRules;
   const totalPaid = paidExpenses.reduce((sum, e) => sum + e.amount, 0);
   const available = input.amount - totalPending;
@@ -188,7 +195,7 @@ export function executePlanAllocation(
   lines.push(`Received: ${fmt(input.amount)}`);
   lines.push("");
 
-  if (pendingExpenses.length === 0 && unsyncedRules.length === 0) {
+  if (pendingExpenses.length === 0 && unsyncedRulesWithDates.length === 0) {
     lines.push(`No pending commitments this month. ${fmt(input.amount)} fully available.`);
   } else {
     lines.push("Pending commitments this month:");
@@ -196,9 +203,8 @@ export function executePlanAllocation(
       const label = e.recurring_rule_id ? "(recurring)" : "(manual)";
       lines.push(`  ${e.description}  ${fmt(e.amount)}  due ${e.due_date}  ${label}`);
     }
-    for (const r of unsyncedRules) {
-      const dueDate = estimateDueDate(r, monthStart, monthEnd);
-      lines.push(`  ${r.name}  ${fmt(r.amount)}  due ${dueDate}  (estimated)`);
+    for (const { rule, dueDate } of unsyncedRulesWithDates) {
+      lines.push(`  ${rule.name}  ${fmt(rule.amount)}  due ${dueDate}  (estimated)`);
     }
     lines.push("  ──────────────────────────────────────");
     lines.push(`  Total committed: ${fmt(totalPending)} (${pct.toFixed(1)}%)`);

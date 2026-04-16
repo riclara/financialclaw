@@ -224,29 +224,7 @@ describe("plan-allocation — integración", () => {
     insertCurrency(db, "COP", "$", true);
     setDefault(db, "COP");
 
-    const today = todayISO();
-    const lastMonth = `${today.slice(0, 4)}-${String(Number(today.slice(5, 7)) - 1).padStart(2, "0")}-01`;
-
     insertRule(db, {
-      currency: "COP",
-      amount: 200_000,
-      name: "Regla expirada",
-      frequency: "MONTHLY",
-      startsOn: "2025-01-01",
-      // ends_on en el mes anterior = ya expiró
-      endsOn: lastMonth > "2025-01-01" ? lastMonth : "2025-01-01",
-    });
-
-    const result = executePlanAllocation({ amount: 2_000_000, currency: "COP" }, db);
-
-    // Si ends_on < monthStart, no debe aparecer
-    // Nota: si el test corre en febrero, lastMonth puede ser enero que aún es válido;
-    // pero el test base (sin enero como mes actual) debería filtrar correctamente.
-    // Para un test robusto, forzamos ends_on a un mes claramente anterior
-    const db2 = createTestDb();
-    insertCurrency(db2, "COP", "$", true);
-    setDefault(db2, "COP");
-    insertRule(db2, {
       currency: "COP",
       amount: 200_000,
       name: "Regla expirada",
@@ -255,8 +233,49 @@ describe("plan-allocation — integración", () => {
       endsOn: "2020-12-31", // claramente en el pasado
     });
 
-    const result2 = executePlanAllocation({ amount: 2_000_000, currency: "COP" }, db2);
-    assert.ok(!result2.includes("Regla expirada"), "regla expirada no debe aparecer");
-    assert.ok(result2.includes("No pending commitments") || !result2.includes("(estimated)"), "no debe incluir la regla expirada como estimada");
+    const result = executePlanAllocation({ amount: 2_000_000, currency: "COP" }, db);
+    assert.ok(!result.includes("Regla expirada"), "regla expirada no debe aparecer");
+    assert.ok(
+      result.includes("No pending commitments") || !result.includes("(estimated)"),
+      "no debe incluir la regla expirada como estimada",
+    );
+  });
+
+  it("regla INTERVAL_DAYS con ciclo que salta el mes actual: no se incluye", () => {
+    const db = createTestDb();
+    insertCurrency(db, "COP", "$", true);
+    setDefault(db, "COP");
+
+    // Regla cada 40 días comenzando el día anterior al mes actual.
+    // La ocurrencia siguiente cae a monthStart + 39 días, es decir fuera del mes
+    // en cualquier calendario (meses ≤ 31 días). No hay ciclo en el mes actual.
+    const today = todayISO();
+    const [y, m] = today.split("-").map(Number);
+    const priorMs = Date.UTC(y, m - 1, 1) - 86_400_000;
+    const prior = new Date(priorMs);
+    const startsOn = `${prior.getUTCFullYear()}-${String(prior.getUTCMonth() + 1).padStart(2, "0")}-${String(prior.getUTCDate()).padStart(2, "0")}`;
+
+    const id = randomUUID();
+    const now = new Date().toISOString();
+    db.prepare(
+      `INSERT INTO recurring_expense_rules (
+        id, name, amount, currency, frequency, starts_on, interval_days, is_active, created_at
+      ) VALUES (?, ?, ?, ?, 'INTERVAL_DAYS', ?, 40, 1, ?)`,
+    ).run(id, "Cuota trimestral", 300_000, "COP", startsOn, now);
+
+    const result = executePlanAllocation({ amount: 2_000_000, currency: "COP" }, db);
+
+    assert.ok(
+      !result.includes("Cuota trimestral"),
+      "regla cuya ocurrencia cae fuera del mes no debe aparecer",
+    );
+    assert.ok(
+      !result.includes("(estimated)"),
+      "no debe listar la regla como estimada cuando su ciclo salta el mes",
+    );
+    assert.ok(
+      result.includes("No pending commitments"),
+      "sin otras deudas, el mes debe reportarse sin compromisos",
+    );
   });
 });
