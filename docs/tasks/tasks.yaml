@@ -212,6 +212,36 @@
       "files": ["src/tools/log-expense-from-receipt.ts", "tests/integration/log-expense-from-receipt.test.ts", "src/index.ts", "tests/integration/plugin-entry.test.ts"],
       "references": ["AGENTS.md", "docs/plan-refactor-ocr.md"],
       "acceptance_summary": ["tests de integración pasan", "se eliminan dependencias python", "se inserta ocr_extractions de forma nativa"]
+    },
+    {
+      "id": "TASK-22",
+      "title": "Tool: plan_allocation",
+      "hito": 10,
+      "deps": ["TASK-02", "TASK-07"],
+      "detail_doc": "docs/tasks/task-22.md",
+      "files": ["src/tools/plan-allocation.ts", "tests/integration/plan-allocation.test.ts", "src/index.ts", "tests/integration/plugin-entry.test.ts"],
+      "references": ["CLAUDE.md", "docs/feature/plan-allocation/design.md", "src/tools/get-financial-summary.ts"],
+      "acceptance_summary": ["tests de integración pasan", "tool registrado en index.ts (12 tools)", "output legible con distribución de ingreso vs compromisos"]
+    },
+    {
+      "id": "TASK-23",
+      "title": "Tool: manage_fund",
+      "hito": 11,
+      "deps": ["TASK-02", "TASK-07"],
+      "detail_doc": "docs/tasks/task-23.md",
+      "files": ["src/db/schema.ts", "src/tools/manage-fund.ts", "tests/integration/manage-fund.test.ts", "src/index.ts", "tests/integration/plugin-entry.test.ts"],
+      "references": ["CLAUDE.md", "docs/tasks/task-23.md", "src/tools/manage-currency.ts"],
+      "acceptance_summary": ["tests de integración pasan", "tool registrado en index.ts (13 tools)", "saldo calculado desde transacciones", "migraciones idempotentes"]
+    },
+    {
+      "id": "TASK-24",
+      "title": "Extender plan_allocation con fondos",
+      "hito": 11,
+      "deps": ["TASK-02", "TASK-07", "TASK-23"],
+      "detail_doc": "docs/tasks/task-24.md",
+      "files": ["src/tools/plan-allocation.ts", "tests/integration/plan-allocation.test.ts"],
+      "references": ["CLAUDE.md", "docs/tasks/task-24.md", "src/tools/plan-allocation.ts"],
+      "acceptance_summary": ["todos los tests de plan-allocation pasan", "fondos obligatorios reducen disponible", "sin fondos el output es idéntico al de TASK-22"]
     }
   ]
 }
