@@ -2,6 +2,13 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [1.1.0](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.10...financialclaw-v1.1.0) (2026-04-16)
+
+
+### Added
+
+* add plan_allocation and manage_fund tools ([#57](https://github.com/riclara/financialclaw/issues/57)) ([39434a9](https://github.com/riclara/financialclaw/commit/39434a9e75f39088c3a9ca295d3a696df0c3c752))
+
 ## [1.0.10](https://github.com/riclara/financialclaw/compare/financialclaw-v1.0.9...financialclaw-v1.0.10) (2026-04-03)
 
 
