@@ -383,7 +383,7 @@ export function executePlanAllocation(
     lines.push("Suggested savings:");
     for (const fund of suggestedSavingsFunds) {
       const progressSuffix =
-        fund.target_amount === null ? ""
+        fund.target_amount === null || fund.target_amount === 0 ? ""
         : ` / target: ${fmt(fund.target_amount)} (${Math.round((fund.balance / fund.target_amount) * 100)}%)`;
       lines.push(
         `  ${fund.name}  ${fmt(fund.contribution_amount)} suggested - balance: ${fmt(fund.balance)}${progressSuffix}`,
