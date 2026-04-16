@@ -402,6 +402,31 @@ describe("plan-allocation — integración", () => {
     );
   });
 
+  it("fondo obligatorio ya aportado: muestra el monto real depositado, no el configurado", () => {
+    const db = createTestDb();
+    insertCurrency(db, "COP", "$", true);
+    setDefault(db, "COP");
+
+    const fundId = insertFund(db, {
+      name: "Emergencia",
+      type: "savings",
+      currency: "COP",
+      contributionAmount: 500_000, // monto configurado
+      contributionFrequency: "MONTHLY",
+      contributionRequired: true,
+      contributionStartsOn: monthStart(),
+    });
+    // Depósito real distinto al configurado
+    insertFundTransaction(db, { fundId, type: "deposit", amount: 300_000, date: todayISO() });
+
+    const result = executePlanAllocation({ amount: 2_000_000, currency: "COP" }, db);
+
+    assert.ok(result.includes("Already saved this month:"), "debe mostrar sección de ahorros");
+    // El total debe reflejar el depósito real (300k), no el configurado (500k)
+    assert.ok(result.includes("300"), "debe mostrar el monto real depositado");
+    assert.ok(!result.includes("500.000"), "no debe mostrar el monto configurado como si fuera el depositado");
+  });
+
   it("fondo opcional fijo: aparece en Suggested savings con saldo y progreso", () => {
     const db = createTestDb();
     insertCurrency(db, "COP", "$", true);

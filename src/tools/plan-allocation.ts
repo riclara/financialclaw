@@ -56,7 +56,7 @@ interface FundRequiredPendingRow {
 
 interface FundAlreadySavedRow {
   name: string;
-  contribution_amount: number;
+  amount: number;
   date: string;
 }
 
@@ -236,7 +236,7 @@ export function executePlanAllocation(
   // 6. Required fund contributions already deposited this month
   const alreadySavedFunds = db
     .prepare(
-      `SELECT f.name, f.contribution_amount, ft.date
+      `SELECT f.name, ft.amount, ft.date
        FROM fund_transactions ft
        JOIN funds f ON f.id = ft.fund_id
        WHERE ft.type = 'deposit'
@@ -314,7 +314,7 @@ export function executePlanAllocation(
   );
   const totalPending = totalFromExpenses + totalFromRules + totalFromRequiredFunds;
   const totalPaid = paidExpenses.reduce((sum, e) => sum + e.amount, 0);
-  const totalSaved = alreadySavedFunds.reduce((sum, entry) => sum + entry.contribution_amount, 0);
+  const totalSaved = alreadySavedFunds.reduce((sum, entry) => sum + entry.amount, 0);
   const available = input.amount - totalPending;
   const pct = (totalPending / input.amount) * 100;
 
@@ -363,7 +363,7 @@ export function executePlanAllocation(
   if (alreadySavedFunds.length > 0) {
     lines.push("Already saved this month:");
     for (const fund of alreadySavedFunds) {
-      lines.push(`  ${fund.name}  ${fmt(fund.contribution_amount)}  saved ${fund.date}  (required)`);
+      lines.push(`  ${fund.name}  ${fmt(fund.amount)}  saved ${fund.date}  (required)`);
     }
     lines.push("  ──────────────────────────────────────");
     lines.push(`  Total saved: ${fmt(totalSaved)}`);
