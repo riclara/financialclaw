@@ -52,7 +52,7 @@ Hito 7: Automatización      [DONE]     TASK-18, TASK-19
 Hito 8: Integración final   [DONE]     TASK-20
 Hito 9: OCR Agéntico        [DONE]     TASK-21
 Hito 10: Aprovisionamiento  [DONE]     TASK-22
-Hito 11: Fondos             [TODO]     TASK-23, TASK-24
+Hito 11: Fondos             [DONE]     TASK-23, TASK-24
 ```
 
 ---
@@ -401,12 +401,15 @@ Secuencial:
 - **Notas**: `Se agregan tablas funds/fund_transactions, tool manage_fund con 5 acciones, 11 tests de integración nuevos y el plugin queda con 13 tools registrados. Verificado con npx tsc --noEmit y npm run test:integration.`
 
 ### TASK-24 — Extender plan_allocation con fondos — [ver detalle](tasks/task-24.md)
-- **Estado**: `TODO`
+- **Estado**: `DONE`
 - **Archivo(s)**: `src/tools/plan-allocation.ts`, `tests/integration/plan-allocation.test.ts`
 - **Dependencias**: TASK-02, TASK-07, TASK-23
 - **Desbloquea**: nada (por ahora)
 - **Descripción**: Agregar 4 queries a `executePlanAllocation`: (5) contribuciones obligatorias pendientes este mes, (6) contribuciones obligatorias ya realizadas, (7) fondos opcionales con monto fijo (sugeridos), (8) fondos variables. Las contribuciones obligatorias reducen el disponible igual que los gastos. Sin fondos activos, el output es idéntico al de TASK-22.
 - **Criterio de aceptación**: Todos los tests de `plan-allocation.test.ts` pasan (incluyendo los de TASK-22). Fondos obligatorios aparecen en compromisos. Sin fondos, retrocompatibilidad total.
+- **Timestamp inicio**: `2026-04-16T16:59:11-0500`
+- **Timestamp fin**: `2026-04-16T17:01:13-0500`
+- **Notas**: `plan_allocation ahora incorpora fondos obligatorios, ahorros ya aportados, sugerencias de ahorro y fondos variables sin romper el output previo cuando no hay fondos activos en la moneda solicitada. Verificado con npx tsc --noEmit, npm run test:unit y npm run test:integration.`
 
 ---
 

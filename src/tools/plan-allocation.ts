@@ -44,6 +44,38 @@ interface RuleRow {
   interval_days: number | null;
 }
 
+interface FundRequiredPendingRow {
+  id: string;
+  name: string;
+  type: "savings" | "account";
+  contribution_amount: number;
+  contribution_frequency: string;
+  contribution_starts_on: string;
+  contribution_interval_days: number | null;
+}
+
+interface FundAlreadySavedRow {
+  name: string;
+  amount: number;
+  date: string;
+}
+
+interface FundSuggestedSavingsRow {
+  id: string;
+  name: string;
+  contribution_amount: number;
+  contribution_frequency: string | null;
+  target_amount: number | null;
+  balance: number;
+}
+
+interface FundVariableSavingsRow {
+  id: string;
+  name: string;
+  target_amount: number | null;
+  balance: number;
+}
+
 interface OtherCurrencyRow {
   currency: string;
   count: number;
@@ -71,7 +103,12 @@ function currentMonthRange(today: string): { start: string; end: string } {
  * (possible for INTERVAL_DAYS with interval_days > 31) so the caller can exclude it.
  */
 function estimateDueDate(
-  rule: RuleRow,
+  rule: {
+    frequency: string;
+    starts_on: string;
+    day_of_month: number | null;
+    interval_days: number | null;
+  },
   monthStart: string,
   monthEnd: string,
 ): string | null {
@@ -176,16 +213,110 @@ export function executePlanAllocation(
     )
     .all(monthStart, monthEnd, currency.code) as unknown as OtherCurrencyRow[];
 
+  // 5. Required fund contributions not deposited this month
+  const pendingRequiredFunds = db
+    .prepare(
+      `SELECT f.id, f.name, f.type, f.contribution_amount, f.contribution_frequency,
+              f.contribution_starts_on, f.contribution_interval_days
+       FROM funds f
+       WHERE f.is_active = 1
+         AND f.currency = ?
+         AND f.contribution_required = 1
+         AND f.contribution_amount IS NOT NULL
+         AND f.contribution_frequency IS NOT NULL
+         AND f.contribution_starts_on IS NOT NULL
+         AND f.contribution_starts_on <= ?
+         AND NOT EXISTS (
+           SELECT 1 FROM fund_transactions ft
+           WHERE ft.fund_id = f.id
+             AND ft.type = 'deposit'
+             AND ft.date BETWEEN ? AND ?
+         )`
+    )
+    .all(currency.code, monthEnd, monthStart, monthEnd) as unknown as FundRequiredPendingRow[];
+
+  // 6. Required fund contributions already deposited this month
+  const alreadySavedFunds = db
+    .prepare(
+      `SELECT f.name, ft.amount, ft.date
+       FROM fund_transactions ft
+       JOIN funds f ON f.id = ft.fund_id
+       WHERE ft.type = 'deposit'
+         AND ft.date BETWEEN ? AND ?
+         AND f.currency = ?
+         AND f.is_active = 1
+         AND f.contribution_required = 1
+       ORDER BY ft.date ASC`
+    )
+    .all(monthStart, monthEnd, currency.code) as unknown as FundAlreadySavedRow[];
+
+  // 7. Optional fixed contributions
+  const suggestedSavingsFunds = db
+    .prepare(
+      `SELECT f.id, f.name, f.contribution_amount, f.contribution_frequency,
+              f.target_amount,
+              f.initial_balance +
+                COALESCE((SELECT SUM(ft.amount) FROM fund_transactions ft
+                          WHERE ft.fund_id = f.id AND ft.type = 'deposit'), 0) -
+                COALESCE((SELECT SUM(ft.amount) FROM fund_transactions ft
+                          WHERE ft.fund_id = f.id AND ft.type = 'withdrawal'), 0) AS balance
+       FROM funds f
+       WHERE f.is_active = 1
+         AND f.currency = ?
+         AND f.contribution_required = 0
+         AND f.contribution_amount IS NOT NULL`
+    )
+    .all(currency.code) as unknown as FundSuggestedSavingsRow[];
+
+  // 8. Variable savings
+  const variableSavingsFunds = db
+    .prepare(
+      `SELECT f.id, f.name, f.target_amount,
+              f.initial_balance +
+                COALESCE((SELECT SUM(ft.amount) FROM fund_transactions ft
+                          WHERE ft.fund_id = f.id AND ft.type = 'deposit'), 0) -
+                COALESCE((SELECT SUM(ft.amount) FROM fund_transactions ft
+                          WHERE ft.fund_id = f.id AND ft.type = 'withdrawal'), 0) AS balance
+       FROM funds f
+       WHERE f.is_active = 1
+         AND f.currency = ?
+         AND f.contribution_amount IS NULL`
+    )
+    .all(currency.code) as unknown as FundVariableSavingsRow[];
+
   // ── Calculations ───────────────────────────────────────────────────────────
 
   const unsyncedRulesWithDates = unsyncedRules
     .map((rule) => ({ rule, dueDate: estimateDueDate(rule, monthStart, monthEnd) }))
     .filter((entry): entry is { rule: RuleRow; dueDate: string } => entry.dueDate !== null);
+  const pendingRequiredFundsWithDates = pendingRequiredFunds
+    .map((fund) => ({
+      fund,
+      dueDate: estimateDueDate(
+        {
+          frequency: fund.contribution_frequency,
+          starts_on: fund.contribution_starts_on,
+          day_of_month: null,
+          interval_days: fund.contribution_interval_days,
+        },
+        monthStart,
+        monthEnd,
+      ),
+    }))
+    .filter(
+      (entry): entry is { fund: FundRequiredPendingRow; dueDate: string } =>
+        entry.dueDate !== null,
+    );
 
   const totalFromExpenses = pendingExpenses.reduce((sum, e) => sum + e.amount, 0);
   const totalFromRules = unsyncedRulesWithDates.reduce((sum, e) => sum + e.rule.amount, 0);
-  const totalPending = totalFromExpenses + totalFromRules;
+  const totalFromRequiredFunds = pendingRequiredFundsWithDates.reduce(
+    (sum, entry) => sum + entry.fund.contribution_amount,
+    0,
+  );
+  const totalPending = totalFromExpenses + totalFromRules + totalFromRequiredFunds;
   const totalPaid = paidExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalSaved = alreadySavedFunds.reduce((sum, entry) => sum + entry.amount, 0);
   const available = input.amount - totalPending;
   const pct = (totalPending / input.amount) * 100;
 
@@ -195,7 +326,11 @@ export function executePlanAllocation(
   lines.push(`Received: ${fmt(input.amount)}`);
   lines.push("");
 
-  if (pendingExpenses.length === 0 && unsyncedRulesWithDates.length === 0) {
+  if (
+    pendingExpenses.length === 0 &&
+    unsyncedRulesWithDates.length === 0 &&
+    pendingRequiredFundsWithDates.length === 0
+  ) {
     lines.push(`No pending commitments this month. ${fmt(input.amount)} fully available.`);
   } else {
     lines.push("Pending commitments this month:");
@@ -205,6 +340,11 @@ export function executePlanAllocation(
     }
     for (const { rule, dueDate } of unsyncedRulesWithDates) {
       lines.push(`  ${rule.name}  ${fmt(rule.amount)}  due ${dueDate}  (estimated)`);
+    }
+    for (const { fund, dueDate } of pendingRequiredFundsWithDates) {
+      lines.push(
+        `  ${fund.name}  ${fmt(fund.contribution_amount)}  due ${dueDate}  (${fund.type} - required)`,
+      );
     }
     lines.push("  ──────────────────────────────────────");
     lines.push(`  Total committed: ${fmt(totalPending)} (${pct.toFixed(1)}%)`);
@@ -222,10 +362,43 @@ export function executePlanAllocation(
     lines.push("");
   }
 
+  if (alreadySavedFunds.length > 0) {
+    lines.push("Already saved this month:");
+    for (const fund of alreadySavedFunds) {
+      lines.push(`  ${fund.name}  ${fmt(fund.amount)}  saved ${fund.date}  (required)`);
+    }
+    lines.push("  ──────────────────────────────────────");
+    lines.push(`  Total saved: ${fmt(totalSaved)}`);
+    lines.push("");
+  }
+
   if (available < 0) {
     lines.push(`⚠ Commitments (${fmt(totalPending)}) exceed income. Deficit: ${fmt(available)}`);
   } else if (totalPending > 0) {
     lines.push(`Available: ${fmt(available)}`);
+  }
+
+  if (suggestedSavingsFunds.length > 0) {
+    lines.push("");
+    lines.push("Suggested savings:");
+    for (const fund of suggestedSavingsFunds) {
+      const progressSuffix =
+        fund.target_amount === null || fund.target_amount === 0 ? ""
+        : ` / target: ${fmt(fund.target_amount)} (${Math.round((fund.balance / fund.target_amount) * 100)}%)`;
+      lines.push(
+        `  ${fund.name}  ${fmt(fund.contribution_amount)} suggested - balance: ${fmt(fund.balance)}${progressSuffix}`,
+      );
+    }
+  }
+
+  if (variableSavingsFunds.length > 0) {
+    lines.push("");
+    lines.push("Variable savings:");
+    for (const fund of variableSavingsFunds) {
+      lines.push(
+        `  ${fund.name} - balance: ${fmt(fund.balance)} - How much do you want to set aside?`,
+      );
+    }
   }
 
   if (otherCurrencies.length > 0) {
