@@ -207,6 +207,113 @@ describe("manage_fund", () => {
     );
   });
 
+  it("create falla si contribution_amount llega sin contribution_frequency", () => {
+    const db = createTestDb();
+    insertCop(db);
+
+    assert.throws(
+      () =>
+        executeManageFund(
+          {
+            action: "create",
+            name: "Brokerage",
+            type: "account",
+            currency: "COP",
+            contribution_amount: 500_000,
+            contribution_starts_on: "2026-01-01",
+          },
+          db,
+        ),
+      /contribution_frequency/i,
+    );
+  });
+
+  it("create falla si contribution_amount llega sin contribution_starts_on", () => {
+    const db = createTestDb();
+    insertCop(db);
+
+    assert.throws(
+      () =>
+        executeManageFund(
+          {
+            action: "create",
+            name: "Brokerage",
+            type: "account",
+            currency: "COP",
+            contribution_amount: 500_000,
+            contribution_frequency: "MONTHLY",
+          },
+          db,
+        ),
+      /contribution_starts_on/i,
+    );
+  });
+
+  it("create falla si frequency INTERVAL_DAYS llega sin contribution_interval_days", () => {
+    const db = createTestDb();
+    insertCop(db);
+
+    assert.throws(
+      () =>
+        executeManageFund(
+          {
+            action: "create",
+            name: "Cuota trimestral",
+            type: "savings",
+            currency: "COP",
+            contribution_amount: 300_000,
+            contribution_frequency: "INTERVAL_DAYS",
+            contribution_starts_on: "2026-01-01",
+          },
+          db,
+        ),
+      /contribution_interval_days/i,
+    );
+  });
+
+  it("create falla si llegan campos de contribución sin contribution_amount", () => {
+    const db = createTestDb();
+    insertCop(db);
+
+    assert.throws(
+      () =>
+        executeManageFund(
+          {
+            action: "create",
+            name: "Brokerage",
+            type: "account",
+            currency: "COP",
+            contribution_frequency: "MONTHLY",
+            contribution_starts_on: "2026-01-01",
+          },
+          db,
+        ),
+      /contribution_amount/i,
+    );
+  });
+
+  it("create falla con fecha sintácticamente válida pero imposible en el calendario", () => {
+    const db = createTestDb();
+    insertCop(db);
+
+    assert.throws(
+      () =>
+        executeManageFund(
+          {
+            action: "create",
+            name: "Brokerage",
+            type: "account",
+            currency: "COP",
+            contribution_amount: 500_000,
+            contribution_frequency: "MONTHLY",
+            contribution_starts_on: "2026-02-30",
+          },
+          db,
+        ),
+      /not a valid calendar date/i,
+    );
+  });
+
   it("list muestra el saldo calculado como initial más depósitos menos retiros", () => {
     const db = createTestDb();
     const fund = createCopFund(db);
@@ -388,6 +495,45 @@ describe("manage_fund", () => {
           db,
         ),
       /No fund found/i,
+    );
+  });
+
+  it("lanza error cuando un nombre coincide con múltiples fondos activos", () => {
+    const db = createTestDb();
+    insertCop(db);
+
+    executeManageFund(
+      {
+        action: "create",
+        name: "Ahorros",
+        type: "savings",
+        currency: "COP",
+        initial_balance: 1_000,
+      },
+      db,
+    );
+    executeManageFund(
+      {
+        action: "create",
+        name: "Ahorros",
+        type: "account",
+        currency: "COP",
+        initial_balance: 2_000,
+      },
+      db,
+    );
+
+    assert.throws(
+      () =>
+        executeManageFund(
+          {
+            action: "deposit",
+            fund: "Ahorros",
+            amount: 100,
+          },
+          db,
+        ),
+      /ambiguous/i,
     );
   });
 });
