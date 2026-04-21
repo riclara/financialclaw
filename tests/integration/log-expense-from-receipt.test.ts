@@ -124,6 +124,7 @@ describe("log_expense_from_receipt", () => {
           merchant: "Supermercado",
           category: "GROCERIES",
           raw_text: "SUPERMERCADO XYZ\nTOTAL: $15.000\n28/03/2026",
+          confirm: true,
         },
         db,
       ),
@@ -183,6 +184,7 @@ describe("log_expense_from_receipt", () => {
           category: "SHOPPING",
           currency: "USD",
           raw_text: "TIENDA ABC\nTOTAL: $1000\n28/03/2026",
+          confirm: true,
         },
         db,
       ),
@@ -206,6 +208,7 @@ describe("log_expense_from_receipt", () => {
           date: "2026-03-28",
           category: "OTHER",
           raw_text: "RECIBO SIN COMERCIO\nTOTAL: $50\n28/03/2026",
+          confirm: true,
         },
         db,
       ),
@@ -225,6 +228,7 @@ describe("log_expense_from_receipt", () => {
           date: "2026-03-28",
           merchant: "Cafeteria",
           raw_text: "CAFETERIA\nTOTAL: $30\n28/03/2026",
+          confirm: true,
         },
         db,
       ),
@@ -348,6 +352,74 @@ describe("log_expense_from_receipt", () => {
           ),
         ),
       /raw_text must not be blank/
+    );
+  });
+
+  it("sin confirm devuelve preview y no escribe en BD", () => {
+    const db = createTestDb();
+
+    const before = db.prepare("SELECT COUNT(*) as c FROM expenses").get() as { c: number };
+
+    const result = withFixedDate(() =>
+      executeLogExpenseFromReceipt(
+        {
+          amount: 27314.81,
+          date: "2026-04-21",
+          merchant: "CANDILEJAS VIVA LA CEJA",
+          category: "RESTAURANTE",
+          raw_text: "CANDILEJAS\nTOTAL: 27.314,81",
+        },
+        db,
+      ),
+    );
+
+    assert.match(result, /Preview/);
+    assert.match(result, /27.*314/);
+    assert.match(result, /2026-04-21/);
+    assert.match(result, /CANDILEJAS VIVA LA CEJA/);
+    assert.match(result, /RESTAURANTE/);
+    assert.match(result, /confirm=true/);
+
+    const after = db.prepare("SELECT COUNT(*) as c FROM expenses").get() as { c: number };
+    assert.equal(after.c, before.c, "preview must not insert any expense");
+
+    const extractions = db.prepare("SELECT COUNT(*) as c FROM ocr_extractions").get() as { c: number };
+    assert.equal(extractions.c, 0, "preview must not insert any ocr_extraction");
+  });
+
+  it("con confirm:false explícito también devuelve preview", () => {
+    const db = createTestDb();
+
+    const result = withFixedDate(() =>
+      executeLogExpenseFromReceipt(
+        {
+          amount: 1000,
+          date: "2026-03-28",
+          merchant: "Tienda",
+          raw_text: "TEST",
+          confirm: false,
+        },
+        db,
+      ),
+    );
+
+    assert.match(result, /Preview/);
+    const after = db.prepare("SELECT COUNT(*) as c FROM expenses").get() as { c: number };
+    assert.equal(after.c, 0);
+  });
+
+  it("preview valida input antes de devolver", () => {
+    const db = createTestDb();
+
+    assert.throws(
+      () =>
+        withFixedDate(() =>
+          executeLogExpenseFromReceipt(
+            { amount: 0, date: "2026-03-28", raw_text: "TEST" },
+            db,
+          ),
+        ),
+      /amount is required and must be greater than 0/
     );
   });
 });
