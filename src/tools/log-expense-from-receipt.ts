@@ -85,7 +85,7 @@ export function executeLogExpenseFromReceipt(
       `- Description: ${descriptionFinal}`,
       `- Raw OCR text: ${rawTextLine}`,
       "",
-      "To save, call log_expense_from_receipt again with confirm=true and the exact same amount, date, merchant, category, currency, and raw_text.",
+      "To save, call log_expense_from_receipt again with confirm=true and the exact same amount, date, merchant, category, description, currency, and raw_text.",
     ].join("\n");
   }
 
