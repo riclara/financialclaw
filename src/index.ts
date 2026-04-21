@@ -53,7 +53,8 @@ export default definePluginEntry({
     api.registerTool({
       name: "log_expense_from_receipt",
       label: "Log Expense From Receipt",
-      description: "Log an expense from structured OCR data provided by the agent",
+      description:
+        "Log an expense from structured OCR data. Two-step flow: (1) first call WITHOUT `confirm` returns a preview and does not write to the database; (2) after the user explicitly confirms, call again with `confirm: true` and the identical fields to persist. Never set `confirm: true` without an explicit user confirmation for that specific expense.",
       parameters: LogExpenseFromReceiptInputSchema,
       execute: wrapExecute(executeLogExpenseFromReceipt),
     });

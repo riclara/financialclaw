@@ -23,6 +23,7 @@ export const InputSchema = Type.Object(
     currency: Type.Optional(Type.String()),
     raw_text: Type.Optional(Type.String()),
     description: Type.Optional(Type.String()),
+    confirm: Type.Optional(Type.Boolean()),
   },
   { additionalProperties: false },
 );
@@ -70,6 +71,23 @@ export function executeLogExpenseFromReceipt(
   const descriptionFinal =
     description ??
     (merchant ? `Expense at ${merchant}` : "OCR expense");
+
+  if (input.confirm !== true) {
+    const formattedAmount = formatAmount(amount, currency);
+    const merchantLine = merchant ?? "(none)";
+    const rawTextLine = rawText ? `${rawText.slice(0, 200)}${rawText.length > 200 ? "…" : ""}` : "(none)";
+    return [
+      "Preview (nothing saved yet). Show these fields to the user and ask for explicit confirmation before calling this tool again with confirm=true and the same fields:",
+      `- Amount: ${formattedAmount}`,
+      `- Date: ${date}`,
+      `- Merchant: ${merchantLine}`,
+      `- Category: ${category}`,
+      `- Description: ${descriptionFinal}`,
+      `- Raw OCR text: ${rawTextLine}`,
+      "",
+      "To save, call log_expense_from_receipt again with confirm=true and the exact same amount, date, merchant, category, description, currency, and raw_text.",
+    ].join("\n");
+  }
 
   // Generate IDs
   const extractionId = randomUUID();
