@@ -2,6 +2,17 @@
 
 Formato basado en [Keep a Changelog](https://keepachangelog.com/). Versionado semántico.
 
+## [2.0.0](https://github.com/riclara/financialclaw/compare/financialclaw-v1.2.0...financialclaw-v2.0.0) (2026-04-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* log_expense_from_receipt no longer writes on the first call. Callers must pass confirm=true after the user confirms.
+
+### Added
+
+* require confirm=true to persist log_expense_from_receipt ([#61](https://github.com/riclara/financialclaw/issues/61)) ([7bc9b44](https://github.com/riclara/financialclaw/commit/7bc9b443bb4c0d094a0986635e4eb46c6776eb1b))
+
 ## [1.2.0](https://github.com/riclara/financialclaw/compare/financialclaw-v1.1.0...financialclaw-v1.2.0) (2026-04-16)
 
 
